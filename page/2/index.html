@@ -258,7 +258,135 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第三章-Data语意学.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html" itemprop="url">
+                  [读书笔记]深入探索C++对象模型 第四章 Function语意学
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-14T23:44:43+08:00" content="2016-08-14">
+              2016-08-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="第三章：Function语意学"><a href="#第三章：Function语意学" class="headerlink" title="第三章：Function语意学"></a>第三章：Function语意学</h1><h2 id="Member的各种调用方式"><a href="#Member的各种调用方式" class="headerlink" title="Member的各种调用方式"></a>Member的各种调用方式</h2><h3 id="Nonstatic-Member-Functions"><a href="#Nonstatic-Member-Functions" class="headerlink" title="Nonstatic Member Functions"></a>Nonstatic Member Functions</h3><p>C++的设计准则之一就是:nonstatic member function 至少必须和一般的nonmember function有相同的效率。<br>nonstatic member function会转换为nonmember形式。</p>
+<ol>
+<li>改写函数原型，安插一个额外的参数，也就是this指针。</li>
+<li>将每一个对“nonstatic data member的存取操作”改为经由this指针来存取。</li>
+<li>将member function重写成一个外部函数，对函数名称进行“mangling”处理，使它在程序中成为一个独一无二的词汇。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">normalize__7Point3dFv</span><span class="params">(<span class="keyword">register</span> <span class="keyword">const</span> Point3d *<span class="keyword">const</span> <span class="keyword">this</span>,</div><div class="line">                                                Point3d &amp;__result)</span></div><div class="line"></span>&#123;</div><div class="line">    <span class="keyword">register</span> <span class="keyword">float</span> mag = <span class="keyword">this</span>-&gt;magnitude();</div><div class="line">    __result.Point3d::Point3d();</div><div class="line">    </div><div class="line">    __result._x = <span class="keyword">this</span>-&gt;_x/mag;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第三章-Data语意学.html" itemprop="url">
                   [读书笔记] 深入探索C++对象模型 第三章 Data语意学
                 </a>
               
@@ -302,8 +430,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第三章-Data语意学.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第三章-Data语意学.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第三章-Data语意学.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第三章-Data语意学.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -330,7 +458,7 @@
           <h1 id="第三章：Data语意学"><a href="#第三章：Data语意学" class="headerlink" title="第三章：Data语意学"></a>第三章：Data语意学</h1><p>class的大小：<br>内存对齐<br>空Class需要1byte来占位，说明是独一无二的存在<br>有虚函数时候会有虚表指针<br>static 成员不属于类对象，不占空间</p>
 <h2 id="Data-Member的绑定"><a href="#Data-Member的绑定" class="headerlink" title="Data Member的绑定"></a>Data Member的绑定</h2><p>早期的编译器可能看不到Class后面的内容，导致数据成员的用了外层的同名的。现在已经没有这种情况了。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">long</span> <span class="keyword">long</span> length;</div><div class="line"><span class="keyword">class</span> Point3d</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">    length x;<span class="comment">//是long long</span></div><div class="line">    <span class="keyword">typedef</span> <span class="keyword">int</span> length;    </div><div class="line">    length y;<span class="comment">//是 int</span></div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第三章-Data语意学.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第三章-Data语意学.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -381,7 +509,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/08/2016-08-07-读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="url">
                   [读书笔记]深入理解C++对象模型 第二章 构造函数的语意学
                 </a>
               
@@ -425,8 +553,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-07-读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-07-读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -454,7 +582,7 @@
 <h1 id="Default-Constructor的构建操作"><a href="#Default-Constructor的构建操作" class="headerlink" title="Default Constructor的构建操作"></a>Default Constructor的构建操作</h1><p>默认构造函数只在编译器认为需要的时候才创建。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> Foo&#123;<span class="keyword">public</span>: <span class="keyword">int</span> val; Foo *pnext&#125;;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></div><div class="line"></span>&#123;</div><div class="line">    Foo test;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">]</div></pre></td></tr></table></figure></p>
 <p>这种情况实际没有默认构造函数，编译器什么都没做。<br>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-07-读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -505,7 +633,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/08/2016-08-07-读书笔记-深入探索C-对象模型-第一章-关于对象.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html" itemprop="url">
                   [读书笔记]深入探索C++ 对象模型 第一章 关于对象
                 </a>
               
@@ -549,8 +677,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-07-读书笔记-深入探索C-对象模型-第一章-关于对象.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-07-读书笔记-深入探索C-对象模型-第一章-关于对象.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -578,7 +706,7 @@
 <h1 id="序"><a href="#序" class="headerlink" title="序"></a>序</h1><p>工作里常听到的对于C++的抱怨是C++的编译器为程序员做了太多的服务，导致很多情况不受控制。不像C,大部分都需要手动去执行，可以明确的知道，什么时候做了什么。<br>我想这部分抱怨一方面来源于对于C++的不熟悉，一方面又来源于C++的特性。那么当对C++怎么实现各种特性了解后，对于编译器的行为有了概念后，我相信我应该能够解答很多疑问了。<br>就像Lippman在本书贴出的一封信件一般<br><img src="/img/20160807 inside C++ 0.jpg" alt=""/></p>
 <p>他希望这本书是这些问题的解答。<br>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-07-读书笔记-深入探索C-对象模型-第一章-关于对象.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -629,7 +757,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/08/2016-08-06-读书笔记-《如何阅读一本书》.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-《如何阅读一本书》.html" itemprop="url">
                   [读书笔记] 《如何阅读一本书》
                 </a>
               
@@ -673,8 +801,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-06-读书笔记-《如何阅读一本书》.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-06-读书笔记-《如何阅读一本书》.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-《如何阅读一本书》.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-《如何阅读一本书》.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -703,7 +831,7 @@
 <h1 id="基础阅读"><a href="#基础阅读" class="headerlink" title="基础阅读"></a>基础阅读</h1><p>基础阅读：认识字,能够读大部分读物，能够大概的描述阅读的内容说的是什么。</p>
 <h1 id="检视阅读"><a href="#检视阅读" class="headerlink" title="检视阅读"></a>检视阅读</h1><p>这一个层次要求能够快速的、准确的通过各种方式抓住一本书的重点。<br>分为两类<br>有系统的略读：<br>1、看书名、序言。了解整个书讲的什么。<br>2、研究目录，对书的骨架有了了解。<br>3、看索引，能够快速的知道本书内容的范围。<br>4、阅读其他人写的介绍。<br>5、抽取部分篇章阅读。<br>6、不要忽略最后几页<br>粗浅的阅读：<br>1、快速的阅读，即使对很多内容不理解也要将书籍读完。这样才不会停滞不前。<br>2、提高阅读速度的方式，不断移动眼球，不要后退暂停。大脑要跟上阅读的速度。<br>3、需要判断不同的书籍类型，不同的种类使用不同的阅读速度。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-06-读书笔记-《如何阅读一本书》.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/08/读书笔记-《如何阅读一本书》.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -754,7 +882,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/08/2016-08-06-读书笔记-多任务下的数据结构与算法.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html" itemprop="url">
                   [读书笔记]多任务下的数据结构与算法 序章
                 </a>
               
@@ -798,8 +926,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-06-读书笔记-多任务下的数据结构与算法.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-06-读书笔记-多任务下的数据结构与算法.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -825,7 +953,7 @@
         
           <p>序章部分都是周先生之前的一些经验之谈，感觉在实际编程过程中还是比较有用的，程序里经常遇到这么些问题。<br>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-06-读书笔记-多任务下的数据结构与算法.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -876,7 +1004,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/07/2016-07-26-《The-Last-Of-Us》.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/07/《The-Last-Of-Us》.html" itemprop="url">
                   《The Last Of Us》
                 </a>
               
@@ -920,8 +1048,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/07/2016-07-26-《The-Last-Of-Us》.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/07/2016-07-26-《The-Last-Of-Us》.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/07/《The-Last-Of-Us》.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/07/《The-Last-Of-Us》.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -949,7 +1077,7 @@
 <h2 id="2、火萤是一个怎么样的组织呢？"><a href="#2、火萤是一个怎么样的组织呢？" class="headerlink" title="2、火萤是一个怎么样的组织呢？"></a>2、火萤是一个怎么样的组织呢？</h2><p>从剧情看乔尔的弟弟在离开乔尔之后，加入了火萤，然后从火萤离开，到达森林之中构筑起他的小村落。火萤能不能给人类带来新的希望呢，我觉得是不能的，在长期的对抗之下，火萤显然是从最初的想要找回原来国家秩序的组织退化了，也是由于这个原因让汤米出走，寻找自己的出路，最后汤米接近于实现他的想法。</p>
 <h2 id="3、汤米的村落才是人类的希望。"><a href="#3、汤米的村落才是人类的希望。" class="headerlink" title="3、汤米的村落才是人类的希望。"></a>3、汤米的村落才是人类的希望。</h2><p>汤米的村落才是真正的人类希望。不论是军事管理区、猎人、还是火萤，都让这个国家的秩序不再存在了。从整个游戏的不断对抗之中我们能够发现的是，往往人类比感染者更加难缠，乔尔与爱丽最惊险的时刻还是在与猎人、军政府、火萤的对抗的时候。实际上感染者，可能并没有那么可怕。汤米的小村落，在回归秩序之后，需要担心的更多是猎人，而不是感染者能够说明，如果社会重新回归秩序，那么感染者并没有那么可怕，可怕的更多的是人心。<br>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/07/2016-07-26-《The-Last-Of-Us》.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/07/《The-Last-Of-Us》.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1125,7 +1253,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">17</span>
+              <span class="site-state-item-count">18</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1142,7 +1270,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

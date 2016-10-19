@@ -1,0 +1,728 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="读书笔记,C++,理论," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="第三章：Function语意学Member的各种调用方式Nonstatic Member FunctionsC++的设计准则之一就是:nonstatic member function 至少必须和一般的nonmember function有相同的效率。nonstatic member function会转换为nonmember形式。
+
+改写函数原型，安插一个额外的参数，也就是this指针。
+将每一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[读书笔记]深入探索C++对象模型 第四章 Function语意学">
+<meta property="og:url" content="http://yoursite.com/child/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html">
+<meta property="og:site_name" content="鉴心">
+<meta property="og:description" content="第三章：Function语意学Member的各种调用方式Nonstatic Member FunctionsC++的设计准则之一就是:nonstatic member function 至少必须和一般的nonmember function有相同的效率。nonstatic member function会转换为nonmember形式。
+
+改写函数原型，安插一个额外的参数，也就是this指针。
+将每一">
+<meta property="og:image" content="http://yoursite.com/child/img/20160815 inside C++ 1.jpg">
+<meta property="og:updated_time" content="2016-10-16T06:35:48.514Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[读书笔记]深入探索C++对象模型 第四章 Function语意学">
+<meta name="twitter:description" content="第三章：Function语意学Member的各种调用方式Nonstatic Member FunctionsC++的设计准则之一就是:nonstatic member function 至少必须和一般的nonmember function有相同的效率。nonstatic member function会转换为nonmember形式。
+
+改写函数原型，安插一个额外的参数，也就是this指针。
+将每一">
+<meta name="twitter:image" content="http://yoursite.com/child/img/20160815 inside C++ 1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/child/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html"/>
+
+  <title> [读书笔记]深入探索C++对象模型 第四章 Function语意学 | 鉴心 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?0115f7d97f1f901d9db5ad6b82f372aa";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">鉴心</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [读书笔记]深入探索C++对象模型 第四章 Function语意学
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-14T23:44:43+08:00" content="2016-08-14">
+              2016-08-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="第三章：Function语意学"><a href="#第三章：Function语意学" class="headerlink" title="第三章：Function语意学"></a>第三章：Function语意学</h1><h2 id="Member的各种调用方式"><a href="#Member的各种调用方式" class="headerlink" title="Member的各种调用方式"></a>Member的各种调用方式</h2><h3 id="Nonstatic-Member-Functions"><a href="#Nonstatic-Member-Functions" class="headerlink" title="Nonstatic Member Functions"></a>Nonstatic Member Functions</h3><p>C++的设计准则之一就是:nonstatic member function 至少必须和一般的nonmember function有相同的效率。<br>nonstatic member function会转换为nonmember形式。</p>
+<ol>
+<li>改写函数原型，安插一个额外的参数，也就是this指针。</li>
+<li>将每一个对“nonstatic data member的存取操作”改为经由this指针来存取。</li>
+<li>将member function重写成一个外部函数，对函数名称进行“mangling”处理，使它在程序中成为一个独一无二的词汇。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">normalize__7Point3dFv</span><span class="params">(<span class="keyword">register</span> <span class="keyword">const</span> Point3d *<span class="keyword">const</span> <span class="keyword">this</span>,</span></span></div><div class="line">                                                Point3d &amp;__result)</div><div class="line">&#123;</div><div class="line">    <span class="keyword">register</span> <span class="keyword">float</span> mag = <span class="keyword">this</span>-&gt;magnitude();</div><div class="line">    __result.Point3d::Point3d();</div><div class="line">    </div><div class="line">    __result._x = <span class="keyword">this</span>-&gt;_x/mag;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h3 id="名称的特殊处理"><a href="#名称的特殊处理" class="headerlink" title="名称的特殊处理"></a>名称的特殊处理</h3><p>一般而言，member的名称前面会加上class名称，形成独一无二的命名。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> Bar&#123; <span class="keyword">public</span>: <span class="keyword">int</span> ival; ...&#125;;</div><div class="line"><span class="comment">//其中ival有可能变成这样</span></div><div class="line">ival__3Bar</div></pre></td></tr></table></figure></p>
+<p>主要考虑是存在继承的问题。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//防止函数的重名</span></div><div class="line"><span class="comment">//加入类名</span></div><div class="line"><span class="comment">//加入参数链，使得支持重载</span></div><div class="line"><span class="comment">//cfront采用的编码方式</span></div><div class="line"><span class="keyword">class</span> Point&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">    <span class="function"><span class="keyword">void</span> <span class="title">x__5PointFf</span><span class="params">(<span class="keyword">float</span> newX)</span></span>;</div><div class="line">    <span class="function"><span class="keyword">float</span> <span class="title">x__5PointFv</span><span class="params">()</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="Virtual-Member-Functions"><a href="#Virtual-Member-Functions" class="headerlink" title="Virtual Member Functions"></a>Virtual Member Functions</h3><p>如果normalize()是virtual member function<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//函数会变成</span></div><div class="line">ptr-&gt; normalize()</div><div class="line">(*ptr-&gt;vptr[<span class="number">1</span>])(ptr); <span class="comment">//1为vtbl slot的索引值，关联到normalize</span></div></pre></td></tr></table></figure></p>
+<h3 id="Static-Member-Function"><a href="#Static-Member-Function" class="headerlink" title="Static Member Function"></a>Static Member Function</h3><p>你可能会看到形如以下的调用<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">((Point3d*)<span class="number">0</span>)-&gt;test();</div></pre></td></tr></table></figure></p>
+<p>这种调用在test中没有对类对象的数据成员存储时候是不会出错的。<br>因为根据之前的转化形式看，没有是还用this指针进行操作。<br>这个式子的功能实际上就是实现static 成员函数的功能。在static member function成为c++的标准之前。<br>函数的转化<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> Point3d::object_cout()</div><div class="line">&#123;</div><div class="line"></div><div class="line">&#125;</div><div class="line"><span class="comment">//转化为</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">object_cout__5Point3dSFv</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="Virtual-Member-Functions-1"><a href="#Virtual-Member-Functions-1" class="headerlink" title="Virtual Member Functions"></a>Virtual Member Functions</h2><p>对于多态的class object身上增加两个members</p>
+<ol>
+<li>一个字符串或者数字，表示class的类型</li>
+<li>一个指针，指向某表格，表格中带有程序的virtual functions的执行地址</li>
+</ol>
+<p>一个class只会有一个virtual table，每个table内含其对应的class object中所有active virtual functions函数实体地址。这些active virtual functions包括：</p>
+<blockquote>
+<ul>
+<li>这个class所定义的函数实体。它会改写一个可能存在的Base class virtual function函数实体</li>
+<li>继承自base class的函数实体。这是派生类不改写的部分</li>
+<li>一个Pure_virtual_called()函数实体，它既扮演pure virtual function的空间保卫者角色，也可以作为执行期异常处理函数（有时候会用到）</li>
+</ul>
+</blockquote>
+<p><img src="/img/20160815 inside C++ 1.jpg" alt=""><br>￼</p>
+<h3 id="多重继承下的Virtual-Functions"><a href="#多重继承下的Virtual-Functions" class="headerlink" title="多重继承下的Virtual Functions"></a>多重继承下的Virtual Functions</h3><p>在多重继承中支持virtual functions，其复杂度围绕在第二个以及后继的base classes中，以及必须在执行期间调整的this指针这一点。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> C : <span class="keyword">public</span> A,B...</div><div class="line">A* pA = <span class="keyword">new</span> C;</div><div class="line"></div><div class="line">B* pB = <span class="keyword">new</span> C;</div><div class="line"><span class="comment">//</span></div><div class="line">C* pC = <span class="keyword">new</span> C;</div><div class="line">B* pB = pC;</div><div class="line"></div><div class="line"><span class="comment">//转化</span></div><div class="line">B* pB = pB ? pB + <span class="keyword">sizeof</span>(A) : <span class="number">0</span>;</div><div class="line"><span class="comment">//</span></div><div class="line"><span class="keyword">delete</span> pB;</div></pre></td></tr></table></figure></p>
+<p>delete 操作会要求调用合适的虚析构函数，那么就要求指针再一次被调整。使得指针再次指向C对象的头。</p>
+<p>thunk是小段assembly代码，来完成这个工作。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">pbase2_dtor_thunk:</div><div class="line">    <span class="keyword">this</span> += <span class="keyword">sizeof</span>(base1);</div><div class="line">    Derived::~Derived(<span class="keyword">this</span>);</div></pre></td></tr></table></figure></p>
+<h3 id="多重继承下的Virtual-Functions-1"><a href="#多重继承下的Virtual-Functions-1" class="headerlink" title="多重继承下的Virtual Functions"></a>多重继承下的Virtual Functions</h3><p>没讲明白</p>
+<h2 id="函数的效能"><a href="#函数的效能" class="headerlink" title="函数的效能"></a>函数的效能</h2><h2 id="指向Member-Function的指针"><a href="#指向Member-Function的指针" class="headerlink" title="指向Member Function的指针"></a>指向Member Function的指针</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//指向成员函数的指针声明</span></div><div class="line"><span class="keyword">double</span> (Point :: *coord) () = &amp;Point :: x;</div><div class="line">coord = &amp;Point::y;</div><div class="line"></div><div class="line"><span class="comment">//要想要调用，需要</span></div><div class="line">(origin.*coord)();</div><div class="line">(ptr-&gt;*coord)();</div><div class="line"><span class="comment">//操作会自动被编译器转化</span></div><div class="line">(coord) (&amp;origin);</div><div class="line">(coord)(ptr);</div></pre></td></tr></table></figure>
+<p>指向member function的指针的声明语法，以及指向member selection运算符的指针，其作用是作为this指针的空间保留者。这就是为什么static member functions的类型是函数指针，而不是指向member function指针的原因。<br>利用上述方式去获取一个虚函数的指针，一样能够支持多态。因为实际上获取的是一个索引值，指向虚表的内容。</p>
+<h3 id="在多重继承下，指向member-funcitons的指针"><a href="#在多重继承下，指向member-funcitons的指针" class="headerlink" title="在多重继承下，指向member funcitons的指针"></a>在多重继承下，指向member funcitons的指针</h3><p>为了让指向member funcitons的指针能够支持多重继承和虚拟继承，Stroustrup设计了下面一个机构体</p>
+<p>index faddr分别带有virtual table和nonvirtual member function地址（为了方便，index不指向virtual table时候会被设为-1）。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> __mpter</div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> delta;</div><div class="line">    <span class="keyword">int</span> index;</div><div class="line">    <span class="keyword">union</span></div><div class="line">    &#123;</div><div class="line">        ptrtofunc faddr;</div><div class="line">        <span class="keyword">int</span>            v_offset;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"><span class="comment">//在该模型之下，像这样的操作</span></div><div class="line">(ptr-&gt;*pmf)();</div><div class="line"><span class="comment">//转变为</span></div><div class="line">(pmf.index &lt; <span class="number">0</span>)</div><div class="line">    ? (*pmf.faddr)(ptr)<span class="comment">// nonvirtual invocation</span></div><div class="line">    : (*ptr-&gt;vptr[pmf.index](ptr));<span class="comment">//virtual invocation</span></div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/读书笔记/" rel="tag">#读书笔记</a>
+          
+            <a href="/tags/C/" rel="tag">#C++</a>
+          
+            <a href="/tags/理论/" rel="tag">#理论</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第三章-Data语意学.html" rel="next" title="[读书笔记] 深入探索C++对象模型 第三章 Data语意学">
+                <i class="fa fa-chevron-left"></i> [读书笔记] 深入探索C++对象模型 第三章 Data语意学
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html" rel="prev" title="[读书笔记]深入探索C++对象模型 第五章 构造 解构 拷贝语意学">
+                [读书笔记]深入探索C++对象模型 第五章 构造 解构 拷贝语意学 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html"
+     data-title="[读书笔记]深入探索C++对象模型 第四章 Function语意学"
+     data-content=""
+     data-url="http://yoursite.com/child//blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html"
+           data-title="[读书笔记]深入探索C++对象模型 第四章 Function语意学" data-url="http://yoursite.com/child//blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="YangYi" />
+          <p class="site-author-name" itemprop="name">YangYi</p>
+          <p class="site-description motion-element" itemprop="description">YangYi</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/MekaYangyi" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/yang1" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第三章：Function语意学"><span class="nav-number">1.</span> <span class="nav-text">第三章：Function语意学</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Member的各种调用方式"><span class="nav-number">1.1.</span> <span class="nav-text">Member的各种调用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Nonstatic-Member-Functions"><span class="nav-number">1.1.1.</span> <span class="nav-text">Nonstatic Member Functions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#名称的特殊处理"><span class="nav-number">1.1.2.</span> <span class="nav-text">名称的特殊处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Virtual-Member-Functions"><span class="nav-number">1.1.3.</span> <span class="nav-text">Virtual Member Functions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Static-Member-Function"><span class="nav-number">1.1.4.</span> <span class="nav-text">Static Member Function</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtual-Member-Functions-1"><span class="nav-number">1.2.</span> <span class="nav-text">Virtual Member Functions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多重继承下的Virtual-Functions"><span class="nav-number">1.2.1.</span> <span class="nav-text">多重继承下的Virtual Functions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多重继承下的Virtual-Functions-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">多重继承下的Virtual Functions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数的效能"><span class="nav-number">1.3.</span> <span class="nav-text">函数的效能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#指向Member-Function的指针"><span class="nav-number">1.4.</span> <span class="nav-text">指向Member Function的指针</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在多重继承下，指向member-funcitons的指针"><span class="nav-number">1.4.1.</span> <span class="nav-text">在多重继承下，指向member funcitons的指针</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YangYi</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"mekayangyi"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

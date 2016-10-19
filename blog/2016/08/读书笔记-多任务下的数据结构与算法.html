@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="杂谈,数据结构," />
 
 
 
@@ -84,16 +84,16 @@
 
 
 
-<meta name="description" content="新的博客 Hello World">
+<meta name="description" content="序章部分都是周先生之前的一些经验之谈，感觉在实际编程过程中还是比较有用的，程序里经常遇到这么些问题。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/child/blog/2016/07/hello-world.html">
+<meta property="og:title" content="[读书笔记]多任务下的数据结构与算法 序章">
+<meta property="og:url" content="http://yoursite.com/child/blog/2016/08/读书笔记-多任务下的数据结构与算法.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="新的博客 Hello World">
-<meta property="og:updated_time" content="2016-10-16T06:35:48.608Z">
+<meta property="og:description" content="序章部分都是周先生之前的一些经验之谈，感觉在实际编程过程中还是比较有用的，程序里经常遇到这么些问题。">
+<meta property="og:updated_time" content="2016-10-16T06:35:48.479Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="新的博客 Hello World">
+<meta name="twitter:title" content="[读书笔记]多任务下的数据结构与算法 序章">
+<meta name="twitter:description" content="序章部分都是周先生之前的一些经验之谈，感觉在实际编程过程中还是比较有用的，程序里经常遇到这么些问题。">
 
 
 
@@ -114,9 +114,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/child/blog/2016/07/hello-world.html"/>
+  <link rel="canonical" href="http://yoursite.com/child/blog/2016/08/读书笔记-多任务下的数据结构与算法.html"/>
 
-  <title> Hello World | 鉴心 </title>
+  <title> [读书笔记]多任务下的数据结构与算法 序章 | 鉴心 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -256,7 +256,7 @@
             
             
               
-                Hello World
+                [读书笔记]多任务下的数据结构与算法 序章
               
             
           </h1>
@@ -268,19 +268,38 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T09:15:53+08:00" content="2016-07-24">
-              2016-07-24
+            <time itemprop="dateCreated" datetime="2016-08-06T09:48:28+08:00" content="2016-08-06">
+              2016-08-06
             </time>
           </span>
 
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
           
 
           
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/07/hello-world.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/07/hello-world.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -303,7 +322,35 @@
       
 
       
-        <p>新的博客 Hello World</p>
+        <p>序章部分都是周先生之前的一些经验之谈，感觉在实际编程过程中还是比较有用的，程序里经常遇到这么些问题。<br><a id="more"></a></p>
+<h1 id="1、参数校验"><a href="#1、参数校验" class="headerlink" title="1、参数校验"></a>1、参数校验</h1><pre><code>参数校验，大部分函数开始和使用传进来的参数的都是都是需要参数校验的。有时候不知道该不该校验，怎么样才能划分这部分工作是函数使用者的工作，还是函数设计者的工作呢。一直比较迷糊吧。
+</code></pre><blockquote>
+<p><em>对于在大循环里调用的函数，不需要再函数内校验。比如链表的遍历，如果校验的话，每一个链表的节点都需要校验，那么函数的效率就要大幅度下降了。
+</em>底层的函数调用频度都比较高，一般不校验？这个为什么不校验了，是因为调用频度高？<br><em>如果在一个函数中多次使用这个底层函数，实际上只要在调用函数之前，一次性校验一次就行了。而不需要在底层函数中进行校验，否则多次校验，影响效率。
+</em>调用频率低的校验，和上面一条类似，调用频率低了，自然自带校验好。<br><em>执行时间开销很大，参数校验对于函数运行时间来说忽略不计。
+</em>可以大幅度提高软件的稳定性的。</p>
+</blockquote>
+<h1 id="2、return语句的使用"><a href="#2、return语句的使用" class="headerlink" title="2、return语句的使用"></a>2、return语句的使用</h1><pre><code>函数对于return语句的使用，多次使用该语句的话，要对资源进行回收完全，但实际情况中，经常会忘记写一些，这样就造成内存泄露比较容易发生。但是你不用return语句的话，一般写程序条件过多，分支过多，读程序的困难就比较大的提升了。
+</code></pre><blockquote>
+<p><em>参数校验失败后直接return，并对资源回收
+</em>函数内不同的出错，要使用不同的return来表示不同的出错原因<br>*函数内部同类出错，尽量使用同一个return语句，尽量不要让两个return返回同一个返回值</p>
+</blockquote>
+<h1 id="3、while循环和for循环的问题"><a href="#3、while循环和for循环的问题" class="headerlink" title="3、while循环和for循环的问题"></a>3、while循环和for循环的问题</h1><pre><code>死循环时，在pc-lint中会检测成错误？
+普通时候，循环变量在循环中改变的话，用while，在循环后改变用for
+</code></pre><h1 id="4、if语句多个判断的问题"><a href="#4、if语句多个判断的问题" class="headerlink" title="4、if语句多个判断的问题"></a>4、if语句多个判断的问题</h1><pre><code>需要校验多个参数时候，把条件放在一个if中，这要就少了return。当然，这些条件要产生不容的return结果的时候，就需要分开了。
+</code></pre><h1 id="5、goto语句的使用"><a href="#5、goto语句的使用" class="headerlink" title="5、goto语句的使用"></a>5、goto语句的使用</h1><pre><code>我看周先生在一些代码中还是使用的一些goto语句的，根据之前的描述看，就是运用在出错的时候，跳转到资源回收时，比较方便使用。
+但是goto的语句使用有一些原则goto语句只能goto到同一函数内，而不能从一个函数里goto到另一个函数里使用goto语句在同一个函数内goto时候，goto的起点应该是函数内一小段功能结束处，目的地是一小段功能开始处，而不是乱跳不能从一段复杂的执行状态中的位置goto，这样很容易遗漏东西。
+</code></pre><h1 id="6、swich…case-if-else-if区别"><a href="#6、swich…case-if-else-if区别" class="headerlink" title="6、swich…case if else if区别"></a>6、swich…case if else if区别</h1><pre><code>一般swich效率更高些，但是实际情况是，每一个条件存在不同概率时候，把概率大的放最前的话，效率最高。
+</code></pre><h1 id="7、任意数据类型的处理方式-C"><a href="#7、任意数据类型的处理方式-C" class="headerlink" title="7、任意数据类型的处理方式 C"></a>7、任意数据类型的处理方式 C</h1><pre><code>数据类型几乎存在无限种组合了，c++使用模板，而在c语言中使用void指针是很不错的方法。其实在C++中也经常用到void指针，因为可以指向任意类型的数据。C使用void*时候不知道适合该数据结构的一些操作，所以需要使用回调函数，来传进这些操作。
+</code></pre><blockquote>
+<p><em>数据的比较
+</em>数据的资源释放<br><em>数据的访问
+</em>数据的拷贝<br>*数据的一些其他计算操作</p>
+</blockquote>
+<p><strong>例子</strong></p>
+<blockquote>
+<p><em>typedef void    (</em>DESTROYFUNC)( void *pArgs);</p>
+</blockquote>
 
       
     </div>
@@ -324,17 +371,29 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/杂谈/" rel="tag">#杂谈</a>
+          
+            <a href="/tags/数据结构/" rel="tag">#数据结构</a>
+          
+        </div>
+      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/blog/2016/07/《The-Last-Of-Us》.html" rel="next" title="《The Last Of Us》">
+                <i class="fa fa-chevron-left"></i> 《The Last Of Us》
+              </a>
+            
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/2016/07/《The-Last-Of-Us》.html" rel="prev" title="《The Last Of Us》">
-                《The Last Of Us》 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2016/08/读书笔记-《如何阅读一本书》.html" rel="prev" title="[读书笔记] 《如何阅读一本书》">
+                [读书笔记] 《如何阅读一本书》 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -350,10 +409,10 @@
 
     <div class="post-spread">
       
-        <div class="ds-share flat" data-thread-key="/blog/2016/07/hello-world.html"
-     data-title="Hello World"
+        <div class="ds-share flat" data-thread-key="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html"
+     data-title="[读书笔记]多任务下的数据结构与算法 序章"
      data-content=""
-     data-url="http://yoursite.com/child//blog/2016/07/hello-world.html">
+     data-url="http://yoursite.com/child//blog/2016/08/读书笔记-多任务下的数据结构与算法.html">
   <div class="ds-share-inline">
     <ul  class="ds-share-icons-16">
 
@@ -383,8 +442,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="/blog/2016/07/hello-world.html"
-           data-title="Hello World" data-url="http://yoursite.com/child//blog/2016/07/hello-world.html">
+      <div class="ds-thread" data-thread-key="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html"
+           data-title="[读书笔记]多任务下的数据结构与算法 序章" data-url="http://yoursite.com/child//blog/2016/08/读书笔记-多任务下的数据结构与算法.html">
       </div>
     
   </div>
@@ -495,7 +554,7 @@
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1、参数校验"><span class="nav-number">1.</span> <span class="nav-text">1、参数校验</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2、return语句的使用"><span class="nav-number">2.</span> <span class="nav-text">2、return语句的使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3、while循环和for循环的问题"><span class="nav-number">3.</span> <span class="nav-text">3、while循环和for循环的问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4、if语句多个判断的问题"><span class="nav-number">4.</span> <span class="nav-text">4、if语句多个判断的问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5、goto语句的使用"><span class="nav-number">5.</span> <span class="nav-text">5、goto语句的使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6、swich…case-if-else-if区别"><span class="nav-number">6.</span> <span class="nav-text">6、swich…case if else if区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7、任意数据类型的处理方式-C"><span class="nav-number">7.</span> <span class="nav-text">7、任意数据类型的处理方式 C</span></a></li></ol></div>
             
           </div>
         </section>

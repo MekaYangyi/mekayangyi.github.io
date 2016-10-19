@@ -258,7 +258,110 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第三章-模块化-对象和状态.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html" itemprop="url">
+                  windows下Pyqt + guiqwt环境的搭建
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-10-19T23:47:25+08:00" content="2016-10-19">
+              2016-10-19
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="事情的起因"><a href="#事情的起因" class="headerlink" title="事情的起因"></a>事情的起因</h1><p>这几天为了搭一个PyQt的生产环境遇到了好一些坑。<br>本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。<br>原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。<br>最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样达到比较高的绘图效率，才解决了问题。但是MFC界面开发复杂，在MFC界面上花费过多的时间。同时本身绘图控件的开发，可能可以利用现有开源控件进行开发来避免重复造轮子。<br>于是利用PyQt+guiqwt绘图库来开发的方案构建起来。guiqwt本身是QT下常用的绘图控件，效率足够高，经过一些优化是能够使用的。相对Python经常使用的matplotlib来说不够漂亮，但是进行实时数据的平移绘图，效率高出很多。PyQt是模仿QT写的图形库，可以利用QTCreate进行快速的界面构建，而Python相对C++来说，需要处理的坑更少，出现各类崩溃的异常的情况会更少一些。<br>本文主要讲的是PyQt+guiqwt在windows上的搭建。<br>目的是在之后能够通过本文进行快速的开发环境的搭建。</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html" itemprop="url">
                   [读书笔记] sicp 第三章 模块化 对象和状态
                 </a>
               
@@ -302,8 +405,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/09/2016-09-10-读书笔记-sicp-第三章-模块化-对象和状态.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/2016-09-10-读书笔记-sicp-第三章-模块化-对象和状态.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -330,7 +433,7 @@
           <p>有效的程序综合还需要一些组织原则，它们能够指导我们系统化地完成系统的整体设计。特别的需要一些能够帮助我们构造起模块化的大型系统策略，也就是说，使这些系统能够“自然地”划分为一些具有内聚力的部分，使这些部分可以分别进行开发和维护。<br>有一种非常强有力的设计策略，特别适合用于构造那类模拟真实物理系统的程序，那就是基于被模拟程序的结构去设计程序的结构。那么有关的物理系统里的每一个对象，我们构造起一个与之对象的计算对象；对该系统里的每种活动，我们在自己的计算系统里顶一种符号操作。采用这一策略时的希望是，在需要针对系统中的新对象或者新活动扩充对应的计算模型时候，我们能够不必对程序的组织方面做得很成功，那么在需要添加新特城或者排除旧东西里的错误时候，就只需要在系统里的一些小局部中工作。<br>本章研究两种特点鲜明的策略。第一种策略将注意力集中在对象上，将大型系统看成一大批对象，它们的行为可能随着时间的进展而不断的变化。另一种组织策略将注意力集中在流过的系统的信息流上，非常像电子工程师观察一个信号处理系统。<br>对于对象途径而言，我们必须关注计算对象可以怎样变化而又同时保持其标识。这将迫使我们抛弃老的计算的代换模型，转向更机械式的，理论上也更不同意把握的计算的环境模型。在处理对象、变化和标识时，各种困难的基本根源在于我们需要在这一计算模型中与时间搏斗。如果允许程序并发指向的可能性，事情会变得更困难许多。流方式特别能用于松解在我们模型中对时间的模拟与计算机求值过程中的各种时间发生的顺序。我们将通过一种称为延时求值的技术做到这一点。</p>
 <h1 id="赋值和局部状态"><a href="#赋值和局部状态" class="headerlink" title="赋值和局部状态"></a>赋值和局部状态</h1><p>一个由许多对象组成的系统里，其中的这些对象极少会是完全独立的。每个对象都可能通过交互作用，影响其他对象的状态，所谓交互就是建立起一个对象的状态变量与其他对象的状态变量之间的联系。确实如果一个系统中的状态变量可以分组，形成一些内部紧密结合的子系统，每个子系统与其他子系统之间只存在松散的练习，此时将这个系统看作是由一些独立对象组成的观点就会特别有用。<br>对于一个系统的这种观点，有可能成为组织这一系统的计算模型的有力框架。要使这样的一个模型成为模块化的，就要求它能够分解为一批计算对象，使它们能够模拟系统里的实际对象。每个计算对象必须有它自己的一些局部状态变量，用于描述实际对象的状态。对于被模拟系统里的对象的状态是随着时间的变化的，与它们对象的计算对象的状态也必须变化。<br>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第三章-模块化-对象和状态.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -381,7 +484,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-带有通用型操作的系统.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html" itemprop="url">
                   [读书笔记] sicp 第二章 带有通用型操作的系统
                 </a>
               
@@ -425,8 +528,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-带有通用型操作的系统.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-带有通用型操作的系统.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -453,7 +556,7 @@
           <h1 id="通用型算术运算"><a href="#通用型算术运算" class="headerlink" title="通用型算术运算"></a>通用型算术运算</h1><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">(<span class="name">define</span> (<span class="name">add</span> x y) (<span class="name">apply-generic</span> 'add x y))</div><div class="line">(<span class="name">define</span> (<span class="name">sub</span> x y) (<span class="name">apply-generic</span> 'sub x y))</div><div class="line">(<span class="name">define</span> (<span class="name">mul</span> x y) (<span class="name">apply-generic</span> 'mul x y))</div><div class="line">(<span class="name">define</span> (<span class="name">div</span> x y) (<span class="name">apply-generic</span> 'div x y))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">install-scheme-number-package</span>)</div><div class="line">  (<span class="name">define</span> (<span class="name">tag</span> x)</div><div class="line">    (<span class="name">attach-tag</span> 'scheme-number x))</div><div class="line">  (<span class="name">put</span> 'add '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">+</span> x y))))</div><div class="line">  (<span class="name">put</span> 'sub '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">-</span> x y))))</div><div class="line">  (<span class="name">put</span> 'mul '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">*</span> x y))))</div><div class="line">  (<span class="name">put</span> 'div '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">/</span> x y))))</div><div class="line">  (<span class="name">put</span> 'make '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span>) (<span class="name">tag</span> x)))</div><div class="line">  'done)</div><div class="line">  </div><div class="line">  (<span class="name">define</span> (<span class="name">make-scheme-number</span> n)</div><div class="line">  ((<span class="name">get</span> 'make 'scheme-number) n))</div></pre></td></tr></table></figure>
 <p>利用同样的方法可以加入有理数/复数等操作</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-带有通用型操作的系统.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -504,7 +607,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-抽象数据的多重表示.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html" itemprop="url">
                   [读书笔记] sicp 第二章 抽象数据的多重表示
                 </a>
               
@@ -548,8 +651,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-抽象数据的多重表示.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-抽象数据的多重表示.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -576,7 +679,7 @@
           <p>对于一个数据对象可以能存在多种有用的表示形式，而且我们也希望所涉及的系统能够处理多种表示形式。<br>例子：复数的极坐标形式和直角坐标的形式<br>构造通用型过程：可以在不止一种数据表示上操作的过程。采用的技术：让它们在带有类型标志的数据对象上工作。也就是说，让数据对象包含着它们应该如何处理的明确信息。</p>
 <h1 id="复数的表示"><a href="#复数的表示" class="headerlink" title="复数的表示"></a>复数的表示</h1><p>为一个数据提供了多种操作，存在多种形式<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">(<span class="name">define</span> (<span class="name">real-part</span> z) (<span class="name">car</span> z))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">imag-part</span> z) (<span class="name">cdr</span> z))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">magnitude</span> z)</div><div class="line">  (<span class="name">sqrt</span> (<span class="name">+</span> (<span class="name">square</span> (<span class="name">real-part</span> z)) (<span class="name">square</span> (<span class="name">imag-part</span> z)))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">angle</span> z)</div><div class="line">  (<span class="name">atan</span> (<span class="name">imag-part</span> z) (<span class="name">real-part</span> z)))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">make-from-real-imag</span> x y) (<span class="name">cons</span> x y))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">make-from-mag-ang</span> r a)</div><div class="line">  (<span class="name">cons</span> (<span class="name">*</span> r (<span class="name">cos</span> a)) (<span class="name">*</span> r (<span class="name">sin</span> a))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">add-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-real-imag</span> (<span class="name">+</span> (<span class="name">real-part</span> z1) (<span class="name">real-part</span> z2))</div><div class="line">                       (<span class="name">+</span> (<span class="name">imag-part</span> z1) (<span class="name">imag-part</span> z2))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">sub-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-real-imag</span> (<span class="name">-</span> (<span class="name">real-part</span> z1) (<span class="name">real-part</span> z2))</div><div class="line">                       (<span class="name">-</span> (<span class="name">imag-part</span> z1) (<span class="name">imag-part</span> z2))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">mul-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-mag-ang</span> (<span class="name">*</span> (<span class="name">magnitude</span> z1) (<span class="name">magnitude</span> z2))</div><div class="line">                     (<span class="name">+</span> (<span class="name">angle</span> z1) (<span class="name">angle</span> z2))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">div-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-mag-ang</span> (<span class="name">/</span> (<span class="name">magnitude</span> z1) (<span class="name">magnitude</span> z2))</div><div class="line">                     (<span class="name">-</span> (<span class="name">angle</span> z1) (<span class="name">angle</span> z2))))</div></pre></td></tr></table></figure></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-抽象数据的多重表示.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -627,7 +730,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-符号数据.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html" itemprop="url">
                   [读书笔记] sicp 第二章 符号数据
                 </a>
               
@@ -671,8 +774,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-符号数据.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-符号数据.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -699,7 +802,7 @@
           <figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">(<span class="name">list</span> 'a 'b)</div><div class="line">(<span class="name">eq</span>? a b)</div></pre></td></tr></table></figure>
 <h1 id="符号求导"><a href="#符号求导" class="headerlink" title="符号求导"></a>符号求导</h1><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">;e是变量吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">variable</span>? x)</div><div class="line">  (<span class="name">symbol</span>? x))<span class="comment">;symbol?判断变量是不是符号</span></div><div class="line"></div><div class="line"><span class="comment">;v1和v2是同一个变量吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">same-variable</span>? v1 v2)</div><div class="line">  (<span class="name">and</span> (<span class="name">variable</span>? v1) (<span class="name">variable</span>? v2) (<span class="name">eq</span>? v1 v2)))</div><div class="line"></div><div class="line"><span class="comment">;e是和式吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">sum</span>? x)</div><div class="line">  (<span class="name">and</span> (<span class="name">pair</span>? x) (<span class="name">eq</span>? (<span class="name">car</span> x) '+)))</div><div class="line"></div><div class="line"><span class="comment">;e的被加数</span></div><div class="line">(<span class="name">define</span> (<span class="name">addend</span> s) (<span class="name">cadr</span> s))</div><div class="line"></div><div class="line"><span class="comment">;e的加数</span></div><div class="line">(<span class="name">define</span> (<span class="name">augend</span> s) (<span class="name">caddr</span> s))</div><div class="line"></div><div class="line"><span class="comment">;构造起a1和a2的和式</span></div><div class="line">(<span class="name">define</span> (<span class="name">make-sum</span> a1 a2) (<span class="name">list</span> '+ a1 a2))</div><div class="line"></div><div class="line"><span class="comment">;e是乘式吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">product</span>? x)</div><div class="line">  (<span class="name">and</span> (<span class="name">pair</span>? x) (<span class="name">eq</span>? (<span class="name">car</span> x) '*)))</div><div class="line"></div><div class="line"><span class="comment">;e的被乘数</span></div><div class="line">(<span class="name">define</span> (<span class="name">multiplier</span> p) (<span class="name">cadr</span> p))</div><div class="line"></div><div class="line"><span class="comment">;e的乘数</span></div><div class="line">(<span class="name">define</span> (<span class="name">multiplicand</span> p) (<span class="name">caddr</span> p))</div><div class="line"></div><div class="line"><span class="comment">;构造起来m1与m2的乘式</span></div><div class="line">(<span class="name">define</span> (<span class="name">make-product</span> m1 m2)</div><div class="line">       (<span class="name">list</span> '* m1 m2))</div><div class="line"></div><div class="line"><span class="comment">;求导</span></div><div class="line">(<span class="name">define</span> (<span class="name">deriv</span> exp var)</div><div class="line">  (<span class="name">cond</span> ((<span class="name">number</span>? exp) <span class="number">0</span>)</div><div class="line">        ((<span class="name">variable</span>? exp)</div><div class="line">         (<span class="name">if</span> (<span class="name">same-variable</span>? exp var) <span class="number">1</span> <span class="number">0</span>))</div><div class="line">        ((<span class="name">sum</span>? exp)</div><div class="line">         (<span class="name">make-sum</span> (<span class="name">deriv</span> (<span class="name">addend</span> exp) var)</div><div class="line">                   (<span class="name">deriv</span> (<span class="name">augend</span> exp) var)))</div><div class="line">        ((<span class="name">product</span>? exp)</div><div class="line">         (<span class="name">make-sum</span></div><div class="line">          (<span class="name">make-product</span> (<span class="name">multiplier</span> exp)</div><div class="line">                        (<span class="name">deriv</span> (<span class="name">multiplicand</span> exp) var))</div><div class="line">          (<span class="name">make-product</span> (<span class="name">deriv</span> (<span class="name">multiplier</span> exp) var)</div><div class="line">                        (<span class="name">multiplicand</span> exp))))</div><div class="line">        (<span class="name">else</span></div><div class="line">         (<span class="name">error</span> <span class="string">"unknown expression type -- DERIV"</span> exp))))</div><div class="line"></div><div class="line">(<span class="name">deriv</span> '(+ x <span class="number">3</span>) 'x)</div><div class="line">(<span class="name">deriv</span> '(* x y) 'x)</div><div class="line">(deriv '(* (* x y) (+ x <span class="number">3</span>)) 'x)</div><div class="line"></div><div class="line">'(+ <span class="number">1</span> <span class="number">0</span>)</div><div class="line">'(+ (* x <span class="number">0</span>) (* <span class="number">1</span> y))</div><div class="line">'(+ (* (* x y) (+ <span class="number">1</span> <span class="number">0</span>)) (* (+ (* x <span class="number">0</span>) (* <span class="number">1</span> y)) (+ x <span class="number">3</span>)))</div></pre></td></tr></table></figure>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-符号数据.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -750,7 +853,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-构造数据抽象.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html" itemprop="url">
                   [读书笔记] sicp 第二章 构造数据抽象
                 </a>
               
@@ -794,8 +897,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-构造数据抽象.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-构造数据抽象.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -824,7 +927,7 @@
 <h2 id="有理数的算数运算"><a href="#有理数的算数运算" class="headerlink" title="有理数的算数运算"></a>有理数的算数运算</h2><p>假定存在构造函数与选择函数<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">(make-rat n d);返回一个有理数，分子是整数n，分母是整数d</div><div class="line">(numer x);返回有理数x的分子</div><div class="line">(denom x));返回有理数x的分母</div></pre></td></tr></table></figure></p>
 <p>那么可以定义以下的规则<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment">;加法</span></div><div class="line">(<span class="name">define</span> (<span class="name">add-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">+</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">               (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x)))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;减法</span></div><div class="line">(<span class="name">define</span> (<span class="name">sub-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">-</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">               (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x)))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;乘法</span></div><div class="line">(<span class="name">define</span> (<span class="name">mul-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">numer</span> y))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;除法</span></div><div class="line">(<span class="name">define</span> (<span class="name">div-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">numer</span> y))))</div><div class="line"><span class="comment">;等于？</span></div><div class="line">(<span class="name">define</span> (<span class="name">equal-rat</span>? x y)</div><div class="line">  (<span class="name">=</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">     (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x))))</div></pre></td></tr></table></figure></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第二章-构造数据抽象.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -875,7 +978,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第一章-构造过程抽象.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第一章-构造过程抽象.html" itemprop="url">
                   [读书笔记] sicp 第一章 构造过程抽象
                 </a>
               
@@ -919,8 +1022,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/09/2016-09-10-读书笔记-sicp-第一章-构造过程抽象.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/2016-09-10-读书笔记-sicp-第一章-构造过程抽象.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/09/读书笔记-sicp-第一章-构造过程抽象.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第一章-构造过程抽象.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -954,7 +1057,7 @@
 <p>在程序设计中，我们需要处理两类元素：过程和数据。非形式的说，数据是一种我们希望去操作的”东西“，而过程是有关操作这些数据的规则的描述。</p>
 <figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">(<span class="name">*</span> ( <span class="name">+</span> <span class="number">2</span> ( <span class="name">*</span> <span class="number">5</span> <span class="number">6</span> ))</div><div class="line">	( <span class="name">+</span> <span class="number">3</span> <span class="number">5</span> <span class="number">7</span>))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">square</span> x) (<span class="name">*</span> x x))</div><div class="line"></div><div class="line">(<span class="name">square</span> <span class="number">21</span>)</div><div class="line"><span class="number">441</span></div></pre></td></tr></table></figure>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/2016-09-10-读书笔记-sicp-第一章-构造过程抽象.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第一章-构造过程抽象.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1005,7 +1108,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/09/2016-09-03-读书摘录-黑客与画家.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/09/读书摘录-黑客与画家.html" itemprop="url">
                   [读书摘录] 黑客与画家
                 </a>
               
@@ -1049,8 +1152,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/09/2016-09-03-读书摘录-黑客与画家.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/2016-09-03-读书摘录-黑客与画家.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/09/读书摘录-黑客与画家.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书摘录-黑客与画家.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -1083,7 +1186,7 @@
 <p> 2016-08-31 08:13:16</p>
 <p>真实世界的特点是，它极其庞大。如果总体足够大，即使是人数最少的少数派，只要聚集在一起，也能产生可观的力量。在真实世界中，书呆子在某些地方聚集起来，形成自己的社区，智力因素成为那里最被看重的东西。有时，这种因素甚至会以相反的形式表现出来，特别是在大学的数理学系，书呆子甚至会夸大笨拙，以显示自己的聪明。约翰·纳什^非常钦佩诺伯特·维纳^^就学维纳的样子，经过走廊的时候都用手扶着墙走路。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/2016-09-03-读书摘录-黑客与画家.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/09/读书摘录-黑客与画家.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1134,7 +1237,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/08/2016-08-20-读书笔记-深入探索C-对象模型-第六章-执行期语意学.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第六章-执行期语意学.html" itemprop="url">
                   [读书笔记] 深入探索C++对象模型 第六章 执行期语意学
                 </a>
               
@@ -1178,8 +1281,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-20-读书笔记-深入探索C-对象模型-第六章-执行期语意学.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-20-读书笔记-深入探索C-对象模型-第六章-执行期语意学.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第六章-执行期语意学.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第六章-执行期语意学.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -1207,7 +1310,7 @@
 <p>xx  yy定义如下<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">X xx;</div><div class="line">Y yy;</div><div class="line"><span class="keyword">class</span> Y</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">  Y();</div><div class="line"> ~Y();</div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>==(<span class="keyword">const</span>&amp; Y) <span class="keyword">const</span>;</div><div class="line">&#125;;</div><div class="line"><span class="keyword">class</span> X</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">  X();</div><div class="line">  ~X();</div><div class="line">  <span class="function"><span class="keyword">operator</span> <span class="title">Y</span><span class="params">()</span> <span class="keyword">const</span></span>;</div><div class="line">  <span class="function">X <span class="title">getValue</span><span class="params">()</span></span>;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
 <p>那么编译器在我们之后做了什么呢<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span>(yy == xx.getValue())</div><div class="line"></div><div class="line"><span class="comment">//转换为</span></div><div class="line"><span class="keyword">if</span>(yy.<span class="keyword">operator</span>==(xx.getValue())</div><div class="line"></div><div class="line"><span class="comment">//接着转换</span></div><div class="line"><span class="keyword">if</span>(yy.<span class="keyword">operator</span>==(xx.getValue().<span class="keyword">operator</span> Y()))</div><div class="line"></div><div class="line"><span class="comment">//接着转换</span></div><div class="line">X temp1 = xx.getValue();</div><div class="line">Y temp2 = temp1.<span class="keyword">operator</span> Y();</div><div class="line"><span class="keyword">int</span> temp3 = (yy.<span class="keyword">operator</span>==(temp2));</div><div class="line"><span class="keyword">if</span>(temp3)</div><div class="line"></div><div class="line">temp2.y::~Y();</div><div class="line">temp1.x::~X();</div></pre></td></tr></table></figure></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-20-读书笔记-深入探索C-对象模型-第六章-执行期语意学.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第六章-执行期语意学.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1258,7 +1361,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/08/2016-08-16-读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html" itemprop="url">
                   [读书笔记]深入探索C++对象模型 第五章 构造 解构 拷贝语意学
                 </a>
               
@@ -1302,8 +1405,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-16-读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-16-读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -1333,135 +1436,7 @@
 <h2 id="“无继承”情况下的对象构造"><a href="#“无继承”情况下的对象构造" class="headerlink" title="“无继承”情况下的对象构造"></a>“无继承”情况下的对象构造</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">float</span> x,y,z;</div><div class="line">&#125; Point;</div></pre></td></tr></table></figure>
 <p>编译器会分析声明，贴上Plaint OI’ Data的卷标，被贴上该卷标的类，不会有构造函数或者析构函数的调用了。直接使用C的方式。<br>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-16-读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第四章-Function语意学.html" itemprop="url">
-                  [读书笔记]深入探索C++对象模型 第四章 Function语意学
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-14T23:44:43+08:00" content="2016-08-14">
-              2016-08-14
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第四章-Function语意学.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第四章-Function语意学.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="第三章：Function语意学"><a href="#第三章：Function语意学" class="headerlink" title="第三章：Function语意学"></a>第三章：Function语意学</h1><h2 id="Member的各种调用方式"><a href="#Member的各种调用方式" class="headerlink" title="Member的各种调用方式"></a>Member的各种调用方式</h2><h3 id="Nonstatic-Member-Functions"><a href="#Nonstatic-Member-Functions" class="headerlink" title="Nonstatic Member Functions"></a>Nonstatic Member Functions</h3><p>C++的设计准则之一就是:nonstatic member function 至少必须和一般的nonmember function有相同的效率。<br>nonstatic member function会转换为nonmember形式。</p>
-<ol>
-<li>改写函数原型，安插一个额外的参数，也就是this指针。</li>
-<li>将每一个对“nonstatic data member的存取操作”改为经由this指针来存取。</li>
-<li>将member function重写成一个外部函数，对函数名称进行“mangling”处理，使它在程序中成为一个独一无二的词汇。</li>
-</ol>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">normalize__7Point3dFv</span><span class="params">(<span class="keyword">register</span> <span class="keyword">const</span> Point3d *<span class="keyword">const</span> <span class="keyword">this</span>,</div><div class="line">                                                Point3d &amp;__result)</span></div><div class="line"></span>&#123;</div><div class="line">    <span class="keyword">register</span> <span class="keyword">float</span> mag = <span class="keyword">this</span>-&gt;magnitude();</div><div class="line">    __result.Point3d::Point3d();</div><div class="line">    </div><div class="line">    __result._x = <span class="keyword">this</span>-&gt;_x/mag;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/2016-08-14-读书笔记-深入探索C-对象模型-第四章-Function语意学.html#more" rel="contents">
+            <a class="btn" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1536,7 +1511,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">17</span>
+              <span class="site-state-item-count">18</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1553,7 +1528,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
