@@ -258,6 +258,132 @@
             
               
                 
+                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html" itemprop="url">
+                  [读书笔记]深入探索C++对象模型 第五章 构造 解构 拷贝语意学
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-16T21:22:40+08:00" content="2016-08-16">
+              2016-08-16
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="构造、解构、拷贝语意学"><a href="#构造、解构、拷贝语意学" class="headerlink" title="构造、解构、拷贝语意学"></a>构造、解构、拷贝语意学</h1><h3 id="纯虚函数的存在"><a href="#纯虚函数的存在" class="headerlink" title="纯虚函数的存在"></a>纯虚函数的存在</h3><p>纯虚函数能够被静态的调用，不能经过虚拟机制调用。<br>虚析构函数不能定义为纯虚的，一定要有定义，否则即使可以编译，但是链接的时候会有错误。因为其子类会静态调用上一层的析构函数。如果说上一层的析构函数是一个纯虚函数的话，那么链接的时候会失败。</p>
+<h3 id="虚拟规格的存在"><a href="#虚拟规格的存在" class="headerlink" title="虚拟规格的存在"></a>虚拟规格的存在</h3><p>不应该把所有的函数都声明为虚函数，然后靠编译器去优化操作吧virtual invocation去除。</p>
+<h3 id="虚拟规格中的const的存在"><a href="#虚拟规格中的const的存在" class="headerlink" title="虚拟规格中的const的存在"></a>虚拟规格中的const的存在</h3><p>实际上你很难知道一个类的子类对于这个函数是不是应该定义为const，因为即使现在你不需要修改类的内容，但子类可能需要修改，你没法预料到。那么最好不要定义一个有const函数的基类了。</p>
+<h2 id="“无继承”情况下的对象构造"><a href="#“无继承”情况下的对象构造" class="headerlink" title="“无继承”情况下的对象构造"></a>“无继承”情况下的对象构造</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">float</span> x,y,z;</div><div class="line">&#125; Point;</div></pre></td></tr></table></figure>
+<p>编译器会分析声明，贴上Plaint OI’ Data的卷标，被贴上该卷标的类，不会有构造函数或者析构函数的调用了。直接使用C的方式。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第五章-构造-解构-拷贝语意学.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第四章-Function语意学.html" itemprop="url">
                   [读书笔记]深入探索C++对象模型 第四章 Function语意学
                 </a>
@@ -1253,7 +1379,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-count">19</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1261,7 +1387,7 @@
           
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -1270,7 +1396,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
