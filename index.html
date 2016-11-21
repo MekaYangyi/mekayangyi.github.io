@@ -258,6 +258,126 @@
             
               
                 
+                <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析.html" itemprop="url">
+                  [读书笔记] stl源码剖析 总结
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-21T20:32:26+08:00" content="2016-11-21">
+              2016-11-21
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/11/读书笔记-stl源码剖析.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/11/读书笔记-stl源码剖析.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>大致上是将STL源码剖析看过了一篇。<br>前三章看到比较认真，后面几章就看到比较粗略了。<br>我想STL的精髓正是在内存配置、迭代器、容器中。<br>至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。<br>我的计划是在未来的一小段日子里实现一个小型的stl，所谓实现，可能也不过是重新将sgi的代码打一遍罢了。不过对于整个stl的理解，我相信会更好一些。<br>之后我应该会更新一些写小型stl遇到的问题和解决方案。<br>项目的地址：<br><a href="https://github.com/MekaYangyi/STL/" target="_blank" rel="external">https://github.com/MekaYangyi/STL/</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析-第四章-序列式容器.html" itemprop="url">
                   [读书笔记] stl源码剖析 第四章 序列式容器
                 </a>
@@ -382,7 +502,7 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器(copy).html" itemprop="url">
+                <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html" itemprop="url">
                   [读书笔记] stl源码剖析 第三章 迭代器
                 </a>
               
@@ -426,8 +546,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器(copy).html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器(copy).html" itemprop="commentsCount"></span>
+                <a href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -455,7 +575,7 @@
 <h1 id="迭代器的设计思维-stl关键所在"><a href="#迭代器的设计思维-stl关键所在" class="headerlink" title="迭代器的设计思维-stl关键所在"></a>迭代器的设计思维-stl关键所在</h1><p>STL的中心思想在于：将数据容器和算法分开，彼此独立设计。容器和算法的泛型化。<br>迭代器就是扮演着粘胶角色。</p>
 <h1 id="迭代器是一种smart-pointer"><a href="#迭代器是一种smart-pointer" class="headerlink" title="迭代器是一种smart pointer"></a>迭代器是一种smart pointer</h1><p>list迭代器stl的实现<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//listnode的基础类</span></div><div class="line"><span class="keyword">struct</span> _List_node_base &#123;</div><div class="line">  _List_node_base* _M_next;</div><div class="line">  _List_node_base* _M_prev;</div><div class="line">&#125;;</div><div class="line"><span class="comment">//listnode</span></div><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> _Tp&gt;</div><div class="line"><span class="keyword">struct</span> _List_node : <span class="keyword">public</span> _List_node_base &#123;</div><div class="line">  _Tp _M_data;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//迭代器基础类</span></div><div class="line"><span class="keyword">struct</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">size_t</span>                     size_type;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">ptrdiff_t</span>                  difference_type;</div><div class="line">  <span class="keyword">typedef</span> bidirectional_iterator_tag iterator_category;</div><div class="line"></div><div class="line">  _List_node_base* _M_node;<span class="comment">//包含一个node</span></div><div class="line"></div><div class="line">  _List_iterator_base(_List_node_base* __x) : _M_node(__x) &#123;&#125;</div><div class="line">  _List_iterator_base() &#123;&#125;</div><div class="line"></div><div class="line">  <span class="keyword">void</span> _M_incr() &#123; _M_node = _M_node-&gt;_M_next; &#125;</div><div class="line">  <span class="keyword">void</span> _M_decr() &#123; _M_node = _M_node-&gt;_M_prev; &#125;</div><div class="line"></div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node == __x._M_node;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>!=(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node != __x._M_node;</div><div class="line">  &#125;</div><div class="line">&#125;;  </div><div class="line"><span class="comment">//迭代器</span></div><div class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> _Tp, <span class="keyword">class</span> _Ref, <span class="keyword">class</span> _Ptr&gt;</div><div class="line"><span class="keyword">struct</span> _List_iterator : <span class="keyword">public</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Tp&amp;,_Tp*&gt;             iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,<span class="keyword">const</span> _Tp&amp;,<span class="keyword">const</span> _Tp*&gt; const_iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Ref,_Ptr&gt;             _Self;</div><div class="line"></div><div class="line">  <span class="keyword">typedef</span> _Tp value_type;</div><div class="line">  <span class="keyword">typedef</span> _Ptr pointer;</div><div class="line">  <span class="keyword">typedef</span> _Ref reference;</div><div class="line">  <span class="keyword">typedef</span> _List_node&lt;_Tp&gt; _Node;</div><div class="line"></div><div class="line">  _List_iterator(_Node* __x) : _List_iterator_base(__x) &#123;&#125;</div><div class="line">  _List_iterator() &#123;&#125;</div><div class="line">  _List_iterator(<span class="keyword">const</span> iterator&amp; __x) : _List_iterator_base(__x._M_node) &#123;&#125;</div><div class="line"></div><div class="line">  reference <span class="keyword">operator</span>*() <span class="keyword">const</span> &#123; <span class="keyword">return</span> ((_Node*) _M_node)-&gt;_M_data; &#125;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __SGI_STL_NO_ARROW_OPERATOR</span></div><div class="line">  pointer <span class="keyword">operator</span>-&gt;() <span class="keyword">const</span> &#123; <span class="keyword">return</span> &amp;(<span class="keyword">operator</span>*()); &#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* __SGI_STL_NO_ARROW_OPERATOR */</span></span></div><div class="line">  <span class="comment">//重载了几个操作实现了迭代器，不是很复杂</span></div><div class="line">  <span class="comment">//++i</span></div><div class="line">  _Self&amp; <span class="keyword">operator</span>++() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//i++</span></div><div class="line">  _Self <span class="keyword">operator</span>++(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">  _Self&amp; <span class="keyword">operator</span>--() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  _Self <span class="keyword">operator</span>--(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器(copy).html#more" rel="contents">
+            <a class="btn" href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1352,131 +1472,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html" itemprop="url">
-                  [读书笔记] sicp 第二章 构造数据抽象
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-10T08:32:08+08:00" content="2016-09-10">
-              2016-09-10
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>第一章关注的是计算过程，以及过程在程序中所扮演的角色。<br>本章，讲将数据对象组合起来，形成复合数据的方式。<br>复合数据：能够提升我们在设计程序时所位于的概念层次，提高设计的模块性，增强语言的表达能力。<br>将程序中处理数据对象的表示的部分与处理数据对象的使用部分相互 隔离的技术，称为数据抽象。<br>复合数据中的一个关键性思想是闭包的概念，也就是说，用于组合数据对象的粘合剂不但能用于组合基本的数据对象，也能组合复合数据对象。<br>复合数据对象能够称为以混合与匹配的方式组合程序模块的方便接口。</p>
-<h1 id="数据抽象引导"><a href="#数据抽象引导" class="headerlink" title="数据抽象引导"></a>数据抽象引导</h1><p>数据抽象的基本思想，就是设法构造出一些使用复合数据对象的程序，使它们就像是在抽象数据上操作一样。</p>
-<h2 id="有理数的算数运算"><a href="#有理数的算数运算" class="headerlink" title="有理数的算数运算"></a>有理数的算数运算</h2><p>假定存在构造函数与选择函数<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">(make-rat n d);返回一个有理数，分子是整数n，分母是整数d</div><div class="line">(numer x);返回有理数x的分子</div><div class="line">(denom x));返回有理数x的分母</div></pre></td></tr></table></figure></p>
-<p>那么可以定义以下的规则<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment">;加法</span></div><div class="line">(<span class="name">define</span> (<span class="name">add-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">+</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">               (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x)))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;减法</span></div><div class="line">(<span class="name">define</span> (<span class="name">sub-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">-</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">               (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x)))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;乘法</span></div><div class="line">(<span class="name">define</span> (<span class="name">mul-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">numer</span> y))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;除法</span></div><div class="line">(<span class="name">define</span> (<span class="name">div-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">numer</span> y))))</div><div class="line"><span class="comment">;等于？</span></div><div class="line">(<span class="name">define</span> (<span class="name">equal-rat</span>? x y)</div><div class="line">  (<span class="name">=</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">     (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x))))</div></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1522,7 +1517,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">22</span>
+              <span class="site-state-item-count">23</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="stl源码剖析," />
 
 
 
@@ -84,15 +84,16 @@
 
 
 
-<meta name="description" content="YangYi">
-<meta property="og:type" content="website">
-<meta property="og:title" content="鉴心">
-<meta property="og:url" content="http://yoursite.com/child/tags/google/index.html">
+<meta name="description" content="大致上是将STL源码剖析看过了一篇。前三章看到比较认真，后面几章就看到比较粗略了。我想STL的精髓正是在内存配置、迭代器、容器中。至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。我的计划是在未来的一小段日子里实现一个小型的stl，所谓">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[读书笔记] stl源码剖析 总结">
+<meta property="og:url" content="http://yoursite.com/child/blog/2016/11/读书笔记-stl源码剖析.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="YangYi">
+<meta property="og:description" content="大致上是将STL源码剖析看过了一篇。前三章看到比较认真，后面几章就看到比较粗略了。我想STL的精髓正是在内存配置、迭代器、容器中。至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。我的计划是在未来的一小段日子里实现一个小型的stl，所谓">
+<meta property="og:updated_time" content="2016-11-21T23:02:47.124Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="鉴心">
-<meta name="twitter:description" content="YangYi">
+<meta name="twitter:title" content="[读书笔记] stl源码剖析 总结">
+<meta name="twitter:description" content="大致上是将STL源码剖析看过了一篇。前三章看到比较认真，后面几章就看到比较粗略了。我想STL的精髓正是在内存配置、迭代器、容器中。至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。我的计划是在未来的一小段日子里实现一个小型的stl，所谓">
 
 
 
@@ -113,9 +114,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/child/tags/google/"/>
+  <link rel="canonical" href="http://yoursite.com/child/blog/2016/11/读书笔记-stl源码剖析.html"/>
 
-  <title> 标签: google | 鉴心 </title>
+  <title> [读书笔记] stl源码剖析 总结 | 鉴心 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -146,7 +147,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -234,53 +235,185 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-collapse">
-    <div class="collection-title">
-      <h2 >
-        google
-        <small>标签</small>
-      </h2>
-    </div>
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
 
     
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [读书笔记] stl源码剖析 总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-21T20:32:26+08:00" content="2016-11-21">
+              2016-11-21
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/11/读书笔记-stl源码剖析.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/11/读书笔记-stl源码剖析.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
       
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+      
+        <p>大致上是将STL源码剖析看过了一篇。<br>前三章看到比较认真，后面几章就看到比较粗略了。<br>我想STL的精髓正是在内存配置、迭代器、容器中。<br>至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。<br>我的计划是在未来的一小段日子里实现一个小型的stl，所谓实现，可能也不过是重新将sgi的代码打一遍罢了。不过对于整个stl的理解，我相信会更好一些。<br>之后我应该会更新一些写小型stl遇到的问题和解决方案。<br>项目的地址：<br><a href="https://github.com/MekaYangyi/STL/" target="_blank" rel="external">https://github.com/MekaYangyi/STL/</a></p>
 
-      <h1 class="post-title">
+      
+    </div>
+
+    <div>
+      
         
-            <a class="post-title-link" href="/blog/2016/11/阅读谷歌编程规范.html" itemprop="url">
-              
-                <span itemprop="name">阅读谷歌编程规范</span>
-              
-            </a>
+
+      
+    </div>
+
+    <div>
+      
         
-      </h1>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-11-06T15:47:25+08:00"
-              content="2016-11-06" >
-          11-06
-        </time>
-      </div>
+      
+    </div>
 
-    </header>
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/stl源码剖析/" rel="tag">#stl源码剖析</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/11/读书笔记-stl源码剖析-第四章-序列式容器.html" rel="next" title="[读书笔记] stl源码剖析 第四章 序列式容器">
+                <i class="fa fa-chevron-left"></i> [读书笔记] stl源码剖析 第四章 序列式容器
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </article>
 
 
-    
-  </div>
 
-  
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="/blog/2016/11/读书笔记-stl源码剖析.html"
+     data-title="[读书笔记] stl源码剖析 总结"
+     data-content=""
+     data-url="http://yoursite.com/child//blog/2016/11/读书笔记-stl源码剖析.html">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
 
 
           </div>
           
 
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="/blog/2016/11/读书笔记-stl源码剖析.html"
+           data-title="[读书笔记] stl源码剖析 总结" data-url="http://yoursite.com/child//blog/2016/11/读书笔记-stl源码剖析.html">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -300,8 +433,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/img/avatar.jpg"
@@ -371,6 +513,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">此文章未包含目录</p>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -467,6 +620,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 

@@ -258,6 +258,131 @@
             
               
                 
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html" itemprop="url">
+                  [读书笔记] sicp 第二章 构造数据抽象
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-10T08:32:08+08:00" content="2016-09-10">
+              2016-09-10
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>第一章关注的是计算过程，以及过程在程序中所扮演的角色。<br>本章，讲将数据对象组合起来，形成复合数据的方式。<br>复合数据：能够提升我们在设计程序时所位于的概念层次，提高设计的模块性，增强语言的表达能力。<br>将程序中处理数据对象的表示的部分与处理数据对象的使用部分相互 隔离的技术，称为数据抽象。<br>复合数据中的一个关键性思想是闭包的概念，也就是说，用于组合数据对象的粘合剂不但能用于组合基本的数据对象，也能组合复合数据对象。<br>复合数据对象能够称为以混合与匹配的方式组合程序模块的方便接口。</p>
+<h1 id="数据抽象引导"><a href="#数据抽象引导" class="headerlink" title="数据抽象引导"></a>数据抽象引导</h1><p>数据抽象的基本思想，就是设法构造出一些使用复合数据对象的程序，使它们就像是在抽象数据上操作一样。</p>
+<h2 id="有理数的算数运算"><a href="#有理数的算数运算" class="headerlink" title="有理数的算数运算"></a>有理数的算数运算</h2><p>假定存在构造函数与选择函数<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">(make-rat n d);返回一个有理数，分子是整数n，分母是整数d</div><div class="line">(numer x);返回有理数x的分子</div><div class="line">(denom x));返回有理数x的分母</div></pre></td></tr></table></figure></p>
+<p>那么可以定义以下的规则<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment">;加法</span></div><div class="line">(<span class="name">define</span> (<span class="name">add-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">+</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">               (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x)))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;减法</span></div><div class="line">(<span class="name">define</span> (<span class="name">sub-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">-</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">               (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x)))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;乘法</span></div><div class="line">(<span class="name">define</span> (<span class="name">mul-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">numer</span> y))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">denom</span> y))))</div><div class="line"><span class="comment">;除法</span></div><div class="line">(<span class="name">define</span> (<span class="name">div-rat</span> x y)</div><div class="line">  (<span class="name">make-rat</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">            (<span class="name">*</span> (<span class="name">denom</span> x) (<span class="name">numer</span> y))))</div><div class="line"><span class="comment">;等于？</span></div><div class="line">(<span class="name">define</span> (<span class="name">equal-rat</span>? x y)</div><div class="line">  (<span class="name">=</span> (<span class="name">*</span> (<span class="name">numer</span> x) (<span class="name">denom</span> y))</div><div class="line">     (<span class="name">*</span> (<span class="name">numer</span> y) (<span class="name">denom</span> x))))</div></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第一章-构造过程抽象.html" itemprop="url">
                   [读书笔记] sicp 第一章 构造过程抽象
                 </a>
@@ -1370,128 +1495,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html" itemprop="url">
-                  [读书笔记]多任务下的数据结构与算法 序章
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-06T09:48:28+08:00" content="2016-08-06">
-              2016-08-06
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>序章部分都是周先生之前的一些经验之谈，感觉在实际编程过程中还是比较有用的，程序里经常遇到这么些问题。<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1537,7 +1540,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">22</span>
+              <span class="site-state-item-count">23</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
