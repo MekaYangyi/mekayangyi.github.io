@@ -84,14 +84,12 @@
 
 
 
-<meta name="description" content="建立测试项目新建一个项目用于测试工作流。演示项目地址：http://10.10.10.98/MekaYangyi/workflow
-设置分支保护新建项目默认master用户才能够push和merge。其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。">
+<meta name="description" content="建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。整个工作流程如下。第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gitlab workflow">
 <meta property="og:url" content="http://yoursite.com/child/blog/2017/01/gitlab-workflow.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="建立测试项目新建一个项目用于测试工作流。演示项目地址：http://10.10.10.98/MekaYangyi/workflow
-设置分支保护新建项目默认master用户才能够push和merge。其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。">
+<meta property="og:description" content="建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。整个工作流程如下。第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-21-42.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-32-56.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-31-10.jpg">
@@ -102,7 +100,10 @@
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-54-23.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-55-03.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-57-19.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-58-28.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-39-02.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-41-09.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-41-37.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-44-54.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-59-05.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-59-45.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-05-10.jpg">
@@ -128,11 +129,10 @@
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-39-48.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-41-19.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-41-51.jpg">
-<meta property="og:updated_time" content="2017-01-28T14:01:23.824Z">
+<meta property="og:updated_time" content="2017-01-28T14:54:37.330Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gitlab workflow">
-<meta name="twitter:description" content="建立测试项目新建一个项目用于测试工作流。演示项目地址：http://10.10.10.98/MekaYangyi/workflow
-设置分支保护新建项目默认master用户才能够push和merge。其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。">
+<meta name="twitter:description" content="建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。整个工作流程如下。第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话">
 <meta name="twitter:image" content="http://yoursite.com/child/img/gitlab工作流程/10-21-42.jpg">
 
 
@@ -362,7 +362,8 @@
       
 
       
-        <h1 id="建立测试项目"><a href="#建立测试项目" class="headerlink" title="建立测试项目"></a>建立测试项目</h1><p>新建一个项目用于测试工作流。<br>演示项目地址：<a href="http://10.10.10.98/MekaYangyi/workflow" target="_blank" rel="external">http://10.10.10.98/MekaYangyi/workflow</a><br><img src="/img/gitlab工作流程/10-21-42.jpg" alt=""></p>
+        <p>建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。<br>整个工作流程如下。<br>第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。<br>第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。<br>第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话机制，大家一起评审和讨论你的代码。对话过程中，你还可以不断提交代码。<br>第四步：你的Pull Request被接受，合并进master，重新部署后，原来你拉出来的那个分支就被删除。（先部署再合并也可。）</p>
+<h1 id="建立测试项目"><a href="#建立测试项目" class="headerlink" title="建立测试项目"></a>建立测试项目</h1><p>新建一个项目用于测试工作流。<br>演示项目地址：<a href="http://10.10.10.98/MekaYangyi/workflow" target="_blank" rel="external">http://10.10.10.98/MekaYangyi/workflow</a><br><img src="/img/gitlab工作流程/10-21-42.jpg" alt=""></p>
 <h1 id="设置分支保护"><a href="#设置分支保护" class="headerlink" title="设置分支保护"></a>设置分支保护</h1><p>新建项目默认master用户才能够push和merge。<br>其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。<br><img src="/img/gitlab工作流程/10-32-56.jpg" alt=""></p>
 <a id="more"></a>
 <h1 id="设置开发成员"><a href="#设置开发成员" class="headerlink" title="设置开发成员"></a>设置开发成员</h1><p>项目创建者在项目页面选择Member。<br><img src="/img/gitlab工作流程/10-31-10.jpg" alt=""></p>
@@ -373,7 +374,10 @@
 <p>一般开发人员指定为Developer。<br>具体权限在<a href="http://10.10.10.98/help/user/permissions.md查看。" target="_blank" rel="external">http://10.10.10.98/help/user/permissions.md查看。</a><br>设置用户权限<br><img src="/img/gitlab工作流程/11-23-52.jpg" alt=""><br>设置整个Group的权限<br><img src="/img/gitlab工作流程/11-24-20.jpg" alt=""></p>
 <h1 id="建立本地分支"><a href="#建立本地分支" class="headerlink" title="建立本地分支"></a>建立本地分支</h1><p>在项目文件夹右键，选择TortoiseGit→Create Branch。<br><img src="/img/gitlab工作流程/11-43-08.jpg" alt=""><br>填写信息<br><img src="/img/gitlab工作流程/11-52-57.jpg" alt=""></p>
 <h1 id="切换分支"><a href="#切换分支" class="headerlink" title="切换分支"></a>切换分支</h1><p>在项目文件夹右键，选择TortoiseGit→Switch/Checkout。<br><img src="/img/gitlab工作流程/11-54-23.jpg" alt=""><br>选择OK。<br><img src="/img/gitlab工作流程/11-55-03.jpg" alt=""></p>
-<h1 id="进行PUSH到新的分支"><a href="#进行PUSH到新的分支" class="headerlink" title="进行PUSH到新的分支"></a>进行PUSH到新的分支</h1><p>修改本地的文件，Commit。<br><img src="/img/gitlab工作流程/11-57-19.jpg" alt=""><br>填写上传备注，Commit，上传成功后选择push。<br><img src="/img/gitlab工作流程/11-58-28.jpg" alt=""><br>确认。<br><img src="/img/gitlab工作流程/11-59-05.jpg" alt=""><br>成功。<br><img src="/img/gitlab工作流程/11-59-45.jpg" alt=""></p>
+<h1 id="Commit"><a href="#Commit" class="headerlink" title="Commit"></a>Commit</h1><p>分出分支后，可以在本地进行Commit，知道一个功能开发完毕后，再上传到服务器。<br>修改本地的文件，Commit。<br><img src="/img/gitlab工作流程/11-57-19.jpg" alt=""><br>填写上传备注，Commit。</p>
+<h1 id="将Master向Test-WorkFlow合并"><a href="#将Master向Test-WorkFlow合并" class="headerlink" title="将Master向Test_WorkFlow合并"></a>将Master向Test_WorkFlow合并</h1><p>先从服务器pull最新版本，然后将master向Test_WorkFlow合并，防止master在分支分出之后被修改导致的冲突。<br>从服务器pull最新版本。<br><img src="/img/gitlab工作流程/22-39-02.jpg" alt=""><br>将master向Test_WorkFlow合并。<br><img src="/img/gitlab工作流程/22-41-09.jpg" alt=""><br>合并解决冲突。<br><img src="/img/gitlab工作流程/22-41-37.jpg" alt=""></p>
+<h1 id="push"><a href="#push" class="headerlink" title="push"></a>push</h1><p>上传成功后选择push。<br><img src="/img/gitlab工作流程/22-44-54.jpg" alt=""></p>
+<p>确认。<br><img src="/img/gitlab工作流程/11-59-05.jpg" alt=""><br>成功。<br><img src="/img/gitlab工作流程/11-59-45.jpg" alt=""></p>
 <h1 id="发起Merge-Request"><a href="#发起Merge-Request" class="headerlink" title="发起Merge Request"></a>发起Merge Request</h1><p>在项目页面找到分支，选择Merge Request<br><img src="/img/gitlab工作流程/12-05-10.jpg" alt=""><br>填写相关信息，Submit merge request<br><img src="/img/gitlab工作流程/12-06-31.jpg" alt=""></p>
 <h1 id="检视代码并讨论"><a href="#检视代码并讨论" class="headerlink" title="检视代码并讨论"></a>检视代码并讨论</h1><p>选择Merge Request。<br>单击测试分支合并功能这一个Merge Request<br><img src="/img/gitlab工作流程/12-08-38.jpg" alt=""><br>弹出页面。<br><img src="/img/gitlab工作流程/12-09-43.jpg" alt=""><br>检视代码</p>
 <h2 id="Commit，查看修改记录。"><a href="#Commit，查看修改记录。" class="headerlink" title="Commit，查看修改记录。"></a>Commit，查看修改记录。</h2><p>图中红色区域单击可以Diff与查看源文件。<br><img src="/img/gitlab工作流程/12-11-44.jpg" alt=""><br>单击任意版本提交记录，增加检视意见，在diff时，任意处可以添加讨论。或者在页面底部对整个修改进行评价。<br><img src="/img/gitlab工作流程/112-18-49.jpg" alt=""></p>
@@ -589,7 +593,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#建立测试项目"><span class="nav-number">1.</span> <span class="nav-text">建立测试项目</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置分支保护"><span class="nav-number">2.</span> <span class="nav-text">设置分支保护</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置开发成员"><span class="nav-number">3.</span> <span class="nav-text">设置开发成员</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#建立本地分支"><span class="nav-number">4.</span> <span class="nav-text">建立本地分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#切换分支"><span class="nav-number">5.</span> <span class="nav-text">切换分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#进行PUSH到新的分支"><span class="nav-number">6.</span> <span class="nav-text">进行PUSH到新的分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#发起Merge-Request"><span class="nav-number">7.</span> <span class="nav-text">发起Merge Request</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#检视代码并讨论"><span class="nav-number">8.</span> <span class="nav-text">检视代码并讨论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Commit，查看修改记录。"><span class="nav-number">8.1.</span> <span class="nav-text">Commit，查看修改记录。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Changes，查看版本区别。"><span class="nav-number">8.2.</span> <span class="nav-text">Changes，查看版本区别。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Discusion，填写建议"><span class="nav-number">8.3.</span> <span class="nav-text">Discusion，填写建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Accept-merge-request或者Close-merge-request"><span class="nav-number">8.4.</span> <span class="nav-text">Accept merge request或者Close merge request</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合并完成"><span class="nav-number">8.5.</span> <span class="nav-text">合并完成</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#本地pull"><span class="nav-number">9.</span> <span class="nav-text">本地pull</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#删除本地分支"><span class="nav-number">10.</span> <span class="nav-text">删除本地分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Issue"><span class="nav-number">11.</span> <span class="nav-text">Issue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#新建Issue"><span class="nav-number">11.1.</span> <span class="nav-text">新建Issue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看结果"><span class="nav-number">11.2.</span> <span class="nav-text">查看结果</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#建立测试项目"><span class="nav-number">1.</span> <span class="nav-text">建立测试项目</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置分支保护"><span class="nav-number">2.</span> <span class="nav-text">设置分支保护</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置开发成员"><span class="nav-number">3.</span> <span class="nav-text">设置开发成员</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#建立本地分支"><span class="nav-number">4.</span> <span class="nav-text">建立本地分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#切换分支"><span class="nav-number">5.</span> <span class="nav-text">切换分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Commit"><span class="nav-number">6.</span> <span class="nav-text">Commit</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#将Master向Test-WorkFlow合并"><span class="nav-number">7.</span> <span class="nav-text">将Master向Test_WorkFlow合并</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#push"><span class="nav-number">8.</span> <span class="nav-text">push</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#发起Merge-Request"><span class="nav-number">9.</span> <span class="nav-text">发起Merge Request</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#检视代码并讨论"><span class="nav-number">10.</span> <span class="nav-text">检视代码并讨论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Commit，查看修改记录。"><span class="nav-number">10.1.</span> <span class="nav-text">Commit，查看修改记录。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Changes，查看版本区别。"><span class="nav-number">10.2.</span> <span class="nav-text">Changes，查看版本区别。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Discusion，填写建议"><span class="nav-number">10.3.</span> <span class="nav-text">Discusion，填写建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Accept-merge-request或者Close-merge-request"><span class="nav-number">10.4.</span> <span class="nav-text">Accept merge request或者Close merge request</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合并完成"><span class="nav-number">10.5.</span> <span class="nav-text">合并完成</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#本地pull"><span class="nav-number">11.</span> <span class="nav-text">本地pull</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#删除本地分支"><span class="nav-number">12.</span> <span class="nav-text">删除本地分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Issue"><span class="nav-number">13.</span> <span class="nav-text">Issue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#新建Issue"><span class="nav-number">13.1.</span> <span class="nav-text">新建Issue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看结果"><span class="nav-number">13.2.</span> <span class="nav-text">查看结果</span></a></li></ol></li></ol></div>
             
           </div>
         </section>
