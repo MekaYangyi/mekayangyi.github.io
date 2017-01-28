@@ -1,0 +1,749 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="gitlab," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="建立测试项目新建一个项目用于测试工作流。演示项目地址：http://10.10.10.98/MekaYangyi/workflow
+设置分支保护新建项目默认master用户才能够push和merge。其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。
+设置开发成员项目创建者在项目页面选择Member。
+设置开发人员分为两种，一种是直接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gitlab workflow">
+<meta property="og:url" content="http://yoursite.com/child/blog/2017/01/gitlab-workflow.html">
+<meta property="og:site_name" content="鉴心">
+<meta property="og:description" content="建立测试项目新建一个项目用于测试工作流。演示项目地址：http://10.10.10.98/MekaYangyi/workflow
+设置分支保护新建项目默认master用户才能够push和merge。其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。
+设置开发成员项目创建者在项目页面选择Member。
+设置开发人员分为两种，一种是直接">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-21-42.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-32-56.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/0-31-10.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-23-52.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-24-20.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-43-08.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-52-57.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-54-23.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-55-03.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-57-19.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-58-28.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-59-05.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-59-45.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-05-10.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-06-31.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-08-38.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-09-43.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-11-44.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/112-18-49.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-19-25.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-12-47.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-15-41.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-22-44.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-23-55.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-25-09.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-26-33.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-27-07.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-54-23.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-47-04.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-45-50.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-32-50.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-36-52.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-37-36.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-39-48.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-41-19.jpg">
+<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-41-51.jpg">
+<meta property="og:updated_time" content="2017-01-28T13:48:58.275Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gitlab workflow">
+<meta name="twitter:description" content="建立测试项目新建一个项目用于测试工作流。演示项目地址：http://10.10.10.98/MekaYangyi/workflow
+设置分支保护新建项目默认master用户才能够push和merge。其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。
+设置开发成员项目创建者在项目页面选择Member。
+设置开发人员分为两种，一种是直接">
+<meta name="twitter:image" content="http://yoursite.com/child/img/gitlab工作流程/10-21-42.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/child/blog/2017/01/gitlab-workflow.html"/>
+
+  <title> gitlab workflow | 鉴心 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?0115f7d97f1f901d9db5ad6b82f372aa";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">鉴心</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                gitlab workflow
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-01-28T21:40:40+08:00" content="2017-01-28">
+              2017-01-28
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/gitlab/" itemprop="url" rel="index">
+                    <span itemprop="name">gitlab</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2017/01/gitlab-workflow.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2017/01/gitlab-workflow.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="建立测试项目"><a href="#建立测试项目" class="headerlink" title="建立测试项目"></a>建立测试项目</h1><p>新建一个项目用于测试工作流。<br>演示项目地址：<a href="http://10.10.10.98/MekaYangyi/workflow" target="_blank" rel="external">http://10.10.10.98/MekaYangyi/workflow</a><br><img src="/img/gitlab工作流程/10-21-42.jpg" alt=""></p>
+<h1 id="设置分支保护"><a href="#设置分支保护" class="headerlink" title="设置分支保护"></a>设置分支保护</h1><p>新建项目默认master用户才能够push和merge。<br>其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。<br><img src="/img/gitlab工作流程/10-32-56.jpg" alt=""></p>
+<h1 id="设置开发成员"><a href="#设置开发成员" class="headerlink" title="设置开发成员"></a>设置开发成员</h1><p>项目创建者在项目页面选择Member。<br><img src="/img/gitlab工作流程/0-31-10.jpg" alt=""></p>
+<p>设置开发人员分为两种，一种是直接设置用户，一种是设置一Group都为指定权限。<br>权限分为四类：</p>
+<blockquote>
+<p>Guest<br>Reporter<br>Developer<br>Master</p>
+</blockquote>
+<p>一般开发人员指定为Developer。<br>具体权限在<a href="http://10.10.10.98/help/user/permissions.md查看。" target="_blank" rel="external">http://10.10.10.98/help/user/permissions.md查看。</a><br>设置用户权限<br><img src="/img/gitlab工作流程/11-23-52.jpg" alt=""><br>设置整个Group的权限<br><img src="/img/gitlab工作流程/11-24-20.jpg" alt=""></p>
+<h1 id="建立本地分支"><a href="#建立本地分支" class="headerlink" title="建立本地分支"></a>建立本地分支</h1><p>在项目文件夹右键，选择TortoiseGit→Create Branch。<br><img src="/img/gitlab工作流程/11-43-08.jpg" alt=""><br>填写信息<br><img src="/img/gitlab工作流程/11-52-57.jpg" alt=""></p>
+<h1 id="切换分支"><a href="#切换分支" class="headerlink" title="切换分支"></a>切换分支</h1><p>在项目文件夹右键，选择TortoiseGit→Switch/Checkout。<br><img src="/img/gitlab工作流程/11-54-23.jpg" alt=""><br>选择OK。<br><img src="/img/gitlab工作流程/11-55-03.jpg" alt=""></p>
+<h1 id="进行PUSH到新的分支"><a href="#进行PUSH到新的分支" class="headerlink" title="进行PUSH到新的分支"></a>进行PUSH到新的分支</h1><p>修改本地的文件，Commit。<br><img src="/img/gitlab工作流程/11-57-19.jpg" alt=""><br>填写上传备注，Commit，上传成功后选择push。<br><img src="/img/gitlab工作流程/11-58-28.jpg" alt=""><br>确认。<br><img src="/img/gitlab工作流程/11-59-05.jpg" alt=""><br>成功。<br><img src="/img/gitlab工作流程/11-59-45.jpg" alt=""></p>
+<h1 id="发起Merge-Request"><a href="#发起Merge-Request" class="headerlink" title="发起Merge Request"></a>发起Merge Request</h1><p>在项目页面找到分支，选择Merge Request<br><img src="/img/gitlab工作流程/12-05-10.jpg" alt=""><br>填写相关信息，Submit merge request<br><img src="/img/gitlab工作流程/12-06-31.jpg" alt=""></p>
+<h1 id="检视代码并讨论"><a href="#检视代码并讨论" class="headerlink" title="检视代码并讨论"></a>检视代码并讨论</h1><p>选择Merge Request。<br>单击测试分支合并功能这一个Merge Request<br><img src="/img/gitlab工作流程/12-08-38.jpg" alt=""><br>弹出页面。<br><img src="/img/gitlab工作流程/12-09-43.jpg" alt=""><br>检视代码</p>
+<h2 id="Commit，查看修改记录。"><a href="#Commit，查看修改记录。" class="headerlink" title="Commit，查看修改记录。"></a>Commit，查看修改记录。</h2><p>图中红色区域单击可以Diff与查看源文件。<br><img src="/img/gitlab工作流程/12-11-44.jpg" alt=""><br>单击任意版本提交记录，增加检视意见，在diff时，任意处可以添加讨论。或者在页面底部对整个修改进行评价。<br><img src="/img/gitlab工作流程/112-18-49.jpg" alt=""></p>
+<p><img src="/img/gitlab工作流程/12-19-25.jpg" alt=""></p>
+<h2 id="Changes，查看版本区别。"><a href="#Changes，查看版本区别。" class="headerlink" title="Changes，查看版本区别。"></a>Changes，查看版本区别。</h2><p><img src="/img/gitlab工作流程/12-12-47.jpg" alt=""></p>
+<h2 id="Discusion，填写建议"><a href="#Discusion，填写建议" class="headerlink" title="Discusion，填写建议"></a>Discusion，填写建议</h2><p>填写建议后，选择Comment可以互相讨论。<br>或者选择Close merge request关闭请求。<br><img src="/img/gitlab工作流程/12-15-41.jpg" alt=""></p>
+<h2 id="Accept-merge-request或者Close-merge-request"><a href="#Accept-merge-request或者Close-merge-request" class="headerlink" title="Accept merge request或者Close merge request"></a>Accept merge request或者Close merge request</h2><p><img src="/img/gitlab工作流程/12-22-44.jpg" alt=""></p>
+<h2 id="合并完成"><a href="#合并完成" class="headerlink" title="合并完成"></a>合并完成</h2><p>选择Accept Merge Request,同时选择合并时将分支删除。<br><img src="/img/gitlab工作流程/12-23-55.jpg" alt=""><br>合并结果。<br><img src="/img/gitlab工作流程/12-25-09.jpg" alt=""></p>
+<h1 id="本地pull"><a href="#本地pull" class="headerlink" title="本地pull"></a>本地pull</h1><p>在本地项目进行pull,同步服务器版本。<br><img src="/img/gitlab工作流程/12-26-33.jpg" alt=""><br>本地同步结果。<br><img src="/img/gitlab工作流程/12-27-07.jpg" alt=""></p>
+<h1 id="删除本地分支"><a href="#删除本地分支" class="headerlink" title="删除本地分支"></a>删除本地分支</h1><p>由于远程分支与本地分支没有关系，那么当远程正式Merge之后，需要删除本地分支，防止以后分支一直增加，不减少。<br>在项目文件夹右键，选择TortoiseGit→Switch/Checkout，先把分支切换到本地master。<br><img src="/img/gitlab工作流程/11-54-23.jpg" alt=""><br>切换完成后，再次进入该界面选择….<br><img src="/img/gitlab工作流程/12-47-04.jpg" alt=""><br>删除分支<br><img src="/img/gitlab工作流程/12-45-50.jpg" alt=""></p>
+<h1 id="Issue"><a href="#Issue" class="headerlink" title="Issue"></a>Issue</h1><p>Issue 用于 Bug追踪和需求管理。建议先新建 Issue，再新建对应的功能分支。功能分支总是为了解决一个或多个 Issue。</p>
+<h2 id="新建Issue"><a href="#新建Issue" class="headerlink" title="新建Issue"></a>新建Issue</h2><p>选择New Issue<br><img src="/img/gitlab工作流程/12-32-50.jpg" alt=""><br>填写相关信息。<br>功能分支的名称，可以与issue的名字保持一致，并且以issue的编号起首，比如”1-测试Issue”。<br><img src="/img/gitlab工作流程/12-36-52.jpg" alt=""></p>
+<p>新建完成,每一个Issue都有一个编号，本Issue的编号为#1。<br><img src="/img/gitlab工作流程/12-37-36.jpg" alt=""><br>在分支开发完成后，在commit message里面，可以写上”fixes #14”或者”closes #67”。<br><img src="/img/gitlab工作流程/12-39-48.jpg" alt=""><br>Github规定，只要commit message里面有下面这些动词 + 编号，就会关闭对应的issue。</p>
+<blockquote>
+<p>close<br>closes<br>closed<br>fix<br>fixes<br>fixed<br>resolve<br>resolves<br>resolved</p>
+</blockquote>
+<p>这种方式还可以一次关闭多个issue，或者关闭其他代码库的issue，格式是username/repository#issue_number。<br>Pull Request被接受以后，issue关闭，原始分支就应该删除。如果以后该issue重新打开，新分支可以复用原来的名字。</p>
+<h2 id="查看结果"><a href="#查看结果" class="headerlink" title="查看结果"></a>查看结果</h2><p><img src="/img/gitlab工作流程/12-41-19.jpg" alt=""><br><img src="/img/gitlab工作流程/12-41-51.jpg" alt=""></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/gitlab/" rel="tag">#gitlab</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2017/01/第一次使用gitlab.html" rel="next" title="第一次使用gitlab">
+                <i class="fa fa-chevron-left"></i> 第一次使用gitlab
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="/blog/2017/01/gitlab-workflow.html"
+     data-title="gitlab workflow"
+     data-content=""
+     data-url="http://yoursite.com/child//blog/2017/01/gitlab-workflow.html">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="/blog/2017/01/gitlab-workflow.html"
+           data-title="gitlab workflow" data-url="http://yoursite.com/child//blog/2017/01/gitlab-workflow.html">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="YangYi" />
+          <p class="site-author-name" itemprop="name">YangYi</p>
+          <p class="site-description motion-element" itemprop="description">YangYi</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">26</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/MekaYangyi" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/yang1" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#建立测试项目"><span class="nav-number">1.</span> <span class="nav-text">建立测试项目</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置分支保护"><span class="nav-number">2.</span> <span class="nav-text">设置分支保护</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置开发成员"><span class="nav-number">3.</span> <span class="nav-text">设置开发成员</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#建立本地分支"><span class="nav-number">4.</span> <span class="nav-text">建立本地分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#切换分支"><span class="nav-number">5.</span> <span class="nav-text">切换分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#进行PUSH到新的分支"><span class="nav-number">6.</span> <span class="nav-text">进行PUSH到新的分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#发起Merge-Request"><span class="nav-number">7.</span> <span class="nav-text">发起Merge Request</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#检视代码并讨论"><span class="nav-number">8.</span> <span class="nav-text">检视代码并讨论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Commit，查看修改记录。"><span class="nav-number">8.1.</span> <span class="nav-text">Commit，查看修改记录。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Changes，查看版本区别。"><span class="nav-number">8.2.</span> <span class="nav-text">Changes，查看版本区别。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Discusion，填写建议"><span class="nav-number">8.3.</span> <span class="nav-text">Discusion，填写建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Accept-merge-request或者Close-merge-request"><span class="nav-number">8.4.</span> <span class="nav-text">Accept merge request或者Close merge request</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合并完成"><span class="nav-number">8.5.</span> <span class="nav-text">合并完成</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#本地pull"><span class="nav-number">9.</span> <span class="nav-text">本地pull</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#删除本地分支"><span class="nav-number">10.</span> <span class="nav-text">删除本地分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Issue"><span class="nav-number">11.</span> <span class="nav-text">Issue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#新建Issue"><span class="nav-number">11.1.</span> <span class="nav-text">新建Issue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看结果"><span class="nav-number">11.2.</span> <span class="nav-text">查看结果</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YangYi</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"mekayangyi"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
