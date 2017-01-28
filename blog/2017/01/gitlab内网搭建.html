@@ -100,7 +100,7 @@
 安装ubuntu选择的版本为ubuntu1">
 <meta property="og:image" content="http://yoursite.com/child/img/20170124gitlab.jpg">
 <meta property="og:image" content="http://yoursite.com/child/img/20170124gitlabrun.jpg">
-<meta property="og:updated_time" content="2017-01-28T01:25:27.515Z">
+<meta property="og:updated_time" content="2017-01-28T01:37:33.704Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gitlab内网搭建">
 <meta name="twitter:description" content="起源之前公司使用svn进行代码管理，仅仅作为代码仓库，开发没有相应的配套工具。
@@ -283,8 +283,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-01-28T09:22:09+08:00" content="2017-01-28">
-              2017-01-28
+            <time itemprop="dateCreated" datetime="2017-01-27T08:22:09+08:00" content="2017-01-27">
+              2017-01-27
             </time>
           </span>
 
@@ -348,6 +348,7 @@
 <p>使用下面命令安装。<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo /目录/dpkg -<span class="selector-tag">i</span> gitlab-ce-XXX.deb</div></pre></td></tr></table></figure></p>
 <h2 id="配置ip地址"><a href="#配置ip地址" class="headerlink" title="配置ip地址"></a>配置ip地址</h2><p>内网采用固定ip进行访问，地址改为10.10.10.98<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo vi  <span class="regexp">/etc/gi</span>tlab<span class="regexp">/gitlab.rb</span></div></pre></td></tr></table></figure></p>
 <p><img src="/img/20170124gitlab.jpg" alt=""></p>
+<a id="more"></a>
 <h2 id="初始化配置"><a href="#初始化配置" class="headerlink" title="初始化配置"></a>初始化配置</h2><p>使用该命令对gitlab进行初始化<br><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">sudo gitlab-ctl reconfigure</span></div></pre></td></tr></table></figure></p>
 <h2 id="打开-sshd-和-postfix-服务"><a href="#打开-sshd-和-postfix-服务" class="headerlink" title="打开 sshd 和 postfix 服务"></a>打开 sshd 和 postfix 服务</h2><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">service sshd <span class="literal">start</span> </div><div class="line">service postfix <span class="literal">start</span></div></pre></td></tr></table></figure>
 <h2 id="设置端口"><a href="#设置端口" class="headerlink" title="设置端口"></a>设置端口</h2><p>为了使 GitLab 社区版的 Web 界面可以通过网络进行访问，我们需要允许 80 端口通过防火墙，这个端口是 GitLab 社区版的默认端口。为此需要运行下面的命令<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo iptables -A INPUT -<span class="selector-tag">p</span> tcp -m tcp --dport <span class="number">80</span> -j ACCEPT</div></pre></td></tr></table></figure></p>
@@ -389,13 +390,17 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2017/01/第一次使用gitlab.html" rel="next" title="第一次使用gitlab">
-                <i class="fa fa-chevron-left"></i> 第一次使用gitlab
+              <a href="/blog/2016/11/读书笔记-stl源码剖析.html" rel="next" title="[读书笔记] stl源码剖析 总结">
+                <i class="fa fa-chevron-left"></i> [读书笔记] stl源码剖析 总结
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2017/01/第一次使用gitlab.html" rel="prev" title="第一次使用gitlab">
+                第一次使用gitlab <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
