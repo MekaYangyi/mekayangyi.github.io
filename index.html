@@ -258,6 +258,138 @@
             
               
                 
+                <a class="post-title-link" href="/blog/2017/02/gitlab内网搭建.html" itemprop="url">
+                  gitlab内网搭建
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-02-27T08:22:09+08:00" content="2017-02-27">
+              2017-02-27
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/环境搭建/" itemprop="url" rel="index">
+                    <span itemprop="name">环境搭建</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2017/02/gitlab内网搭建.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2017/02/gitlab内网搭建.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="起源"><a href="#起源" class="headerlink" title="起源"></a>起源</h1><p>之前公司使用svn进行代码管理，仅仅作为代码仓库，开发没有相应的配套工具。</p>
+<p>于是想找一个搭建简单，提供最够功能的软件管理的平台，使用git进行代码管理，方便出差时进行开发。</p>
+<p>找到了gitlab，本身gitlab与github很相似，学习没有成本。</p>
+<p>功能全面，提供权限管理、代码检视、交流、任务管理、文件管理、wiki、ci。一次搭建集成了足够多的功能。</p>
+<h1 id="安装ubuntu"><a href="#安装ubuntu" class="headerlink" title="安装ubuntu"></a>安装ubuntu</h1><p>选择的版本为ubuntu16.04，64位版本，之前选用15.04安装最新版本gitlab出现问题。<br>运行在vm虚拟机中，网络暂时选择桥接模式，免得其他模式要设置端口，一路无脑安装。<br>ubuntu下载地址<br><a href="https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/16.04/ubuntu-16.04-desktop-amd64.iso">https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/16.04/ubuntu-16.04-desktop-amd64.iso</a><br>下载gitlab</p>
+<h1 id="安装gitlab"><a href="#安装gitlab" class="headerlink" title="安装gitlab"></a>安装gitlab</h1><h2 id="安装gitlab依赖项目"><a href="#安装gitlab依赖项目" class="headerlink" title="安装gitlab依赖项目"></a>安装gitlab依赖项目</h2><p>先安装gitlab的依赖项目，使用网络更新apt-get<br>安装服务。<br><figure class="highlight q"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">apt-<span class="built_in">get</span> <span class="keyword">update</span> <span class="comment">//更新</span></div><div class="line">sudo apt-<span class="built_in">get</span> install curl openssh-server ca-certif</div></pre></td></tr></table></figure></p>
+<p>执行完成后，出现邮件配置，选择Internet那一项（不带Smarthost的）。</p>
+<h2 id="安装gitlab-1"><a href="#安装gitlab-1" class="headerlink" title="安装gitlab"></a>安装gitlab</h2><p>下载gitlab，可以在官网下载gitlab，也可以通过清华大学下载，这样比较快。<br>选择了最新版本8.16.1_64。<br><a href="https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/ubuntu/pool/xenial/main/g/gitlab-ce/gitlab-ce_8.16.1-ce.0_amd64.deb">https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/ubuntu/pool/xenial/main/g/gitlab-ce/gitlab-ce_8.16.1-ce.0_amd64.deb</a></p>
+<p>使用下面命令安装。<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo /目录/dpkg -<span class="selector-tag">i</span> gitlab-ce-XXX.deb</div></pre></td></tr></table></figure></p>
+<h2 id="配置ip地址"><a href="#配置ip地址" class="headerlink" title="配置ip地址"></a>配置ip地址</h2><p>内网采用固定ip进行访问，地址改为10.10.10.98<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo vi  <span class="regexp">/etc/gi</span>tlab<span class="regexp">/gitlab.rb</span></div></pre></td></tr></table></figure></p>
+<p><img src="/img/20170124gitlab.jpg" alt=""/></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/blog/2017/02/gitlab内网搭建.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/blog/2017/01/gitlab-workflow.html" itemprop="url">
                   gitlab workflow
                 </a>
@@ -463,138 +595,6 @@
 <h2 id="登录"><a href="#登录" class="headerlink" title="登录"></a>登录</h2><p>登陆内网gitlab，目前网址：10.10.10.98。<br><img src="/img/第一次使用gitlab/22-04-07.jpg" alt=""/></p>
           <div class="post-more-link text-center">
             <a class="btn" href="/blog/2017/01/第一次使用gitlab.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2017/01/gitlab内网搭建.html" itemprop="url">
-                  gitlab内网搭建
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-01-27T08:22:09+08:00" content="2017-01-27">
-              2017-01-27
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/环境搭建/" itemprop="url" rel="index">
-                    <span itemprop="name">环境搭建</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/blog/2017/01/gitlab内网搭建.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2017/01/gitlab内网搭建.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="起源"><a href="#起源" class="headerlink" title="起源"></a>起源</h1><p>之前公司使用svn进行代码管理，仅仅作为代码仓库，开发没有相应的配套工具。</p>
-<p>于是想找一个搭建简单，提供最够功能的软件管理的平台，使用git进行代码管理，方便出差时进行开发。</p>
-<p>找到了gitlab，本身gitlab与github很相似，学习没有成本。</p>
-<p>功能全面，提供权限管理、代码检视、交流、任务管理、文件管理、wiki、ci。一次搭建集成了足够多的功能。</p>
-<h1 id="安装ubuntu"><a href="#安装ubuntu" class="headerlink" title="安装ubuntu"></a>安装ubuntu</h1><p>选择的版本为ubuntu16.04，64位版本，之前选用15.04安装最新版本gitlab出现问题。<br>运行在vm虚拟机中，网络暂时选择桥接模式，免得其他模式要设置端口，一路无脑安装。<br>ubuntu下载地址<br><a href="https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/16.04/ubuntu-16.04-desktop-amd64.iso">https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/16.04/ubuntu-16.04-desktop-amd64.iso</a><br>下载gitlab</p>
-<h1 id="安装gitlab"><a href="#安装gitlab" class="headerlink" title="安装gitlab"></a>安装gitlab</h1><h2 id="安装gitlab依赖项目"><a href="#安装gitlab依赖项目" class="headerlink" title="安装gitlab依赖项目"></a>安装gitlab依赖项目</h2><p>先安装gitlab的依赖项目，使用网络更新apt-get<br>安装服务。<br><figure class="highlight q"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">apt-<span class="built_in">get</span> <span class="keyword">update</span> <span class="comment">//更新</span></div><div class="line">sudo apt-<span class="built_in">get</span> install curl openssh-server ca-certif</div></pre></td></tr></table></figure></p>
-<p>执行完成后，出现邮件配置，选择Internet那一项（不带Smarthost的）。</p>
-<h2 id="安装gitlab-1"><a href="#安装gitlab-1" class="headerlink" title="安装gitlab"></a>安装gitlab</h2><p>下载gitlab，可以在官网下载gitlab，也可以通过清华大学下载，这样比较快。<br>选择了最新版本8.16.1_64。<br><a href="https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/ubuntu/pool/xenial/main/g/gitlab-ce/gitlab-ce_8.16.1-ce.0_amd64.deb">https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/ubuntu/pool/xenial/main/g/gitlab-ce/gitlab-ce_8.16.1-ce.0_amd64.deb</a></p>
-<p>使用下面命令安装。<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo /目录/dpkg -<span class="selector-tag">i</span> gitlab-ce-XXX.deb</div></pre></td></tr></table></figure></p>
-<h2 id="配置ip地址"><a href="#配置ip地址" class="headerlink" title="配置ip地址"></a>配置ip地址</h2><p>内网采用固定ip进行访问，地址改为10.10.10.98<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo vi  <span class="regexp">/etc/gi</span>tlab<span class="regexp">/gitlab.rb</span></div></pre></td></tr></table></figure></p>
-<p><img src="/img/20170124gitlab.jpg" alt=""/></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/blog/2017/01/gitlab内网搭建.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
