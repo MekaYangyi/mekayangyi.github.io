@@ -1,0 +1,703 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis,源码阅读," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="redis源码阅读-内存分配redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。
+内存分配器的选择redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis源码阅读-开始">
+<meta property="og:url" content="http://yoursite.com/child/blog/2017/03/redis源码阅读-开始.html">
+<meta property="og:site_name" content="鉴心">
+<meta property="og:description" content="redis源码阅读-内存分配redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。
+内存分配器的选择redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。">
+<meta property="og:updated_time" content="2017-03-21T02:23:51.893Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis源码阅读-开始">
+<meta name="twitter:description" content="redis源码阅读-内存分配redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。
+内存分配器的选择redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/child/blog/2017/03/redis源码阅读-开始.html"/>
+
+  <title> redis源码阅读-开始 | 鉴心 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?0115f7d97f1f901d9db5ad6b82f372aa";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">鉴心</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                redis源码阅读-开始
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-03-21T10:21:21+08:00" content="2017-03-21">
+              2017-03-21
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2017/03/redis源码阅读-开始.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2017/03/redis源码阅读-开始.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="redis源码阅读-内存分配"><a href="#redis源码阅读-内存分配" class="headerlink" title="redis源码阅读-内存分配"></a>redis源码阅读-内存分配</h1><p>redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。</p>
+<h2 id="内存分配器的选择"><a href="#内存分配器的选择" class="headerlink" title="内存分配器的选择"></a>内存分配器的选择</h2><p>redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。</p>
+<a id="more"></a>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// zmalloc.h</span></div><div class="line"><span class="comment">// 选择使用的内存分配器，分别为tcmalloc、jemalloc、dlmalloc、malloc/malloc.h</span></div><div class="line"><span class="comment">// 同时设置HAVE_MALLOC_SIZE为真，内存分配器自带大小统计。</span></div><div class="line"><span class="comment">// 如果不选择内存分配器，则使用默认的malloc，同时同时设置HAVE_MALLOC_SIZE为假。</span></div><div class="line"><span class="comment">// 指定zmalloc_size</span></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> defined(USE_TCMALLOC)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> ZMALLOC_LIB (<span class="meta-string">"tcmalloc-"</span> __xstr(TC_VERSION_MAJOR) <span class="meta-string">"."</span> __xstr(TC_VERSION_MINOR))</span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;google/tcmalloc.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (TC_VERSION_MAJOR == 1 &amp;&amp; TC_VERSION_MINOR &gt;= 6) || (TC_VERSION_MAJOR &gt; 1)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HAVE_MALLOC_SIZE 1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> zmalloc_size(p) tc_malloc_size(p)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">error</span> <span class="meta-string">"Newer version of tcmalloc required"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(USE_JEMALLOC)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> ZMALLOC_LIB (<span class="meta-string">"jemalloc-"</span> __xstr(JEMALLOC_VERSION_MAJOR) <span class="meta-string">"."</span> __xstr(JEMALLOC_VERSION_MINOR) <span class="meta-string">"."</span> __xstr(JEMALLOC_VERSION_BUGFIX))</span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;jemalloc/jemalloc.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (JEMALLOC_VERSION_MAJOR == 2 &amp;&amp; JEMALLOC_VERSION_MINOR &gt;= 1) || (JEMALLOC_VERSION_MAJOR &gt; 2)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HAVE_MALLOC_SIZE 1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> zmalloc_size(p) je_malloc_usable_size(p)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">error</span> <span class="meta-string">"Newer version of jemalloc required"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(__APPLE__)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;malloc/malloc.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HAVE_MALLOC_SIZE 1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> zmalloc_size(p) malloc_size(p)</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(USE_DLMALLOC)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"Win32_Interop/win32_dlmalloc.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> ZMALLOC_LIB (<span class="meta-string">"dlmalloc-"</span> __xstr(2) <span class="meta-string">"."</span> __xstr(8) )</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HAVE_MALLOC_SIZE 1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> zmalloc_size(p)  g_msize(p)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> ZMALLOC_LIB</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> ZMALLOC_LIB <span class="meta-string">"libc"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="comment">// zmalloc.c</span></div><div class="line"><span class="comment">// 依据选择的内存分配器，设定好宏定义，否则使用系统默认分配。</span></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> defined(USE_TCMALLOC)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> malloc(size) tc_malloc(size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> calloc(count,size) tc_calloc(count,size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> realloc(ptr,size) tc_realloc(ptr,size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> free(ptr) tc_free(ptr)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(USE_JEMALLOC)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> malloc(size) je_malloc(size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> calloc(count,size) je_calloc(count,size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> realloc(ptr,size) je_realloc(ptr,size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> free(ptr) je_free(ptr)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(USE_DLMALLOC)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> malloc(size) g_malloc(size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> calloc(count,size) g_calloc(count,size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> realloc(ptr,size) g_realloc(ptr,size)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> free(ptr) g_free(ptr)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div></pre></td></tr></table></figure>
+<h2 id="功能函数一栏"><a href="#功能函数一栏" class="headerlink" title="功能函数一栏"></a>功能函数一栏</h2><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">void *zmalloc(size_t size);// 调用malloc，分配size大小的空间</div><div class="line">void *zcalloc(size_t size);// 调用calloc，分配size大小的空间</div><div class="line">void *zrealloc(void *ptr, size_t size);// 调用realloc，重新分配size大小的空间</div><div class="line">void zfree(void *ptr);// 释放ptr</div><div class="line">char *zstrdup(const char *s);// c风格字符串copy</div><div class="line">size_t zmalloc_used_memory(void); // 获取当前占用的内存大小</div><div class="line">void zmalloc_enable_thread_safeness(void); // 设置线程安全</div><div class="line">void zmalloc_set_oom_handler(void (*oom_handler)(size_t)); // 设置内存分配失败的处理方法</div><div class="line">float zmalloc_get_fragmentation_ratio(size_t rss);// 获取所给内存和已经使用的内存大小之比</div><div class="line">size_t zmalloc_get_rss(void); // 获取RSS信息（Resident Set Size）</div><div class="line">size_t zmalloc_get_private_dirty(void);// 获取实际内存大小</div><div class="line">size_t zmalloc_get_smap_bytes_by_field(char *field);// 获取/proc/self/smaps字段的字节数</div><div class="line">void zlibc_free(void *ptr); // 获取物理内存大小</div><div class="line">WIN32_ONLY(void zmalloc_free_used_memory_mutex(void);) //原始系统free的释放方法</div></pre></td></tr></table></figure>
+<h2 id="统计使用的内存总数"><a href="#统计使用的内存总数" class="headerlink" title="统计使用的内存总数"></a>统计使用的内存总数</h2><p>redis每次分配内存、释放内存都会进行记录。用来统计redis使用的总内存。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">size_t</span> zmalloc_used_memory(<span class="keyword">void</span>) &#123;<span class="comment">// 获取使用的内存，直接获取used_memory的变量的值。</span></div><div class="line">    <span class="keyword">size_t</span> um;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (zmalloc_thread_safe) &#123;<span class="comment">// 线程安全</span></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> defined(__ATOMIC_RELAXED) || defined(HAVE_ATOMIC)</span></div><div class="line">        um = update_zmalloc_stat_add(<span class="number">0</span>);</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line">        pthread_mutex_lock(&amp;used_memory_mutex);</div><div class="line">        um = used_memory;</div><div class="line">        pthread_mutex_unlock(&amp;used_memory_mutex);</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span> &#123;<span class="comment">// 非线程安全</span></div><div class="line">        um = used_memory;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> um;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">size_t</span> used_memory = <span class="number">0</span>;<span class="comment">// 定义了一个全局变量，用来记录使用的内存数量。</span></div><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> zmalloc_thread_safe = <span class="number">0</span>;<span class="comment">// 默认不线程安全，调用zmalloc_enable_thread_safeness进行设置为线程安全。</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _WIN32<span class="comment">// 根据系统选择多线程锁。</span></span></div><div class="line"><span class="keyword">pthread_mutex_t</span> used_memory_mutex;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="keyword">pthread_mutex_t</span> used_memory_mutex = PTHREAD_MUTEX_INITIALIZER;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="comment">// __ATOMIC_RELAXED提供原子加减操作</span></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> defined(__ATOMIC_RELAXED)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_add(__n) __atomic_add_fetch(&amp;used_memory, (__n), __ATOMIC_RELAXED)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_sub(__n) __atomic_sub_fetch(&amp;used_memory, (__n), __ATOMIC_RELAXED)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(HAVE_ATOMIC)<span class="comment">// GCC提供的原子加减操作</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_add(__n) __sync_add_and_fetch(&amp;used_memory, (__n))</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_sub(__n) __sync_sub_and_fetch(&amp;used_memory, (__n))</span></div><div class="line"><span class="meta">#<span class="meta-keyword">else</span><span class="comment">// 使用多线程锁来实现多线程加减操作</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_add(__n) do &#123; \</span></div><div class="line">    pthread_mutex_lock(&amp;used_memory_mutex); \</div><div class="line">    used_memory += (__n); \</div><div class="line">    pthread_mutex_unlock(&amp;used_memory_mutex); \</div><div class="line">&#125; while(0)</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_sub(__n) do &#123; \</span></div><div class="line">    pthread_mutex_lock(&amp;used_memory_mutex); \</div><div class="line">    used_memory -= (__n); \</div><div class="line">    pthread_mutex_unlock(&amp;used_memory_mutex); \</div><div class="line">&#125; while(0)</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="comment">// 增加redis内存计数</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_alloc(__n) do &#123; \</span></div><div class="line">    size_t _n = (__n); \</div><div class="line">    <span class="meta-keyword">if</span> (_n&amp;(sizeof(PORT_LONG)-1)) _n += sizeof(PORT_LONG)-(_n&amp;(sizeof(PORT_LONG)-1)); \ <span class="comment">// 将n调整为sizeof(PORT_LONG)的整数倍</span></div><div class="line">    <span class="keyword">if</span> (zmalloc_thread_safe) &#123; \ <span class="comment">// 开启线程安全</span></div><div class="line">        update_zmalloc_stat_add(_n); \</div><div class="line">    &#125; <span class="keyword">else</span> &#123; \</div><div class="line">        used_memory += _n; \ <span class="comment">// 不开启线程安全</span></div><div class="line">    &#125; \</div><div class="line">&#125; <span class="keyword">while</span>(<span class="number">0</span>)</div><div class="line"></div><div class="line"><span class="comment">// 减少redis内存计数</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> update_zmalloc_stat_free(__n) do &#123; \</span></div><div class="line">    size_t _n = (__n); \</div><div class="line">    <span class="meta-keyword">if</span> (_n&amp;(sizeof(PORT_LONG)-1)) _n += sizeof(PORT_LONG)-(_n&amp;(sizeof(PORT_LONG)-1)); \ <span class="comment">// 将n调整为sizeof(PORT_LONG)的整数倍</span></div><div class="line">    <span class="keyword">if</span> (zmalloc_thread_safe) &#123; \</div><div class="line">        update_zmalloc_stat_sub(_n); \<span class="comment">// 开启线程安全</span></div><div class="line">    &#125; <span class="keyword">else</span> &#123; \</div><div class="line">        used_memory -= _n; \<span class="comment">// 不开启线程安全</span></div><div class="line">    &#125; \</div><div class="line">&#125; <span class="keyword">while</span>(<span class="number">0</span>)</div></pre></td></tr></table></figure>
+<h2 id="内存管理函数"><a href="#内存管理函数" class="headerlink" title="内存管理函数"></a>内存管理函数</h2><h3 id="异常处理函数"><a href="#异常处理函数" class="headerlink" title="异常处理函数"></a>异常处理函数</h3><p>异常处理函数, 在内存分配失败时进行调用。</p>
+<p>默认使用zmalloc_default_oom，也可以通过zmalloc_set_oom_handler进行设置异常处理方式。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">static void (*zmalloc_oom_handler)(size_t) = zmalloc_default_oom;</div><div class="line"></div><div class="line">void zmalloc_set_oom_handler(void (*oom_handler)(size_t)) &#123;</div><div class="line">    zmalloc_oom_handler = oom_handler;</div><div class="line">&#125;</div><div class="line"></div><div class="line">static void zmalloc_default_oom(size_t size) &#123;</div><div class="line">    fprintf(stderr, "zmalloc: Out of memory trying to allocate %Iu bytes\n",    WIN_PORT_FIX /* %zu -&gt; %Iu */</div><div class="line">        size);// 打印日志</div><div class="line">    fflush(stderr);</div><div class="line">    abort();// 中断退出</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="zmalloc"><a href="#zmalloc" class="headerlink" title="zmalloc"></a>zmalloc</h3><p>zmalloc用来分配指定大小的内存。实际上对malloc进行了一层封装，加入了异常处理和内存统计。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> *<span class="title">zmalloc</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</div><div class="line">    <span class="comment">// 调用malloc进行内存分配</span></div><div class="line">    <span class="comment">// 多出的PREFIX_SIZE大内存用来记录该段内存大小。</span></div><div class="line">    <span class="keyword">void</span> *ptr = <span class="built_in">malloc</span>(size+PREFIX_SIZE);</div><div class="line"></div><div class="line">    <span class="comment">// 分配失败的异常处理</span></div><div class="line">    <span class="keyword">if</span> (!ptr) zmalloc_oom_handler(size);</div><div class="line"></div><div class="line">    <span class="comment">// 统计内存使用</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> HAVE_MALLOC_SIZE</span></div><div class="line"></div><div class="line">    <span class="comment">// 内存分配器自带内存大小</span></div><div class="line">    update_zmalloc_stat_alloc(zmalloc_size(ptr));</div><div class="line">    <span class="keyword">return</span> ptr;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line">    *((<span class="keyword">size_t</span>*)ptr) = size;</div><div class="line">    update_zmalloc_stat_alloc(size+PREFIX_SIZE);</div><div class="line">    <span class="keyword">return</span> (<span class="keyword">char</span>*)ptr+PREFIX_SIZE;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="zcalloc"><a href="#zcalloc" class="headerlink" title="zcalloc"></a>zcalloc</h3><p>calloc是分配内存，并初始化为0。封装的和zmalloc类似。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> *<span class="title">zcalloc</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</div><div class="line">    <span class="comment">// 分配内存</span></div><div class="line">    <span class="keyword">void</span> *ptr = <span class="built_in">calloc</span>(<span class="number">1</span>, size+PREFIX_SIZE);</div><div class="line"></div><div class="line">    <span class="comment">// 分配失败的异常处理</span></div><div class="line">    <span class="keyword">if</span> (!ptr) zmalloc_oom_handler(size);</div><div class="line"></div><div class="line">    <span class="comment">// 统计内存使用</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> HAVE_MALLOC_SIZE</span></div><div class="line">    update_zmalloc_stat_alloc(zmalloc_size(ptr));</div><div class="line">    <span class="keyword">return</span> ptr;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line">    *((<span class="keyword">size_t</span>*)ptr) = size;</div><div class="line">    update_zmalloc_stat_alloc(size+PREFIX_SIZE);</div><div class="line">    <span class="keyword">return</span> (<span class="keyword">char</span>*)ptr+PREFIX_SIZE;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="zrealloc"><a href="#zrealloc" class="headerlink" title="zrealloc"></a>zrealloc</h3><p>zrealloc用来重新调整分配的内存大小。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> *<span class="title">zrealloc</span><span class="params">(<span class="keyword">void</span> *ptr, <span class="keyword">size_t</span> size)</span> </span>&#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> HAVE_MALLOC_SIZE</span></div><div class="line">    <span class="keyword">void</span> *realptr;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">    <span class="keyword">size_t</span> oldsize;</div><div class="line">    <span class="keyword">void</span> *newptr;</div><div class="line"></div><div class="line">    <span class="comment">// ptr为空，直接使用zmalloc进行分配size大小内存。</span></div><div class="line">    <span class="keyword">if</span> (ptr == <span class="literal">NULL</span>) <span class="keyword">return</span> zmalloc(size);</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> HAVE_MALLOC_SIZE</span></div><div class="line">    oldsize = zmalloc_size(ptr); <span class="comment">// 获取ptr指向的内存大小</span></div><div class="line">    newptr = <span class="built_in">realloc</span>(ptr,size); <span class="comment">// 重新分配内存</span></div><div class="line">    <span class="keyword">if</span> (!newptr) zmalloc_oom_handler(size); <span class="comment">// 异常处理</span></div><div class="line"></div><div class="line">    update_zmalloc_stat_free(oldsize);<span class="comment">// 先减</span></div><div class="line">    update_zmalloc_stat_alloc(zmalloc_size(newptr));<span class="comment">// 后加</span></div><div class="line">    <span class="keyword">return</span> newptr;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line">    realptr = (<span class="keyword">char</span>*)ptr-PREFIX_SIZE;</div><div class="line">    oldsize = *((<span class="keyword">size_t</span>*)realptr);<span class="comment">// 获取ptr指向的内存大小</span></div><div class="line">    newptr = <span class="built_in">realloc</span>(realptr,size+PREFIX_SIZE);<span class="comment">// 重新分配内存</span></div><div class="line">    <span class="keyword">if</span> (!newptr) zmalloc_oom_handler(size);<span class="comment">// 异常处理</span></div><div class="line"></div><div class="line">    *((<span class="keyword">size_t</span>*)newptr) = size;</div><div class="line">    update_zmalloc_stat_free(oldsize);<span class="comment">// 先减</span></div><div class="line">    update_zmalloc_stat_alloc(size);<span class="comment">// 后加</span></div><div class="line">    <span class="keyword">return</span> (<span class="keyword">char</span>*)newptr+PREFIX_SIZE;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="zfree"><a href="#zfree" class="headerlink" title="zfree"></a>zfree</h3><p>释放函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zfree</span><span class="params">(<span class="keyword">void</span> *ptr)</span> </span>&#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> HAVE_MALLOC_SIZE</span></div><div class="line">    <span class="keyword">void</span> *realptr;</div><div class="line">    <span class="keyword">size_t</span> oldsize;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line">    <span class="keyword">if</span> (ptr == <span class="literal">NULL</span>) <span class="keyword">return</span>;<span class="comment">// 空直接返回</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> HAVE_MALLOC_SIZE</span></div><div class="line">    update_zmalloc_stat_free(zmalloc_size(ptr));<span class="comment">// 减少统计数量</span></div><div class="line">    <span class="built_in">free</span>(ptr);<span class="comment">// 释放</span></div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line">    realptr = (<span class="keyword">char</span>*)ptr-PREFIX_SIZE; <span class="comment">// 获取真实的指针</span></div><div class="line">    oldsize = *((<span class="keyword">size_t</span>*)realptr);<span class="comment">// 获取大小</span></div><div class="line">    update_zmalloc_stat_free(oldsize+PREFIX_SIZE);<span class="comment">// 减少统计数量</span></div><div class="line">    <span class="built_in">free</span>(realptr);<span class="comment">// 释放</span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="zmalloc-size"><a href="#zmalloc-size" class="headerlink" title="zmalloc_size"></a>zmalloc_size</h3><p>获取指针指向内存大小，在内存分配器不自带该函数时定义。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// zmalloc.h</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> HAVE_MALLOC_SIZE</span></div><div class="line"><span class="keyword">size_t</span> zmalloc_size(<span class="keyword">void</span> *ptr);</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"><span class="comment">// zmalloc.c</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> HAVE_MALLOC_SIZE</span></div><div class="line"><span class="keyword">size_t</span> zmalloc_size(<span class="keyword">void</span> *ptr) &#123;</div><div class="line">    <span class="keyword">void</span> *realptr = (<span class="keyword">char</span>*)ptr-PREFIX_SIZE;</div><div class="line">    <span class="keyword">size_t</span> size = *((<span class="keyword">size_t</span>*)realptr);</div><div class="line">    <span class="comment">/* Assume at least that all the allocations are padded at sizeof(PORT_LONG) by</span></div><div class="line">     * the underlying allocator. */</div><div class="line">    <span class="keyword">if</span> (size&amp;(<span class="keyword">sizeof</span>(PORT_LONG)<span class="number">-1</span>)) size += <span class="keyword">sizeof</span>(PORT_LONG)-(size&amp;(<span class="keyword">sizeof</span>(PORT_LONG)<span class="number">-1</span>));</div><div class="line">    <span class="keyword">return</span> size+PREFIX_SIZE;</div><div class="line">&#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag">#redis</a>
+          
+            <a href="/tags/源码阅读/" rel="tag">#源码阅读</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2017/01/gitlab-workflow.html" rel="next" title="gitlab workflow">
+                <i class="fa fa-chevron-left"></i> gitlab workflow
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2017/03/redis源码阅读-内存分配.html" rel="prev" title="redis源码阅读-内存分配">
+                redis源码阅读-内存分配 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="/blog/2017/03/redis源码阅读-开始.html"
+     data-title="redis源码阅读-开始"
+     data-content=""
+     data-url="http://yoursite.com/child//blog/2017/03/redis源码阅读-开始.html">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="/blog/2017/03/redis源码阅读-开始.html"
+           data-title="redis源码阅读-开始" data-url="http://yoursite.com/child//blog/2017/03/redis源码阅读-开始.html">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="YangYi" />
+          <p class="site-author-name" itemprop="name">YangYi</p>
+          <p class="site-description motion-element" itemprop="description">YangYi</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">27</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/MekaYangyi" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/yang1" target="_blank" title="zhihu">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  zhihu
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#redis源码阅读-内存分配"><span class="nav-number">1.</span> <span class="nav-text">redis源码阅读-内存分配</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存分配器的选择"><span class="nav-number">1.1.</span> <span class="nav-text">内存分配器的选择</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#功能函数一栏"><span class="nav-number">1.2.</span> <span class="nav-text">功能函数一栏</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#统计使用的内存总数"><span class="nav-number">1.3.</span> <span class="nav-text">统计使用的内存总数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理函数"><span class="nav-number">1.4.</span> <span class="nav-text">内存管理函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#异常处理函数"><span class="nav-number">1.4.1.</span> <span class="nav-text">异常处理函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zmalloc"><span class="nav-number">1.4.2.</span> <span class="nav-text">zmalloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zcalloc"><span class="nav-number">1.4.3.</span> <span class="nav-text">zcalloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zrealloc"><span class="nav-number">1.4.4.</span> <span class="nav-text">zrealloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zfree"><span class="nav-number">1.4.5.</span> <span class="nav-text">zfree</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zmalloc-size"><span class="nav-number">1.4.6.</span> <span class="nav-text">zmalloc_size</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YangYi</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"mekayangyi"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

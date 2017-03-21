@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="windows,环境搭建," />
+  <meta name="keywords" content="redis,源码阅读," />
 
 
 
@@ -84,16 +84,22 @@
 
 
 
-<meta name="description" content="事情的起因这几天为了搭一个PyQt的生产环境遇到了好一些坑。本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样">
+<meta name="description" content="Redis源码阅读自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
+Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
+阅读顺序如何阅读Redis源码？阅读的顺序主要">
 <meta property="og:type" content="article">
-<meta property="og:title" content="windows下Pyqt + guiqwt环境的搭建">
-<meta property="og:url" content="http://yoursite.com/child/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html">
+<meta property="og:title" content="redis源码阅读-内存分配">
+<meta property="og:url" content="http://yoursite.com/child/blog/2017/03/redis源码阅读-内存分配.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="事情的起因这几天为了搭一个PyQt的生产环境遇到了好一些坑。本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样">
-<meta property="og:updated_time" content="2016-11-06T08:22:52.282Z">
+<meta property="og:description" content="Redis源码阅读自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
+Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
+阅读顺序如何阅读Redis源码？阅读的顺序主要">
+<meta property="og:updated_time" content="2017-03-21T02:23:15.355Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="windows下Pyqt + guiqwt环境的搭建">
-<meta name="twitter:description" content="事情的起因这几天为了搭一个PyQt的生产环境遇到了好一些坑。本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样">
+<meta name="twitter:title" content="redis源码阅读-内存分配">
+<meta name="twitter:description" content="Redis源码阅读自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
+Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
+阅读顺序如何阅读Redis源码？阅读的顺序主要">
 
 
 
@@ -114,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/child/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html"/>
+  <link rel="canonical" href="http://yoursite.com/child/blog/2017/03/redis源码阅读-内存分配.html"/>
 
-  <title> windows下Pyqt + guiqwt环境的搭建 | 鉴心 </title>
+  <title> redis源码阅读-内存分配 | 鉴心 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -256,7 +262,7 @@
             
             
               
-                windows下Pyqt + guiqwt环境的搭建
+                redis源码阅读-内存分配
               
             
           </h1>
@@ -268,8 +274,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-19T23:47:25+08:00" content="2016-10-19">
-              2016-10-19
+            <time itemprop="dateCreated" datetime="2017-03-21T10:21:33+08:00" content="2017-03-21">
+              2017-03-21
             </time>
           </span>
 
@@ -282,8 +288,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/开发环境/" itemprop="url" rel="index">
-                    <span itemprop="name">开发环境</span>
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
                   </a>
                 </span>
 
@@ -298,8 +304,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html" itemprop="commentsCount"></span>
+                <a href="/blog/2017/03/redis源码阅读-内存分配.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="/blog/2017/03/redis源码阅读-内存分配.html" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -322,15 +328,18 @@
       
 
       
-        <h1 id="事情的起因"><a href="#事情的起因" class="headerlink" title="事情的起因"></a>事情的起因</h1><p>这几天为了搭一个PyQt的生产环境遇到了好一些坑。<br>本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。<br>原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。<br>最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样达到比较高的绘图效率，才解决了问题。但是MFC界面开发复杂，在MFC界面上花费过多的时间。同时本身绘图控件的开发，可能可以利用现有开源控件进行开发来避免重复造轮子。<br>于是利用PyQt+guiqwt绘图库来开发的方案构建起来。guiqwt本身是QT下常用的绘图控件，效率足够高，经过一些优化是能够使用的。相对Python经常使用的matplotlib来说不够漂亮，但是进行实时数据的平移绘图，效率高出很多。PyQt是模仿QT写的图形库，可以利用QTCreate进行快速的界面构建，而Python相对C++来说，需要处理的坑更少，出现各类崩溃的异常的情况会更少一些。<br>本文主要讲的是PyQt+guiqwt在windows上的搭建。<br>目的是在之后能够通过本文进行快速的开发环境的搭建。</p>
-<a id="more"></a>
-<h1 id="开始搭建"><a href="#开始搭建" class="headerlink" title="开始搭建"></a>开始搭建</h1><h2 id="安装Python"><a href="#安装Python" class="headerlink" title="安装Python"></a>安装Python</h2><p><a href="https://www.python.org/downloads/" target="_blank" rel="external">Python官网</a><br>通过Python官网下载相应版本的Python,我这里下载的是：python-3.5.2-amd64。<br>64位版本，记住版本号，用于之后的库的选择。</p>
-<h2 id="安装PyQt"><a href="#安装PyQt" class="headerlink" title="安装PyQt"></a>安装PyQt</h2><p>PyQt有完整的安装包，过程中会自动安装PyQt+Qt等完整的依赖库。<br><a href="https://sourceforge.net/projects/pyqt/?source=directory" target="_blank" rel="external">PyQt下载站点</a><br>浏览所有文件找到对应的PyQt完整安装包。<br>我下的是下面网址中的64位版本。<br>PyQt5-5.6-gpl-Py3.5-Qt5.6.0-x64-2<br><a href="https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.6/" target="_blank" rel="external">PyQt完整安装包下载</a><br>安装一路下一步完成。</p>
-<h2 id="安装NumPy"><a href="#安装NumPy" class="headerlink" title="安装NumPy"></a>安装NumPy</h2><p>为了能够使用guiqwt必须安装依赖的库。<br>首先安装numpy，注意的是需要安装+mk1的numpy库，否则scipy无法正常安装后使用。<br><a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/" target="_blank" rel="external">下载地址</a><br>搜索Numpy找到相应的位置。<br>我选择下载的是，与Python版本对应：numpy-1.11.2+mkl-cp35-cp35m-win_amd64.whl<br>使用pip3.5安装</p>
-<h2 id="安装scipy"><a href="#安装scipy" class="headerlink" title="安装scipy"></a>安装scipy</h2><p>同上，在上面的网站找到scipy。<br>版本我选择的是：scipy-0.18.1-cp35-cp35m-win_amd64<br>使用pip3.5在numpy之后安装</p>
-<h2 id="安装guiqwt"><a href="#安装guiqwt" class="headerlink" title="安装guiqwt"></a>安装guiqwt</h2><p>安装guiqwt<br>上面网站搜索guiqwt<br>选择guiqwt-3.0.3-cp35-cp35m-win_amd64。<br>在sicpy之后使用pip3.5安装</p>
-<h2 id="安装eric6"><a href="#安装eric6" class="headerlink" title="安装eric6"></a>安装eric6</h2><p><a href="https://sourceforge.net/projects/eric-ide/" target="_blank" rel="external">下载地址</a><br>我选择的是：eric6-6.1.10和eric6-i18n-zh_CN-6.1.10<br>解压，放到python的安装目录下：python35/eric6<br>运行python35/eric6、install.py进行安装。<br>运行Python35\Scripts\eric6.bat 就打开了eric6</p>
-<p>至此开发环境搭建完成。</p>
+        <h1 id="Redis源码阅读"><a href="#Redis源码阅读" class="headerlink" title="Redis源码阅读"></a>Redis源码阅读</h1><p>自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。</p>
+<h2 id="Redis的介绍"><a href="#Redis的介绍" class="headerlink" title="Redis的介绍"></a>Redis的介绍</h2><p>redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。</p>
+<h2 id="阅读顺序"><a href="#阅读顺序" class="headerlink" title="阅读顺序"></a>阅读顺序</h2><p><a href="http://blog.huangz.me/diary/2014/how-to-read-redis-source-code.html" target="_blank" rel="external">如何阅读Redis源码？</a>阅读的顺序主要还是按照黄建宏老师所建议的顺序进行阅读。</p>
+<ol>
+<li>阅读数据结构的实现。</li>
+<li>阅读内存编码数据结构的实现。</li>
+<li>阅读数据类型的实现。</li>
+<li>阅读数据库实现相关代码。</li>
+<li>阅读客户端和服务端相关代码。</li>
+<li>阅读多机功能的实现。</li>
+</ol>
+<p>至此将Redis阅读完毕。</p>
 
       
     </div>
@@ -353,9 +362,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/windows/" rel="tag">#windows</a>
+            <a href="/tags/redis/" rel="tag">#redis</a>
           
-            <a href="/tags/环境搭建/" rel="tag">#环境搭建</a>
+            <a href="/tags/源码阅读/" rel="tag">#源码阅读</a>
           
         </div>
       
@@ -364,17 +373,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html" rel="next" title="[读书笔记] sicp 第三章 模块化 对象和状态">
-                <i class="fa fa-chevron-left"></i> [读书笔记] sicp 第三章 模块化 对象和状态
+              <a href="/blog/2017/03/redis源码阅读-开始.html" rel="next" title="redis源码阅读-开始">
+                <i class="fa fa-chevron-left"></i> redis源码阅读-开始
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/2016/11/阅读谷歌编程规范.html" rel="prev" title="阅读谷歌编程规范">
-                阅读谷歌编程规范 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -389,10 +394,10 @@
 
     <div class="post-spread">
       
-        <div class="ds-share flat" data-thread-key="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html"
-     data-title="windows下Pyqt + guiqwt环境的搭建"
+        <div class="ds-share flat" data-thread-key="/blog/2017/03/redis源码阅读-内存分配.html"
+     data-title="redis源码阅读-内存分配"
      data-content=""
-     data-url="http://yoursite.com/child//blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html">
+     data-url="http://yoursite.com/child//blog/2017/03/redis源码阅读-内存分配.html">
   <div class="ds-share-inline">
     <ul  class="ds-share-icons-16">
 
@@ -422,8 +427,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html"
-           data-title="windows下Pyqt + guiqwt环境的搭建" data-url="http://yoursite.com/child//blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html">
+      <div class="ds-thread" data-thread-key="/blog/2017/03/redis源码阅读-内存分配.html"
+           data-title="redis源码阅读-内存分配" data-url="http://yoursite.com/child//blog/2017/03/redis源码阅读-内存分配.html">
       </div>
     
   </div>
@@ -534,7 +539,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#事情的起因"><span class="nav-number">1.</span> <span class="nav-text">事情的起因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开始搭建"><span class="nav-number">2.</span> <span class="nav-text">开始搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Python"><span class="nav-number">2.1.</span> <span class="nav-text">安装Python</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装PyQt"><span class="nav-number">2.2.</span> <span class="nav-text">安装PyQt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装NumPy"><span class="nav-number">2.3.</span> <span class="nav-text">安装NumPy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装scipy"><span class="nav-number">2.4.</span> <span class="nav-text">安装scipy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装guiqwt"><span class="nav-number">2.5.</span> <span class="nav-text">安装guiqwt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装eric6"><span class="nav-number">2.6.</span> <span class="nav-text">安装eric6</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis源码阅读"><span class="nav-number">1.</span> <span class="nav-text">Redis源码阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis的介绍"><span class="nav-number">1.1.</span> <span class="nav-text">Redis的介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读顺序"><span class="nav-number">1.2.</span> <span class="nav-text">阅读顺序</span></a></li></ol></li></ol></div>
             
           </div>
         </section>
