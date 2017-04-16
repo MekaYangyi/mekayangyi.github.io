@@ -89,22 +89,22 @@
 
 
 
-<meta name="description" content="Redis源码阅读自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
+<meta name="description" content="自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
 Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
-阅读顺序如何阅读Redis源码？阅读的顺序主要">
+阅读顺序如何阅读Redis源码？阅读的顺序主要还是按照黄建宏老师">
 <meta property="og:type" content="article">
 <meta property="og:title" content="redis源码阅读-开始">
 <meta property="og:url" content="http://yoursite.com/child/blog/2017/03/redis源码阅读-开始.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="Redis源码阅读自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
+<meta property="og:description" content="自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
 Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
-阅读顺序如何阅读Redis源码？阅读的顺序主要">
-<meta property="og:updated_time" content="2017-03-21T02:27:21.847Z">
+阅读顺序如何阅读Redis源码？阅读的顺序主要还是按照黄建宏老师">
+<meta property="og:updated_time" content="2017-04-16T07:12:30.977Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis源码阅读-开始">
-<meta name="twitter:description" content="Redis源码阅读自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
+<meta name="twitter:description" content="自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
 Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
-阅读顺序如何阅读Redis源码？阅读的顺序主要">
+阅读顺序如何阅读Redis源码？阅读的顺序主要还是按照黄建宏老师">
 
 
 
@@ -432,7 +432,7 @@ Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且
       
 
       
-        <h1 id="Redis源码阅读"><a href="#Redis源码阅读" class="headerlink" title="Redis源码阅读"></a>Redis源码阅读</h1><p>自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。</p>
+        <p>自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。</p>
 <h2 id="Redis的介绍"><a href="#Redis的介绍" class="headerlink" title="Redis的介绍"></a>Redis的介绍</h2><p>redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。</p>
 <h2 id="阅读顺序"><a href="#阅读顺序" class="headerlink" title="阅读顺序"></a>阅读顺序</h2><p><a href="http://blog.huangz.me/diary/2014/how-to-read-redis-source-code.html" target="_blank" rel="external">如何阅读Redis源码？</a>阅读的顺序主要还是按照黄建宏老师所建议的顺序进行阅读。</p>
 <ol>
@@ -580,7 +580,7 @@ Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-count">31</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -591,7 +591,7 @@ Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -602,7 +602,7 @@ Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-count">20</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -664,7 +664,7 @@ Redis的介绍redis是一个使用C编写的key-value数据库。性能极高且
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis源码阅读"><span class="nav-number">1.</span> <span class="nav-text">Redis源码阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis的介绍"><span class="nav-number">1.1.</span> <span class="nav-text">Redis的介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读顺序"><span class="nav-number">1.2.</span> <span class="nav-text">阅读顺序</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis的介绍"><span class="nav-number">1.</span> <span class="nav-text">Redis的介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读顺序"><span class="nav-number">2.</span> <span class="nav-text">阅读顺序</span></a></li></ol></div>
             
 
           </div>
