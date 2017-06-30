@@ -316,6 +316,166 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/09/读书笔记-sicp-第二章-符号数据.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YangYi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html" itemprop="url">
+                  [读书笔记] sicp 第二章 符号数据
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-10T08:32:26+08:00">
+                2016-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">(<span class="name">list</span> 'a 'b)</div><div class="line">(<span class="name">eq</span>? a b)</div></pre></td></tr></table></figure>
+<h1 id="符号求导"><a href="#符号求导" class="headerlink" title="符号求导"></a>符号求导</h1><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">;e是变量吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">variable</span>? x)</div><div class="line">  (<span class="name">symbol</span>? x))<span class="comment">;symbol?判断变量是不是符号</span></div><div class="line"></div><div class="line"><span class="comment">;v1和v2是同一个变量吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">same-variable</span>? v1 v2)</div><div class="line">  (<span class="name">and</span> (<span class="name">variable</span>? v1) (<span class="name">variable</span>? v2) (<span class="name">eq</span>? v1 v2)))</div><div class="line"></div><div class="line"><span class="comment">;e是和式吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">sum</span>? x)</div><div class="line">  (<span class="name">and</span> (<span class="name">pair</span>? x) (<span class="name">eq</span>? (<span class="name">car</span> x) '+)))</div><div class="line"></div><div class="line"><span class="comment">;e的被加数</span></div><div class="line">(<span class="name">define</span> (<span class="name">addend</span> s) (<span class="name">cadr</span> s))</div><div class="line"></div><div class="line"><span class="comment">;e的加数</span></div><div class="line">(<span class="name">define</span> (<span class="name">augend</span> s) (<span class="name">caddr</span> s))</div><div class="line"></div><div class="line"><span class="comment">;构造起a1和a2的和式</span></div><div class="line">(<span class="name">define</span> (<span class="name">make-sum</span> a1 a2) (<span class="name">list</span> '+ a1 a2))</div><div class="line"></div><div class="line"><span class="comment">;e是乘式吗</span></div><div class="line">(<span class="name">define</span> (<span class="name">product</span>? x)</div><div class="line">  (<span class="name">and</span> (<span class="name">pair</span>? x) (<span class="name">eq</span>? (<span class="name">car</span> x) '*)))</div><div class="line"></div><div class="line"><span class="comment">;e的被乘数</span></div><div class="line">(<span class="name">define</span> (<span class="name">multiplier</span> p) (<span class="name">cadr</span> p))</div><div class="line"></div><div class="line"><span class="comment">;e的乘数</span></div><div class="line">(<span class="name">define</span> (<span class="name">multiplicand</span> p) (<span class="name">caddr</span> p))</div><div class="line"></div><div class="line"><span class="comment">;构造起来m1与m2的乘式</span></div><div class="line">(<span class="name">define</span> (<span class="name">make-product</span> m1 m2)</div><div class="line">       (<span class="name">list</span> '* m1 m2))</div><div class="line"></div><div class="line"><span class="comment">;求导</span></div><div class="line">(<span class="name">define</span> (<span class="name">deriv</span> exp var)</div><div class="line">  (<span class="name">cond</span> ((<span class="name">number</span>? exp) <span class="number">0</span>)</div><div class="line">        ((<span class="name">variable</span>? exp)</div><div class="line">         (<span class="name">if</span> (<span class="name">same-variable</span>? exp var) <span class="number">1</span> <span class="number">0</span>))</div><div class="line">        ((<span class="name">sum</span>? exp)</div><div class="line">         (<span class="name">make-sum</span> (<span class="name">deriv</span> (<span class="name">addend</span> exp) var)</div><div class="line">                   (<span class="name">deriv</span> (<span class="name">augend</span> exp) var)))</div><div class="line">        ((<span class="name">product</span>? exp)</div><div class="line">         (<span class="name">make-sum</span></div><div class="line">          (<span class="name">make-product</span> (<span class="name">multiplier</span> exp)</div><div class="line">                        (<span class="name">deriv</span> (<span class="name">multiplicand</span> exp) var))</div><div class="line">          (<span class="name">make-product</span> (<span class="name">deriv</span> (<span class="name">multiplier</span> exp) var)</div><div class="line">                        (<span class="name">multiplicand</span> exp))))</div><div class="line">        (<span class="name">else</span></div><div class="line">         (<span class="name">error</span> <span class="string">"unknown expression type -- DERIV"</span> exp))))</div><div class="line"></div><div class="line">(<span class="name">deriv</span> '(+ x <span class="number">3</span>) 'x)</div><div class="line">(<span class="name">deriv</span> '(* x y) 'x)</div><div class="line">(deriv '(* (* x y) (+ x <span class="number">3</span>)) 'x)</div><div class="line"></div><div class="line">'(+ <span class="number">1</span> <span class="number">0</span>)</div><div class="line">'(+ (* x <span class="number">0</span>) (* <span class="number">1</span> y))</div><div class="line">'(+ (* (* x y) (+ <span class="number">1</span> <span class="number">0</span>)) (* (+ (* x <span class="number">0</span>) (* <span class="number">1</span> y)) (+ x <span class="number">3</span>)))</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-符号数据.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/09/读书笔记-sicp-第二章-构造数据抽象.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1773,168 +1933,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/08/读书笔记-《如何阅读一本书》.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="鉴心">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2016/08/读书笔记-《如何阅读一本书》.html" itemprop="url">
-                  [读书笔记] 《如何阅读一本书》
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-06T12:55:22+08:00">
-                2016-08-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/08/读书笔记-《如何阅读一本书》.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/08/读书笔记-《如何阅读一本书》.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="阅读的活力与艺术"><a href="#阅读的活力与艺术" class="headerlink" title="阅读的活力与艺术"></a>阅读的活力与艺术</h1><p>阅读存在很多个层次：娱乐、获取资讯、加深理解力。<br>本书更多的是为了读者能够加深理解力而写的书籍，教导人们如何通过各种手段，来阅读一本值得阅读的书籍。<br>阅读是一种主动的学习方式。而教师的教导等方式更多的是被动的接受。阅读作为主动的学习方式。这里的主动是你主动去获取知识，比如编程的书籍，看了不代表主动，需要更多的实践，这就是主动。不断的去实践、检测书籍中的内容，这样才能够对于艰深的书籍有更多的理解。</p>
-<p>作者的观点里存在四个阅读的层次：(这里的层次更多的是阅读方法上的分类)</p>
-<h1 id="基础阅读"><a href="#基础阅读" class="headerlink" title="基础阅读"></a>基础阅读</h1><p>基础阅读：认识字,能够读大部分读物，能够大概的描述阅读的内容说的是什么。</p>
-<h1 id="检视阅读"><a href="#检视阅读" class="headerlink" title="检视阅读"></a>检视阅读</h1><p>这一个层次要求能够快速的、准确的通过各种方式抓住一本书的重点。<br>分为两类<br>有系统的略读：<br>1、看书名、序言。了解整个书讲的什么。<br>2、研究目录，对书的骨架有了了解。<br>3、看索引，能够快速的知道本书内容的范围。<br>4、阅读其他人写的介绍。<br>5、抽取部分篇章阅读。<br>6、不要忽略最后几页<br>粗浅的阅读：<br>1、快速的阅读，即使对很多内容不理解也要将书籍读完。这样才不会停滞不前。<br>2、提高阅读速度的方式，不断移动眼球，不要后退暂停。大脑要跟上阅读的速度。<br>3、需要判断不同的书籍类型，不同的种类使用不同的阅读速度。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/08/读书笔记-《如何阅读一本书》.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1984,7 +1982,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

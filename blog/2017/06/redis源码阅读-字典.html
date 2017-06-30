@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="redis,源码阅读," />
 
 
 
@@ -89,16 +89,25 @@
 
 
 
-<meta name="description" content="新的博客 Hello World">
+<meta name="description" content="Redis字典由哈希表实现的保存键值对的抽象数据结构。
+实现文件在dict.h\dict.c中。
+哈希表Redis字典结构体定义。
+12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849typedef struct dictEntry &amp;#123;    void *key;">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/child/blog/2016/07/hello-world.html">
+<meta property="og:title" content="redis源码阅读-字典">
+<meta property="og:url" content="http://yoursite.com/child/blog/2017/06/redis源码阅读-字典.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="新的博客 Hello World">
-<meta property="og:updated_time" content="2016-10-16T06:35:48.608Z">
+<meta property="og:description" content="Redis字典由哈希表实现的保存键值对的抽象数据结构。
+实现文件在dict.h\dict.c中。
+哈希表Redis字典结构体定义。
+12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849typedef struct dictEntry &amp;#123;    void *key;">
+<meta property="og:updated_time" content="2017-06-30T07:10:42.525Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="新的博客 Hello World">
+<meta name="twitter:title" content="redis源码阅读-字典">
+<meta name="twitter:description" content="Redis字典由哈希表实现的保存键值对的抽象数据结构。
+实现文件在dict.h\dict.c中。
+哈希表Redis字典结构体定义。
+12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849typedef struct dictEntry &amp;#123;    void *key;">
 
 
 
@@ -126,13 +135,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/child/blog/2016/07/hello-world.html"/>
+  <link rel="canonical" href="http://yoursite.com/child/blog/2017/06/redis源码阅读-字典.html"/>
 
 
 
 
 
-  <title> Hello World | 鉴心 </title>
+  <title> redis源码阅读-字典 | 鉴心 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -315,7 +324,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/07/hello-world.html">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/06/redis源码阅读-字典.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="YangYi">
@@ -336,7 +345,7 @@
             
             
               
-                Hello World
+                redis源码阅读-字典
               
             
           </h2>
@@ -351,8 +360,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-07-24T09:15:53+08:00">
-                2016-07-24
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-30T15:09:34+08:00">
+                2017-06-30
               </time>
             
 
@@ -361,6 +370,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -371,8 +402,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/2016/07/hello-world.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/07/hello-world.html" itemprop="commentsCount"></span>
+                <a href="/blog/2017/06/redis源码阅读-字典.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/06/redis源码阅读-字典.html" itemprop="commentsCount"></span>
                 </a>
               </span>
               <!--/noindex-->
@@ -404,7 +435,24 @@
       
 
       
-        <p>新的博客 Hello World</p>
+        <p>Redis字典由哈希表实现的保存键值对的抽象数据结构。</p>
+<p>实现文件在dict.h\dict.c中。</p>
+<h2 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h2><p>Redis字典结构体定义。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictEntry &#123;</div><div class="line">    <span class="keyword">void</span> *key;<span class="comment">// key 键</span></div><div class="line">    <span class="keyword">union</span> &#123;</div><div class="line">        <span class="keyword">void</span> *val;</div><div class="line">        <span class="keyword">uint64_t</span> u64;</div><div class="line">        <span class="keyword">int64_t</span> s64;</div><div class="line">        <span class="keyword">double</span> d;</div><div class="line">    &#125; v;<span class="comment">// 值，支持多种类型,使用联合。</span></div><div class="line">    <span class="keyword">struct</span> dictEntry *next;<span class="comment">// 下一个点 采用链式来解决索引冲突问题</span></div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictType &#123;</div><div class="line">    <span class="function"><span class="keyword">unsigned</span> <span class="title">int</span> <span class="params">(*hashFunction)</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *key)</span></span>;<span class="comment">// hash函数</span></div><div class="line">    <span class="keyword">void</span> *(*keyDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key);<span class="comment">// key复制函数</span></div><div class="line">    <span class="keyword">void</span> *(*valDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *obj);<span class="comment">// value复制函数</span></div><div class="line">    <span class="keyword">int</span> (*keyCompare)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key1, <span class="keyword">const</span> <span class="keyword">void</span> *key2);<span class="comment">// key比较函数</span></div><div class="line">    <span class="keyword">void</span> (*keyDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *key);<span class="comment">// key释放函数</span></div><div class="line">    <span class="keyword">void</span> (*valDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *obj);<span class="comment">// value释放函数</span></div><div class="line">&#125; dictType;</div><div class="line"></div><div class="line"><span class="comment">/* This is our hash table structure. Every dictionary has two of this as we</span></div><div class="line"> * implement incremental rehashing, for the old to the new table. */</div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictht &#123;</div><div class="line">    dictEntry **table;<span class="comment">// 指针的数组头的指针</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> size;<span class="comment">// 大小</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> sizemask;<span class="comment">// 大小的掩码 总是等于size-1</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> used;<span class="comment">// 被使用的节点数</span></div><div class="line">&#125; dictht;<span class="comment">// hash表</span></div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dict &#123;</div><div class="line">    dictType *type;<span class="comment">// 绑定的函数</span></div><div class="line">    <span class="keyword">void</span> *privdata;<span class="comment">// 私有数据</span></div><div class="line">    dictht ht[<span class="number">2</span>];<span class="comment">// hash表，一般只使用[0]，在rehash的时候使用[1]</span></div><div class="line">    <span class="keyword">long</span> rehashidx; <span class="comment">// 记录rehash的进度，不进行rehash的时候为-1</span></div><div class="line">    <span class="keyword">int</span> iterators; <span class="comment">/* number of iterators currently running */</span></div><div class="line">&#125; dict;<span class="comment">// 字典</span></div><div class="line"></div><div class="line"><span class="comment">/* If safe is set to 1 this is a safe iterator, that means, you can call</span></div><div class="line"> * dictAdd, dictFind, and other functions against the dictionary even while</div><div class="line"> * iterating. Otherwise it is a non safe iterator, and only dictNext()</div><div class="line"> * should be called while iterating. */</div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictIterator &#123;</div><div class="line">    dict *d;</div><div class="line">    <span class="keyword">long</span> index;</div><div class="line">    <span class="keyword">int</span> table, safe;</div><div class="line">    dictEntry *entry, *nextEntry;</div><div class="line">    <span class="comment">/* unsafe iterator fingerprint for misuse detection. */</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> fingerprint;</div><div class="line">&#125; dictIterator;<span class="comment">// 迭代器</span></div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h2><p>确认一个键值插入到字典的位置是哪，需要调用hash算法</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//计算key的hash值</span></div><div class="line">hash = dict-&gt;type-&gt;hashFunction(key);</div><div class="line"><span class="comment">//按位与确认在hash表中的位置</span></div><div class="line"><span class="comment">//根据情况，可能是ht[0]或者ht[1]</span></div><div class="line">index = hash &amp; dict-&gt;ht[x].sizemask;</div></pre></td></tr></table></figure>
+<p>字典在redis中使用MurmurHash2算法进行计算键的哈希值。有点在于计算速度非常快，即使输入的键有规律也能够很好的给出一个随机分布。</p>
+<h2 id="键的冲突解决"><a href="#键的冲突解决" class="headerlink" title="键的冲突解决"></a>键的冲突解决</h2><p>在key获取的index相同的情况下，产生了键的冲突。redis采用链式解决冲突，新的键值放在链的头部。</p>
+<h2 id="rehash"><a href="#rehash" class="headerlink" title="rehash"></a>rehash</h2><p>随着hash表不断插入删除数据，hash表的负载因子会不断变化。当负载因子在一个不合理的范围内，则redis的会对hash表进行rehash。</p>
+<h2 id="渐进式-rehash"><a href="#渐进式-rehash" class="headerlink" title="渐进式 rehash"></a>渐进式 rehash</h2><p>渐进式rehash的目的是为了防止一次性rehash的情况下，服务器停止响应。</p>
+<p>redis渐进式rehash的步骤:</p>
+<p>1）为ht[1]分配空间，让字典同时持有 ht[0]和ht[1]两个哈希表</p>
+<p>2）在字典位置一个索引计数器变量rehashidx，并将它的值设置为0，表示rehash工作正式开始。</p>
+<p>3）在rehash进行期间，每次对字典执行删除、添加、查找或者更新操作时候，程序除了执行指定的操作外，还顺便将ht[0]哈希表在rehashidx索引上的所有键值对rehash到ht[1]，当rehash工作完成后将rehashidx属性的值增加1</p>
+<p>4）随着字典操作的不断执行，最终在某个时间点上，ht[0]的所有键值对都会被rehsh至ht[1]，这时程序将rehashidx属性值设为-1，表示rehash操作已完成。</p>
+<p>渐进式rehash过程中，字典会同时对ht[0]和ht[1]两个哈希表进行操作，字典在删除、查找、更新等操作会在两个哈希表进行。</p>
+<p>在渐进式rehash执行期间，新添加到字典的键值对一律会被保存在ht[1]里面，而ht[0]则不再进行任何添加操作，这一措施保证了ht[0]包含的键值对数量会只减少不增加，并随着rehash操作的执行最终变为空。</p>
 
       
     </div>
@@ -432,6 +480,14 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+            <a href="/tags/源码阅读/" rel="tag"># 源码阅读</a>
+          
+        </div>
+      
 
       
         
@@ -441,15 +497,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/blog/2017/05/读书摘录-编程大师访谈录.html" rel="next" title="读书摘录-编程大师访谈录">
+                <i class="fa fa-chevron-left"></i> 读书摘录-编程大师访谈录
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/2016/07/《The-Last-Of-Us》.html" rel="prev" title="《The Last Of Us》">
-                《The Last Of Us》 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -504,8 +560,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/img/avatar.jpg"
@@ -594,6 +659,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#哈希表"><span class="nav-number">1.</span> <span class="nav-text">哈希表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#哈希算法"><span class="nav-number">2.</span> <span class="nav-text">哈希算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#键的冲突解决"><span class="nav-number">3.</span> <span class="nav-text">键的冲突解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rehash"><span class="nav-number">4.</span> <span class="nav-text">rehash</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#渐进式-rehash"><span class="nav-number">5.</span> <span class="nav-text">渐进式 rehash</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -749,7 +830,7 @@
 		_hcwp.push({widget:"Bloggerstream", widget_id: 88745, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
 		
-		_hcwp.push({widget:"Stream", widget_id: 88745, xid: "/blog/2016/07/hello-world.html"});
+		_hcwp.push({widget:"Stream", widget_id: 88745, xid: "/blog/2017/06/redis源码阅读-字典.html"});
 		
 
 		(function() {
