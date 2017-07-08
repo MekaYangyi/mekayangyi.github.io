@@ -316,6 +316,167 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/01/gitlab-workflow.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YangYi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2017/01/gitlab-workflow.html" itemprop="url">
+                  gitlab workflow
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-29T21:40:40+08:00">
+                2017-01-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/gitlab/" itemprop="url" rel="index">
+                    <span itemprop="name">gitlab</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2017/01/gitlab-workflow.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/01/gitlab-workflow.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。<br>整个工作流程如下。<br>第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。<br>第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。<br>第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话机制，大家一起评审和讨论你的代码。对话过程中，你还可以不断提交代码。<br>第四步：你的Pull Request被接受，合并进master，重新部署后，原来你拉出来的那个分支就被删除。（先部署再合并也可。）</p>
+<h1 id="建立测试项目"><a href="#建立测试项目" class="headerlink" title="建立测试项目"></a>建立测试项目</h1><p>新建一个项目用于测试工作流。<br>演示项目地址：<a href="http://10.10.10.98/MekaYangyi/workflow">http://10.10.10.98/MekaYangyi/workflow</a><br><img src="/img/gitlab工作流程/10-21-42.jpg" alt=""/></p>
+<h1 id="设置分支保护"><a href="#设置分支保护" class="headerlink" title="设置分支保护"></a>设置分支保护</h1><p>新建项目默认master用户才能够push和merge。<br>其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。<br><img src="/img/gitlab工作流程/10-32-56.jpg" alt=""/></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2017/01/gitlab-workflow.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/01/第一次使用gitlab.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1758,166 +1919,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="鉴心">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html" itemprop="url">
-                  [读书笔记] sicp 第二章 抽象数据的多重表示
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-10T08:32:38+08:00">
-                2016-09-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>对于一个数据对象可以能存在多种有用的表示形式，而且我们也希望所涉及的系统能够处理多种表示形式。<br>例子：复数的极坐标形式和直角坐标的形式<br>构造通用型过程：可以在不止一种数据表示上操作的过程。采用的技术：让它们在带有类型标志的数据对象上工作。也就是说，让数据对象包含着它们应该如何处理的明确信息。</p>
-<h1 id="复数的表示"><a href="#复数的表示" class="headerlink" title="复数的表示"></a>复数的表示</h1><p>为一个数据提供了多种操作，存在多种形式<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">(<span class="name">define</span> (<span class="name">real-part</span> z) (<span class="name">car</span> z))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">imag-part</span> z) (<span class="name">cdr</span> z))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">magnitude</span> z)</div><div class="line">  (<span class="name">sqrt</span> (<span class="name">+</span> (<span class="name">square</span> (<span class="name">real-part</span> z)) (<span class="name">square</span> (<span class="name">imag-part</span> z)))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">angle</span> z)</div><div class="line">  (<span class="name">atan</span> (<span class="name">imag-part</span> z) (<span class="name">real-part</span> z)))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">make-from-real-imag</span> x y) (<span class="name">cons</span> x y))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">make-from-mag-ang</span> r a)</div><div class="line">  (<span class="name">cons</span> (<span class="name">*</span> r (<span class="name">cos</span> a)) (<span class="name">*</span> r (<span class="name">sin</span> a))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">add-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-real-imag</span> (<span class="name">+</span> (<span class="name">real-part</span> z1) (<span class="name">real-part</span> z2))</div><div class="line">                       (<span class="name">+</span> (<span class="name">imag-part</span> z1) (<span class="name">imag-part</span> z2))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">sub-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-real-imag</span> (<span class="name">-</span> (<span class="name">real-part</span> z1) (<span class="name">real-part</span> z2))</div><div class="line">                       (<span class="name">-</span> (<span class="name">imag-part</span> z1) (<span class="name">imag-part</span> z2))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">mul-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-mag-ang</span> (<span class="name">*</span> (<span class="name">magnitude</span> z1) (<span class="name">magnitude</span> z2))</div><div class="line">                     (<span class="name">+</span> (<span class="name">angle</span> z1) (<span class="name">angle</span> z2))))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">div-complex</span> z1 z2)</div><div class="line">  (<span class="name">make-from-mag-ang</span> (<span class="name">/</span> (<span class="name">magnitude</span> z1) (<span class="name">magnitude</span> z2))</div><div class="line">                     (<span class="name">-</span> (<span class="name">angle</span> z1) (<span class="name">angle</span> z2))))</div></pre></td></tr></table></figure></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1967,7 +1968,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">34</span>
+                <span class="site-state-item-count">35</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
