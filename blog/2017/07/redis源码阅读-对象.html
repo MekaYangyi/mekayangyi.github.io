@@ -1,0 +1,1044 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis,源码阅读," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="鉴心" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。
+redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。
+对象的类型与编码redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis源码阅读-对象">
+<meta property="og:url" content="http://yoursite.com/child/blog/2017/07/redis源码阅读-对象.html">
+<meta property="og:site_name" content="鉴心">
+<meta property="og:description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。
+redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。
+对象的类型与编码redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一">
+<meta property="og:updated_time" content="2017-07-09T14:56:51.995Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis源码阅读-对象">
+<meta name="twitter:description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。
+redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。
+对象的类型与编码redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-对象.html"/>
+
+
+
+
+
+  <title> redis源码阅读-对象 | 鉴心 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7f324988b3db76841dfdbe38d09d8603";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鉴心</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-对象.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YangYi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                redis源码阅读-对象
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-09T22:55:14+08:00">
+                2017-07-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2017/07/redis源码阅读-对象.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-对象.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。</p>
+<p>redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。</p>
+<h2 id="对象的类型与编码"><a href="#对象的类型与编码" class="headerlink" title="对象的类型与编码"></a>对象的类型与编码</h2><p>redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一个对象用作键值对的键，一个对象用作键值对的值。</p>
+<h3 id="对象的结构体"><a href="#对象的结构体" class="headerlink" title="对象的结构体"></a>对象的结构体</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> redisObject &#123;</div><div class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>; <span class="comment">// 类型</span></div><div class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>; <span class="comment">// 编码</span></div><div class="line">    <span class="keyword">unsigned</span> lru:REDIS_LRU_BITS; <span class="comment">/* lru time (relative to server.lruclock) */</span></div><div class="line">    <span class="keyword">int</span> refcount; <span class="comment">// 引用计数</span></div><div class="line">    <span class="keyword">void</span> *ptr; <span class="comment">// 值</span></div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+<p>redis结构体使用位段结构节省空间</p>
+<h4 id="类型type"><a href="#类型type" class="headerlink" title="类型type"></a>类型type</h4><p>记录redis对象类型，五种类型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_STRING 0 <span class="comment">// 字符串对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_LIST 1 <span class="comment">// 列表对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_SET 2 <span class="comment">// 哈希对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ZSET 3 <span class="comment">// 集合对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_HASH 4 <span class="comment">// 有序集合对象</span></span></div></pre></td></tr></table></figure>
+<h4 id="编码encoding"><a href="#编码encoding" class="headerlink" title="编码encoding"></a>编码encoding</h4><p>记录redis对象的编码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 对象编码</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_RAW 0     <span class="comment">/* 简单动态字符串 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_INT 1     <span class="comment">/* long类型的整数 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_HT 2      <span class="comment">/* 字典 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_ZIPMAP 3  <span class="comment">/* zipmap 3.2.5不再使用 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_LINKEDLIST 4 <span class="comment">/* 双端队列 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_ZIPLIST 5 <span class="comment">/* 压缩列表 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_INTSET 6  <span class="comment">/* 整数集合 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_SKIPLIST 7  <span class="comment">/* 跳跃表 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_EMBSTR 8  <span class="comment">/* EMBSTR编码的简单字符串 */</span></span></div></pre></td></tr></table></figure>
+<p>每种类型对应至少两种不同的编码。</p>
+<table>
+<thead>
+<tr>
+<th>对象类型</th>
+<th>编码方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REDIS_STRING</td>
+<td>REDIS_ENCODING_RAW ,REDIS_ENCODING_INT ,REDIS_ENCODING_EMBSTR</td>
+</tr>
+<tr>
+<td>REDIS_LIST</td>
+<td>REDIS_ENCODING_LINKEDLIST ,REDIS_ENCODING_ZIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_SET</td>
+<td>REDIS_ENCODING_INTSET ,REDIS_ENCODING_HT</td>
+</tr>
+<tr>
+<td>REDIS_ZSET</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_SKIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_HASH</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_HT</td>
+</tr>
+</tbody>
+</table>
+<h4 id="访问时间"><a href="#访问时间" class="headerlink" title="访问时间"></a>访问时间</h4><p>表示对象的最后一次访问时间。</p>
+<h4 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h4><p>常见的管理方式，引用计数为0时回收。</p>
+<a id="more"></a>
+<h2 id="对象的API"><a href="#对象的API" class="headerlink" title="对象的API"></a>对象的API</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrRefCount</span><span class="params">(robj *o)</span></span>; <span class="comment">// 引用计数-1，降为0时释放对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrRefCountVoid</span><span class="params">(<span class="keyword">void</span> *o)</span></span>; <span class="comment">// 用于特定数据结构的释放</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">incrRefCount</span><span class="params">(robj *o)</span></span>; <span class="comment">// 引用计数+1</span></div><div class="line"><span class="function">robj *<span class="title">resetRefCount</span><span class="params">(robj *obj)</span></span>; <span class="comment">// 设置引用计数为0</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeStringObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放字符串对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeListObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放列表对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeSetObject</span><span class="params">(robj *o)</span></span>;  <span class="comment">// 释放集合对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeZsetObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放有序集合对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeHashObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放hash对象</span></div><div class="line"><span class="function">robj *<span class="title">createObject</span><span class="params">(<span class="keyword">int</span> type, <span class="keyword">void</span> *ptr)</span></span>; <span class="comment">// 创建一个新robj对象</span></div><div class="line"><span class="function">robj *<span class="title">createStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span></span>; <span class="comment">// 创建一个字符串对象，根据大小选择编码</span></div><div class="line"><span class="function">robj *<span class="title">createRawStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span></span>;<span class="comment">// 创建一个 REDIS_ENCODING_RAW 编码的字符对象</span></div><div class="line"><span class="function">robj *<span class="title">createEmbeddedStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span></span>;<span class="comment">// 创建一个 REDIS_ENCODING_EMBSTR 编码的字符对象</span></div><div class="line"><span class="function">robj *<span class="title">dupStringObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 复制一个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">isObjectRepresentableAsLongLong</span><span class="params">(robj *o, <span class="keyword">long</span> <span class="keyword">long</span> *llongval)</span></span>; <span class="comment">// 检查对象的值是否为Long long</span></div><div class="line"><span class="function">robj *<span class="title">tryObjectEncoding</span><span class="params">(robj *o)</span></span>; <span class="comment">// 尝试对字符串对象编码，以节约内存</span></div><div class="line"><span class="function">robj *<span class="title">getDecodedObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 返回一个对象的编码版本</span></div><div class="line"><span class="keyword">size_t</span> stringObjectLen(robj *o); <span class="comment">// 返回字符串对象的字符串值的长度</span></div><div class="line"><span class="function">robj *<span class="title">createStringObjectFromLongLong</span><span class="params">(<span class="keyword">long</span> <span class="keyword">long</span> value)</span></span>; <span class="comment">// 根据传入的值，创建一个字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createStringObjectFromLongDouble</span><span class="params">(<span class="keyword">long</span> <span class="keyword">double</span> value, <span class="keyword">int</span> humanfriendly)</span></span>; <span class="comment">// 根据传入的值，创建一个字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createListObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个linkedlist编码的列表对象</span></div><div class="line"><span class="function">robj *<span class="title">createZiplistObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ziplist编码的列表对象</span></div><div class="line"><span class="function">robj *<span class="title">createSetObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ht编码的集合对象</span></div><div class="line"><span class="function">robj *<span class="title">createIntsetObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个intset编码的集合对象</span></div><div class="line"><span class="function">robj *<span class="title">createHashObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ziplist编码的哈希对象</span></div><div class="line"><span class="function">robj *<span class="title">createZsetObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个skiplist编码的有序集合</span></div><div class="line"><span class="function">robj *<span class="title">createZsetZiplistObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ziplist编码的有序集合</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">long</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象中获取Long类型值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">checkType</span><span class="params">(redisClient *c, robj *o, <span class="keyword">int</span> type)</span></span>; <span class="comment">// 检查对象0的类型是否和type相同</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongLongFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">long</span> <span class="keyword">long</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象中取出整数值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getDoubleFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">double</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象中取出double值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongLongFromObject</span><span class="params">(robj *o, <span class="keyword">long</span> <span class="keyword">long</span> *target)</span></span>; <span class="comment">// 尝试从对象中获取整数值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongDoubleFromObject</span><span class="params">(robj *o, <span class="keyword">long</span> <span class="keyword">double</span> *target)</span></span>; <span class="comment">// 尝试从对象获取long double值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongDoubleFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">long</span> <span class="keyword">double</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象获取long double值</span></div><div class="line"><span class="function"><span class="keyword">char</span> *<span class="title">strEncoding</span><span class="params">(<span class="keyword">int</span> encoding)</span></span>; <span class="comment">// 返回编码的字符串表示</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">compareStringObjects</span><span class="params">(robj *a, robj *b)</span></span>; <span class="comment">// 二进制方式比较两个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">collateStringObjects</span><span class="params">(robj *a, robj *b)</span></span>; <span class="comment">// 以collation方式比较两个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">equalStringObjects</span><span class="params">(robj *a, robj *b)</span></span>; <span class="comment">// 判断是否相同两个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="title">estimateObjectIdleTime</span><span class="params">(robj *o)</span></span>; <span class="comment">// 计算对象的闲置时间</span></div></pre></td></tr></table></figure>
+<h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><p>对象的创建都比较类似，一般创建底层数据结构，然后创建对象。然后初始化。</p>
+<p>以string对象为例</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 创建字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</div><div class="line">    <span class="comment">// 长度小于39时使用EMBSTR</span></div><div class="line">    <span class="keyword">if</span> (len &lt;= REDIS_ENCODING_EMBSTR_SIZE_LIMIT)</div><div class="line">        <span class="keyword">return</span> createEmbeddedStringObject(ptr,len);</div><div class="line">    <span class="keyword">else</span></div><div class="line">        <span class="keyword">return</span> createRawStringObject(ptr,len);</div><div class="line">&#125;</div><div class="line"></div><div class="line"> <span class="comment">// 创建一个embstr编码的字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createEmbeddedStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</div><div class="line">    <span class="comment">// 直接分配一个连续空间长度为redis和字符串结构+字符串保存内存</span></div><div class="line">    robj *o = zmalloc(<span class="keyword">sizeof</span>(robj)+<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sdshdr)+len+<span class="number">1</span>);</div><div class="line">    <span class="keyword">struct</span> sdshdr *sh = (<span class="keyword">void</span>*)(o+<span class="number">1</span>); <span class="comment">// 找到字符串的起始位置</span></div><div class="line"></div><div class="line">    <span class="comment">// 初始化字符串</span></div><div class="line">    o-&gt;type = REDIS_STRING;</div><div class="line">    o-&gt;encoding = REDIS_ENCODING_EMBSTR;</div><div class="line">    o-&gt;ptr = sh+<span class="number">1</span>;</div><div class="line">    o-&gt;refcount = <span class="number">1</span>;</div><div class="line">    o-&gt;lru = LRU_CLOCK();</div><div class="line"></div><div class="line">    sh-&gt;len = len;</div><div class="line">    sh-&gt;<span class="built_in">free</span> = <span class="number">0</span>;</div><div class="line">    <span class="keyword">if</span> (ptr) &#123;</div><div class="line">        <span class="built_in">memcpy</span>(sh-&gt;buf,ptr,len);</div><div class="line">        sh-&gt;buf[len] = <span class="string">'\0'</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="built_in">memset</span>(sh-&gt;buf,<span class="number">0</span>,len+<span class="number">1</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> o;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 创建一个 REDIS_ENCODING_RAW 编码的字符对象</span></div><div class="line"><span class="comment">// 对象的指针指向一个 sds 结构</span></div><div class="line"><span class="function">robj *<span class="title">createRawStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</div><div class="line">  	<span class="comment">// sdsnewlen新建字符串</span></div><div class="line">    <span class="keyword">return</span> createObject(REDIS_STRING,sdsnewlen(ptr,len));</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 创建一个新对象</span></div><div class="line"><span class="function">robj *<span class="title">createObject</span><span class="params">(<span class="keyword">int</span> type, <span class="keyword">void</span> *ptr)</span> </span>&#123;</div><div class="line"></div><div class="line">    robj *o = zmalloc(<span class="keyword">sizeof</span>(*o));</div><div class="line"></div><div class="line">    o-&gt;type = type;</div><div class="line">    o-&gt;encoding = REDIS_ENCODING_RAW;</div><div class="line">    o-&gt;ptr = ptr;</div><div class="line">    o-&gt;refcount = <span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* Set the LRU to the current lruclock (minutes resolution). */</span></div><div class="line">    o-&gt;lru = LRU_CLOCK();</div><div class="line">    <span class="keyword">return</span> o;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="对象的释放"><a href="#对象的释放" class="headerlink" title="对象的释放"></a>对象的释放</h3><p>以字符串对象为例子，redis采用引用计数进行对象的释放，当对象不再使用时调用decrRefCount减少引用计数，在引用计数减到0后，释放对象。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrRefCount</span><span class="params">(robj *o)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount &lt;= <span class="number">0</span>) redisPanic(<span class="string">"decrRefCount against refcount &lt;= 0"</span>);</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount == <span class="number">1</span>) &#123;</div><div class="line">        <span class="keyword">switch</span>(o-&gt;type) &#123;</div><div class="line">        <span class="comment">// 根据类型释放 各个函数会调用各自的释放函数释放</span></div><div class="line">        <span class="keyword">case</span> REDIS_STRING: freeStringObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_LIST: freeListObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_SET: freeSetObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_ZSET: freeZsetObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_HASH: freeHashObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">default</span>: redisPanic(<span class="string">"Unknown object type"</span>); <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">        zfree(o); <span class="comment">// 释放对象内存</span></div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        o-&gt;refcount--;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 如果时RAW编码调用sdsfree释放，否则在释放robj时就释放了，因为采用了embstr编码</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeStringObject</span><span class="params">(robj *o)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;encoding == REDIS_ENCODING_RAW) &#123;</div><div class="line">        sdsfree(o-&gt;ptr);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+            <a href="/tags/源码阅读/" rel="tag"># 源码阅读</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2017/07/redis源码阅读-压缩列表ziplist.html" rel="next" title="redis源码阅读-压缩列表ziplist">
+                <i class="fa fa-chevron-left"></i> redis源码阅读-压缩列表ziplist
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="hypercomments_widget"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="YangYi" />
+          <p class="site-author-name" itemprop="name">YangYi</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+           
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">38</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/MekaYangyi" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/yang1" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#对象的类型与编码"><span class="nav-number">1.</span> <span class="nav-text">对象的类型与编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的结构体"><span class="nav-number">1.1.</span> <span class="nav-text">对象的结构体</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#类型type"><span class="nav-number">1.1.1.</span> <span class="nav-text">类型type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编码encoding"><span class="nav-number">1.1.2.</span> <span class="nav-text">编码encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#访问时间"><span class="nav-number">1.1.3.</span> <span class="nav-text">访问时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#引用计数"><span class="nav-number">1.1.4.</span> <span class="nav-text">引用计数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象的API"><span class="nav-number">2.</span> <span class="nav-text">对象的API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的创建"><span class="nav-number">2.1.</span> <span class="nav-text">对象的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的释放"><span class="nav-number">2.2.</span> <span class="nav-text">对象的释放</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YangYi</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 88745, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 88745, xid: "/blog/2017/07/redis源码阅读-对象.html"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/88745/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

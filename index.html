@@ -316,6 +316,206 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-对象.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YangYi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-对象.html" itemprop="url">
+                  redis源码阅读-对象
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-09T22:55:14+08:00">
+                2017-07-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2017/07/redis源码阅读-对象.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-对象.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。</p>
+<p>redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。</p>
+<h2 id="对象的类型与编码"><a href="#对象的类型与编码" class="headerlink" title="对象的类型与编码"></a>对象的类型与编码</h2><p>redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一个对象用作键值对的键，一个对象用作键值对的值。</p>
+<h3 id="对象的结构体"><a href="#对象的结构体" class="headerlink" title="对象的结构体"></a>对象的结构体</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> redisObject &#123;</div><div class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>; <span class="comment">// 类型</span></div><div class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>; <span class="comment">// 编码</span></div><div class="line">    <span class="keyword">unsigned</span> lru:REDIS_LRU_BITS; <span class="comment">/* lru time (relative to server.lruclock) */</span></div><div class="line">    <span class="keyword">int</span> refcount; <span class="comment">// 引用计数</span></div><div class="line">    <span class="keyword">void</span> *ptr; <span class="comment">// 值</span></div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+<p>redis结构体使用位段结构节省空间</p>
+<h4 id="类型type"><a href="#类型type" class="headerlink" title="类型type"></a>类型type</h4><p>记录redis对象类型，五种类型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_STRING 0 <span class="comment">// 字符串对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_LIST 1 <span class="comment">// 列表对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_SET 2 <span class="comment">// 哈希对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ZSET 3 <span class="comment">// 集合对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_HASH 4 <span class="comment">// 有序集合对象</span></span></div></pre></td></tr></table></figure>
+<h4 id="编码encoding"><a href="#编码encoding" class="headerlink" title="编码encoding"></a>编码encoding</h4><p>记录redis对象的编码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 对象编码</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_RAW 0     <span class="comment">/* 简单动态字符串 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_INT 1     <span class="comment">/* long类型的整数 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_HT 2      <span class="comment">/* 字典 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_ZIPMAP 3  <span class="comment">/* zipmap 3.2.5不再使用 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_LINKEDLIST 4 <span class="comment">/* 双端队列 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_ZIPLIST 5 <span class="comment">/* 压缩列表 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_INTSET 6  <span class="comment">/* 整数集合 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_SKIPLIST 7  <span class="comment">/* 跳跃表 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_EMBSTR 8  <span class="comment">/* EMBSTR编码的简单字符串 */</span></span></div></pre></td></tr></table></figure>
+<p>每种类型对应至少两种不同的编码。</p>
+<table>
+<thead>
+<tr>
+<th>对象类型</th>
+<th>编码方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REDIS_STRING</td>
+<td>REDIS_ENCODING_RAW ,REDIS_ENCODING_INT ,REDIS_ENCODING_EMBSTR</td>
+</tr>
+<tr>
+<td>REDIS_LIST</td>
+<td>REDIS_ENCODING_LINKEDLIST ,REDIS_ENCODING_ZIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_SET</td>
+<td>REDIS_ENCODING_INTSET ,REDIS_ENCODING_HT</td>
+</tr>
+<tr>
+<td>REDIS_ZSET</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_SKIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_HASH</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_HT</td>
+</tr>
+</tbody>
+</table>
+<h4 id="访问时间"><a href="#访问时间" class="headerlink" title="访问时间"></a>访问时间</h4><p>表示对象的最后一次访问时间。</p>
+<h4 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h4><p>常见的管理方式，引用计数为0时回收。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2017/07/redis源码阅读-对象.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-压缩列表ziplist.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1769,175 +1969,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/03/读书摘录-程序员的思维方式.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="鉴心">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2017/03/读书摘录-程序员的思维方式.html" itemprop="url">
-                  读书摘录-程序员的思维方式
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-26T12:26:05+08:00">
-                2017-03-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/摘录/" itemprop="url" rel="index">
-                    <span itemprop="name">摘录</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/03/读书摘录-程序员的思维方式.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/03/读书摘录-程序员的思维方式.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>2.2 德雷福斯模型的5个阶段</p>
-<p>2017-01-24</p>
-<p>但是，如果给新手提供与情境无关的规则去参照，他们就会变得能干起来。也就是说，需要这种形式的规则：“当X发生时，执行Y。”换言之，需要一份指令清单。<br>图2-2　玉米饼食谱，不过你知道需要烹饪多长时间吗<br>这就是呼叫中心的工作原理。你可以雇用一大批对当前技术没有很多经验的人，然后让他们按照一个决策树按部就班地执行下去。</p>
-<p>3.3 L型和R型的特征</p>
-<p>2017-02-06</p>
-<p>事实上，综合是一项非常强大的学习技术，以至于麻省理工学院媒体实验室的尼葛洛庞蒂在Don’t Dissect the Frog, Build It [Neg94]中建议，真正想要了解一只青蛙，传统的解剖不是办法，更好的方式是构造一只青蛙。<br>也就是说，要求学生构造一个具有青蛙特征的生物。这是一种伟大的方式，可以真正了解到，什么使青蛙成之为青蛙，以及青蛙如何适应其特定环境。这是一个综合学习的绝佳例子。</p>
-<p>4.4 收获R型线索</p>
-<p>2017-02-08</p>
-<p>这种方法为什么会起作用？我认为这是因为晨写让毫无防备的大脑倾倒想法。早上刚起床时，你还没有像你想的那样清醒。潜意识仍然占主角。你还没有提起所有防备，也还未适应有限的现实世界。你可以直接连通R型，至少一小会儿。</p>
-<p>2017-02-08</p>
-<p>你需要培养一种非目标驱动的思维方式。正如庞加莱所做，把一切都写在纸上（或者编辑器中，如果你必须得这么做的话），然后不去管它。不要试图思考。记住它，如布朗所说，不要关注它。只要简单地记住它。让事实和问题自由地搅和、浸泡（我们将在8.2节讨论这一话题）</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/03/读书摘录-程序员的思维方式.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1987,7 +2018,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">37</span>
+                <span class="site-state-item-count">38</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
