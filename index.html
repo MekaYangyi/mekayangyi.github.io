@@ -316,6 +316,170 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-事件.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YangYi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-事件.html" itemprop="url">
+                  redis源码阅读-事件
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-16T22:24:01+08:00">
+                2017-07-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2017/07/redis源码阅读-事件.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-事件.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="redis源码阅读-事件"><a href="#redis源码阅读-事件" class="headerlink" title="redis源码阅读-事件"></a>redis源码阅读-事件</h1><p>redis服务器是一个事件驱动程序。当触发一个事件时,redis会创建一个事件,放入到待处理的队列，依次进行处理。</p>
+<p>redis事件分为文件时间和时间事件。</p>
+<p>文件事件：文件事件是对套接字操作的抽象，当服务器与客户端进行通讯，会产生出各种文件事件，而服务器则通过监听并处理这些事件来完成一系列网络通讯操作。</p>
+<p>时间事件：redis一些操作是需要定时进行执行的，而时间事件就是对这类操作的抽象。</p>
+<h2 id="事件的实现"><a href="#事件的实现" class="headerlink" title="事件的实现"></a>事件的实现</h2><p>以下是事件结构体定义。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* File event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeFileEvent &#123;</div><div class="line">    <span class="keyword">int</span> mask; <span class="comment">// one of AE_(READABLE|WRITABLE) 类型</span></div><div class="line">    aeFileProc *rfileProc; <span class="comment">// 读事件处理器</span></div><div class="line">    aeFileProc *wfileProc; <span class="comment">// 写事件处理器</span></div><div class="line">    <span class="keyword">void</span> *clientData; <span class="comment">// 多路复用库的私有数据</span></div><div class="line">&#125; aeFileEvent;</div><div class="line"></div><div class="line"><span class="comment">/* Time event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeTimeEvent &#123;</div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> id;  <span class="comment">// 唯一标志</span></div><div class="line">    <span class="keyword">long</span> when_sec; <span class="comment">// 事件到达事件s</span></div><div class="line">    <span class="keyword">long</span> when_ms;  <span class="comment">// 事件到达事件ms</span></div><div class="line">    aeTimeProc *timeProc; <span class="comment">// 事件处理函数</span></div><div class="line">    aeEventFinalizerProc *finalizerProc; <span class="comment">// 事件释放函数</span></div><div class="line">    <span class="keyword">void</span> *clientData; <span class="comment">// 多路复用库的私有数据</span></div><div class="line">    <span class="keyword">struct</span> aeTimeEvent *next; <span class="comment">//　指向下一个时间事件结构，形成链表</span></div><div class="line">&#125; aeTimeEvent;</div><div class="line"></div><div class="line"><span class="comment">/* A fired event */</span></div><div class="line"><span class="comment">// 触发的事件结构体</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeFiredEvent &#123;</div><div class="line">    <span class="keyword">int</span> fd; <span class="comment">// 文件事件描述符</span></div><div class="line">    <span class="keyword">int</span> mask;　<span class="comment">// one of AE_(READABLE|WRITABLE) 类型</span></div><div class="line">&#125; aeFiredEvent;</div><div class="line"></div><div class="line"><span class="comment">// 事件循环结构体</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeEventLoop &#123;</div><div class="line">    <span class="keyword">int</span> maxfd;   <span class="comment">// 当前注册的最大描述符</span></div><div class="line">    <span class="keyword">int</span> setsize; <span class="comment">// 需要监听的描述符个数</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> timeEventNextId; <span class="comment">// 下一个时间事件ID</span></div><div class="line">    <span class="keyword">time_t</span> lastTime;     <span class="comment">// 上一次时间循环时间</span></div><div class="line">    aeFileEvent *events; <span class="comment">// 注册要使用的文件时间</span></div><div class="line">    aeFiredEvent *fired; <span class="comment">// 已准备好，待处理事件</span></div><div class="line">    aeTimeEvent *timeEventHead; <span class="comment">// 时间事件</span></div><div class="line">    <span class="keyword">int</span> stop; <span class="comment">// 事件处理器开关</span></div><div class="line">    <span class="keyword">void</span> *apidata; <span class="comment">// 处理多路服用库的私有数据</span></div><div class="line">    aeBeforeSleepProc *beforesleep; <span class="comment">// 处理事件前要执行的函数</span></div><div class="line">&#125; aeEventLoop;</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2017/07/redis源码阅读-事件.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-事务.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1863,168 +2027,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/06/redis源码阅读-字典.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="鉴心">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2017/06/redis源码阅读-字典.html" itemprop="url">
-                  redis源码阅读-字典
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-30T15:09:34+08:00">
-                2017-06-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
-                    <span itemprop="name">源码阅读</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/06/redis源码阅读-字典.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/06/redis源码阅读-字典.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Redis字典由哈希表实现的保存键值对的抽象数据结构。</p>
-<p>实现文件在dict.h\dict.c中。</p>
-<h2 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h2><p>Redis字典结构体定义。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictEntry &#123;</div><div class="line">    <span class="keyword">void</span> *key;<span class="comment">// key 键</span></div><div class="line">    <span class="keyword">union</span> &#123;</div><div class="line">        <span class="keyword">void</span> *val;</div><div class="line">        <span class="keyword">uint64_t</span> u64;</div><div class="line">        <span class="keyword">int64_t</span> s64;</div><div class="line">        <span class="keyword">double</span> d;</div><div class="line">    &#125; v;<span class="comment">// 值，支持多种类型,使用联合。</span></div><div class="line">    <span class="keyword">struct</span> dictEntry *next;<span class="comment">// 下一个点 采用链式来解决索引冲突问题</span></div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictType &#123;</div><div class="line">    <span class="function"><span class="keyword">unsigned</span> <span class="title">int</span> <span class="params">(*hashFunction)</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *key)</span></span>;<span class="comment">// hash函数</span></div><div class="line">    <span class="keyword">void</span> *(*keyDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key);<span class="comment">// key复制函数</span></div><div class="line">    <span class="keyword">void</span> *(*valDup)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *obj);<span class="comment">// value复制函数</span></div><div class="line">    <span class="keyword">int</span> (*keyCompare)(<span class="keyword">void</span> *privdata, <span class="keyword">const</span> <span class="keyword">void</span> *key1, <span class="keyword">const</span> <span class="keyword">void</span> *key2);<span class="comment">// key比较函数</span></div><div class="line">    <span class="keyword">void</span> (*keyDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *key);<span class="comment">// key释放函数</span></div><div class="line">    <span class="keyword">void</span> (*valDestructor)(<span class="keyword">void</span> *privdata, <span class="keyword">void</span> *obj);<span class="comment">// value释放函数</span></div><div class="line">&#125; dictType;</div><div class="line"></div><div class="line"><span class="comment">/* This is our hash table structure. Every dictionary has two of this as we</div><div class="line"> * implement incremental rehashing, for the old to the new table. */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictht &#123;</div><div class="line">    dictEntry **table;<span class="comment">// 指针的数组头的指针</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> size;<span class="comment">// 大小</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> sizemask;<span class="comment">// 大小的掩码 总是等于size-1</span></div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> used;<span class="comment">// 被使用的节点数</span></div><div class="line">&#125; dictht;<span class="comment">// hash表</span></div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dict &#123;</div><div class="line">    dictType *type;<span class="comment">// 绑定的函数</span></div><div class="line">    <span class="keyword">void</span> *privdata;<span class="comment">// 私有数据</span></div><div class="line">    dictht ht[<span class="number">2</span>];<span class="comment">// hash表，一般只使用[0]，在rehash的时候使用[1]</span></div><div class="line">    <span class="keyword">long</span> rehashidx; <span class="comment">// 记录rehash的进度，不进行rehash的时候为-1</span></div><div class="line">    <span class="keyword">int</span> iterators; <span class="comment">/* number of iterators currently running */</span></div><div class="line">&#125; dict;<span class="comment">// 字典</span></div><div class="line"></div><div class="line"><span class="comment">/* If safe is set to 1 this is a safe iterator, that means, you can call</div><div class="line"> * dictAdd, dictFind, and other functions against the dictionary even while</div><div class="line"> * iterating. Otherwise it is a non safe iterator, and only dictNext()</div><div class="line"> * should be called while iterating. */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> dictIterator &#123;</div><div class="line">    dict *d;</div><div class="line">    <span class="keyword">long</span> index;</div><div class="line">    <span class="keyword">int</span> table, safe;</div><div class="line">    dictEntry *entry, *nextEntry;</div><div class="line">    <span class="comment">/* unsafe iterator fingerprint for misuse detection. */</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> fingerprint;</div><div class="line">&#125; dictIterator;<span class="comment">// 迭代器</span></div></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/06/redis源码阅读-字典.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2074,7 +2076,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-count">44</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
