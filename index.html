@@ -316,6 +316,176 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-一个命令的旅程.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YangYi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-一个命令的旅程.html" itemprop="url">
+                  redis源码阅读-一个命令的旅程
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-18T15:28:23+08:00">
+                2017-07-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2017/07/redis源码阅读-一个命令的旅程.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-一个命令的旅程.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>redis服务器会与多个客户端建立网络连接，处理客户端发送的命令请求，在数据库中保存客户端执行的命令，并通过资源管理来维持整个服务器自身的运转。</p>
+<p>本文目的是为了理清楚服务器对于命令请求的整个处理过程，说明这个过程中服务器与客户端如何互相交互，服务器内部如何调用内部组件达到对命令的执行。</p>
+<h2 id="命令的处理流程"><a href="#命令的处理流程" class="headerlink" title="命令的处理流程"></a>命令的处理流程</h2><p>之前在事务代码部分的阅读，已经对于服务器接收客户端的连接并创建命令请求处理器等待命令请求的过程。</p>
+<p>现在以一个简单的set命令为例子，看服务器在接收请求之后如何处理。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">redis&gt; SET KEY VALUE</div><div class="line">ok</div></pre></td></tr></table></figure>
+<p>从客户端发送set key value命令到接收回复ok，都做了如下操作：</p>
+<ul>
+<li>客户端发送命令。</li>
+<li>服务器命令请求处理器接收，引发命令的执行，并产生命令回复处理器。</li>
+<li>命令回复处理器发送ok给客户端。</li>
+<li>客户端接收ok，并打印。</li>
+</ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2017/07/redis源码阅读-一个命令的旅程.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-事件.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1864,169 +2034,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-跳跃表.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="鉴心">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-跳跃表.html" itemprop="url">
-                  redis源码阅读-跳跃表
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-08T14:29:58+08:00">
-                2017-07-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
-                    <span itemprop="name">源码阅读</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-跳跃表.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-跳跃表.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>跳跃表一种有序数据结构，每个节点维护多个指向其他节点的指针，达到快速访问节点的目的。</p>
-<p>大部分情况下跳跃表的效率可以和平衡数媲美，实现比平衡树简单，不少程序使用跳跃表来代替平衡树。</p>
-<p>跳跃表有时会作为有序集合的实现。以分值排序。</p>
-<h2 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 跳跃表节点</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> zskiplistNode &#123;</div><div class="line">    robj *obj; <span class="comment">// 保存的对象</span></div><div class="line">    <span class="keyword">double</span> score; <span class="comment">// 分值 跳跃表按照分值进行排序</span></div><div class="line">    <span class="keyword">struct</span> zskiplistNode *backward; <span class="comment">// 上一节点</span></div><div class="line">    <span class="keyword">struct</span> zskiplistLevel &#123;</div><div class="line">        <span class="keyword">struct</span> zskiplistNode *forward; <span class="comment">// 前进指针</span></div><div class="line">        <span class="keyword">unsigned</span> <span class="keyword">int</span> span; <span class="comment">// 跨度 记录两个节点之间的距离</span></div><div class="line">    &#125; level[]; <span class="comment">// 层</span></div><div class="line">&#125; zskiplistNode;</div><div class="line"></div><div class="line"><span class="comment">// 跳跃表</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> zskiplist &#123;</div><div class="line">    <span class="keyword">struct</span> zskiplistNode *header, *tail; <span class="comment">// 头、尾指针</span></div><div class="line">    PORT_ULONG length; <span class="comment">// 跳跃表长度</span></div><div class="line">    <span class="keyword">int</span> level; <span class="comment">// 层数最大节点层数</span></div><div class="line">&#125; zskiplist;</div></pre></td></tr></table></figure>
-<h2 id="跳跃表的创建"><a href="#跳跃表的创建" class="headerlink" title="跳跃表的创建"></a>跳跃表的创建</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 创建节点</span></div><div class="line"><span class="function">zskiplistNode *<span class="title">zslCreateNode</span><span class="params">(<span class="keyword">int</span> level, <span class="keyword">double</span> score, robj *obj)</span> </span>&#123;</div><div class="line">    <span class="comment">// 申请内存</span></div><div class="line">    zskiplistNode *zn = zmalloc(<span class="keyword">sizeof</span>(*zn)+level*<span class="keyword">sizeof</span>(<span class="keyword">struct</span> zskiplistLevel));</div><div class="line">    zn-&gt;score = score; <span class="comment">// 赋值分数</span></div><div class="line">    zn-&gt;obj = obj; <span class="comment">// 设定成员对象</span></div><div class="line">    <span class="keyword">return</span> zn;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 创建跳跃表</span></div><div class="line"><span class="function">zskiplist *<span class="title">zslCreate</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</div><div class="line">    <span class="keyword">int</span> j;</div><div class="line">    zskiplist *zsl;</div><div class="line"></div><div class="line">    <span class="comment">// 申请内存</span></div><div class="line">    zsl = zmalloc(<span class="keyword">sizeof</span>(*zsl));</div><div class="line">    zsl-&gt;level = <span class="number">1</span>; <span class="comment">// 设置层数初始为1</span></div><div class="line">    zsl-&gt;length = <span class="number">0</span>; <span class="comment">// 设置长度初始为0</span></div><div class="line"></div><div class="line">    <span class="comment">// 创建头节点 层数为32 分数为0</span></div><div class="line">    zsl-&gt;header = zslCreateNode(ZSKIPLIST_MAXLEVEL,<span class="number">0</span>,<span class="literal">NULL</span>);</div><div class="line"></div><div class="line">    <span class="comment">// 将每层的forward指针指向null，跨度0</span></div><div class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; ZSKIPLIST_MAXLEVEL; j++) &#123;</div><div class="line">        zsl-&gt;header-&gt;level[j].forward = <span class="literal">NULL</span>;</div><div class="line">        zsl-&gt;header-&gt;level[j].span = <span class="number">0</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">// 设定backward指向null</span></div><div class="line">    zsl-&gt;header-&gt;backward = <span class="literal">NULL</span>;</div><div class="line">    zsl-&gt;tail = <span class="literal">NULL</span>;</div><div class="line">    <span class="keyword">return</span> zsl;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-跳跃表.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2076,7 +2083,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">44</span>
+                <span class="site-state-item-count">45</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
