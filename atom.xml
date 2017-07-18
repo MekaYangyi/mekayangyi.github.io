@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/child/"/>
-  <updated>2017-07-18T07:29:41.517Z</updated>
+  <updated>2017-07-18T08:00:24.866Z</updated>
   <id>http://yoursite.com/child/</id>
   
   <author>
@@ -14,6 +14,45 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Redis源码阅读-总结</title>
+    <link href="http://yoursite.com/child//blog/2017/07/Redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%80%BB%E7%BB%93.html"/>
+    <id>http://yoursite.com/child//blog/2017/07/Redis源码阅读-总结.html</id>
+    <published>2017-07-18T07:59:57.000Z</published>
+    <updated>2017-07-18T08:00:24.866Z</updated>
+    
+    <content type="html"><![CDATA[<p>然后快到七月的时候，项目在经过编码、测试，最终投用起来之后，又有了更多的时间来学习。便开始了源码的继续阅读。</p>
+<p>阅读redis源码的目的:</p>
+<ul>
+<li>为了之后项目如果使用redis的话能够游刃有余。</li>
+<li>学习其优秀的编码。</li>
+</ul>
+<p>参加工作两年。</p>
+<p>第一年是从机械专业学生转变为程序员，更多的是在打基础，看了挺多计算机的基础书籍。那段时间相对是痛苦的，遇到一个问题往往不明白，不断去探究又探究出一个新的不明白的问题。</p>
+<p>第二年在积累了十万行之后，开始感觉基础编码方面比较游刃有余了，遇到的问题大多数能提取终点，找到解决方案。但是想着继续提升，于是开始了部分项目的源码阅读。除了公司项目源码的阅读，网上开源项目的源码阅读也提上了日程，在经过了sgi stl的仿写之后，开始了redis的阅读。</p>
+<p>redis是我第一个比较完整的看完的现在流行的开源项目源码。不算中间停下来的时间，大概看了三个星期。这三个星期里不能说对redis理解很深透，但是起码整个项目的结构，怎么实现主要的功能，内部模块的互相调用算是理解了。</p>
+<p>收获有很多，修炼还需要继续。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;然后快到七月的时候，项目在经过编码、测试，最终投用起来之后，又有了更多的时间来学习。便开始了源码的继续阅读。&lt;/p&gt;
+&lt;p&gt;阅读redis源码的目的:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为了之后项目如果使用redis的话能够游刃有余。&lt;/li&gt;
+&lt;li&gt;学习其优秀的编码。&lt;/li&gt;
+    
+    </summary>
+    
+      <category term="源码阅读" scheme="http://yoursite.com/child/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    
+    
+      <category term="redis" scheme="http://yoursite.com/child/tags/redis/"/>
+    
+      <category term="源码阅读" scheme="http://yoursite.com/child/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    
+  </entry>
   
   <entry>
     <title>redis源码阅读-一个命令的旅程</title>
@@ -1268,43 +1307,6 @@
     
       &lt;p&gt;redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。&lt;/p&gt;
 &lt;h2 id=&quot;内存分配器的选择&quot;&gt;&lt;a href=&quot;#内存分配器的选择&quot; class=&quot;headerlink&quot; title=&quot;内存分配器的选择&quot;&gt;&lt;/a&gt;内存分配器的选择&lt;/h2&gt;&lt;p&gt;redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="源码阅读" scheme="http://yoursite.com/child/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
-    
-    
-      <category term="redis" scheme="http://yoursite.com/child/tags/redis/"/>
-    
-      <category term="源码阅读" scheme="http://yoursite.com/child/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>redis源码阅读-开始</title>
-    <link href="http://yoursite.com/child//blog/2017/03/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B.html"/>
-    <id>http://yoursite.com/child//blog/2017/03/redis源码阅读-开始.html</id>
-    <published>2017-03-21T02:21:21.000Z</published>
-    <updated>2017-07-10T04:17:37.118Z</updated>
-    
-    <content type="html"><![CDATA[<p>自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行阅读的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。</p>
-<h2 id="Redis的介绍"><a href="#Redis的介绍" class="headerlink" title="Redis的介绍"></a>Redis的介绍</h2><p>redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。</p>
-<h2 id="阅读顺序"><a href="#阅读顺序" class="headerlink" title="阅读顺序"></a>阅读顺序</h2><p><a href="http://blog.huangz.me/diary/2014/how-to-read-redis-source-code.html" target="_blank" rel="external">如何阅读Redis源码？</a>阅读的顺序主要还是按照黄建宏老师所建议的顺序进行阅读。</p>
-<ol>
-<li>阅读数据结构的实现。</li>
-<li>阅读内存编码数据结构的实现。</li>
-<li>阅读数据类型的实现。</li>
-<li>阅读数据库实现相关代码。</li>
-<li>阅读客户端和服务端相关代码。</li>
-<li>阅读多机功能的实现。</li>
-</ol>
-<p>至此将Redis阅读完毕。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行阅读的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。&lt;/p&gt;
-&lt;h2 id=&quot;Redis的介绍&quot;&gt;&lt;a href=&quot;#Redis的介绍&quot; class=&quot;
     
     </summary>
     
