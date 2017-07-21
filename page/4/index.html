@@ -316,6 +316,166 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YangYi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html" itemprop="url">
+                  [读书笔记] sicp 第二章 带有通用型操作的系统
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-10T08:32:54+08:00">
+                2016-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            <!--noindex-->
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html" itemprop="commentsCount"></span>
+                </a>
+              </span>
+              <!--/noindex-->
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="通用型算术运算"><a href="#通用型算术运算" class="headerlink" title="通用型算术运算"></a>通用型算术运算</h1><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">(<span class="name">define</span> (<span class="name">add</span> x y) (<span class="name">apply-generic</span> 'add x y))</div><div class="line">(<span class="name">define</span> (<span class="name">sub</span> x y) (<span class="name">apply-generic</span> 'sub x y))</div><div class="line">(<span class="name">define</span> (<span class="name">mul</span> x y) (<span class="name">apply-generic</span> 'mul x y))</div><div class="line">(<span class="name">define</span> (<span class="name">div</span> x y) (<span class="name">apply-generic</span> 'div x y))</div><div class="line"></div><div class="line">(<span class="name">define</span> (<span class="name">install-scheme-number-package</span>)</div><div class="line">  (<span class="name">define</span> (<span class="name">tag</span> x)</div><div class="line">    (<span class="name">attach-tag</span> 'scheme-number x))</div><div class="line">  (<span class="name">put</span> 'add '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">+</span> x y))))</div><div class="line">  (<span class="name">put</span> 'sub '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">-</span> x y))))</div><div class="line">  (<span class="name">put</span> 'mul '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">*</span> x y))))</div><div class="line">  (<span class="name">put</span> 'div '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span> y) (<span class="name">tag</span> (<span class="name">/</span> x y))))</div><div class="line">  (<span class="name">put</span> 'make '(scheme-number scheme-number)</div><div class="line">       (<span class="name">lambda</span> (<span class="name">x</span>) (<span class="name">tag</span> x)))</div><div class="line">  'done)</div><div class="line">  </div><div class="line">  (<span class="name">define</span> (<span class="name">make-scheme-number</span> n)</div><div class="line">  ((<span class="name">get</span> 'make 'scheme-number) n))</div></pre></td></tr></table></figure>
+<p>利用同样的方法可以加入有理数/复数等操作</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第二章-带有通用型操作的系统.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/09/读书笔记-sicp-第二章-抽象数据的多重表示.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1771,167 +1931,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="鉴心">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="url">
-                  [读书笔记]深入理解C++对象模型 第二章 构造函数的语意学
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-07T18:36:20+08:00">
-                2016-08-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="第二章：构造函数语意学"><a href="#第二章：构造函数语意学" class="headerlink" title="第二章：构造函数语意学"></a>第二章：构造函数语意学</h1><p>由于C++的编译器在程序员之外做了太多事情，导致会产生很多意料之外的错误。<br>例子 Conversion运算符。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//为了支持</span></div><div class="line"><span class="keyword">if</span>(<span class="built_in">cin</span>);</div><div class="line"><span class="comment">//定义了一个perator int()</span></div><div class="line"><span class="comment">//但是导致了以下错误的代码能够正常运行</span></div><div class="line"><span class="keyword">int</span> inVal;</div><div class="line"><span class="built_in">cin</span> &lt;&lt; inVal;</div><div class="line"><span class="comment">//此处&lt;&lt;被解释为左移操作符</span></div><div class="line"><span class="keyword">int</span> temp = <span class="built_in">cin</span>.<span class="keyword">operator</span> <span class="keyword">int</span>();</div><div class="line">temp &lt;&lt; intVal;</div></pre></td></tr></table></figure></p>
-<h1 id="Default-Constructor的构建操作"><a href="#Default-Constructor的构建操作" class="headerlink" title="Default Constructor的构建操作"></a>Default Constructor的构建操作</h1><p>默认构造函数只在编译器认为需要的时候才创建。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> Foo&#123;<span class="keyword">public</span>: <span class="keyword">int</span> val; Foo *pnext&#125;;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></div><div class="line"></span>&#123;</div><div class="line">    Foo test;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">]</div></pre></td></tr></table></figure></p>
-<p>这种情况实际没有默认构造函数，编译器什么都没做。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1981,7 +1980,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">45</span>
+                <span class="site-state-item-count">46</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
