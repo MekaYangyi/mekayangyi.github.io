@@ -92,53 +92,53 @@
 <meta name="description" content="建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。整个工作流程如下。第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gitlab workflow">
-<meta property="og:url" content="http://yoursite.com/child/blog/2017/01/gitlab-workflow.html">
+<meta property="og:url" content="http://www.coderyang.com/blog/2017/01/gitlab-workflow.html">
 <meta property="og:site_name" content="鉴心">
 <meta property="og:description" content="建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。整个工作流程如下。第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-21-42.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-32-56.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/10-31-10.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-23-52.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-24-20.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-43-08.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-52-57.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-54-23.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-55-03.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-57-19.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-39-02.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-41-09.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-41-37.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/22-44-54.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-59-05.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-59-45.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-05-10.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-06-31.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-08-38.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-09-43.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-11-44.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/112-18-49.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-19-25.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-12-47.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-15-41.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-22-44.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-23-55.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-25-09.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-26-33.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-27-07.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/11-54-23.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-47-04.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-45-50.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-32-50.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-36-52.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-37-36.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-39-48.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-41-19.jpg">
-<meta property="og:image" content="http://yoursite.com/child/img/gitlab工作流程/12-41-51.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/10-21-42.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/10-32-56.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/10-31-10.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-23-52.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-24-20.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-43-08.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-52-57.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-54-23.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-55-03.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-57-19.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/22-39-02.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/22-41-09.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/22-41-37.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/22-44-54.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-59-05.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-59-45.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-05-10.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-06-31.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-08-38.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-09-43.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-11-44.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/112-18-49.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-19-25.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-12-47.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-15-41.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-22-44.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-23-55.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-25-09.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-26-33.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-27-07.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/11-54-23.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-47-04.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-45-50.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-32-50.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-36-52.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-37-36.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-39-48.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-41-19.jpg">
+<meta property="og:image" content="http://www.coderyang.com/img/gitlab工作流程/12-41-51.jpg">
 <meta property="og:updated_time" content="2017-01-28T14:54:37.330Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gitlab workflow">
 <meta name="twitter:description" content="建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。整个工作流程如下。第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话">
-<meta name="twitter:image" content="http://yoursite.com/child/img/gitlab工作流程/10-21-42.jpg">
+<meta name="twitter:image" content="http://www.coderyang.com/img/gitlab工作流程/10-21-42.jpg">
 
 
 
@@ -166,7 +166,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/child/blog/2017/01/gitlab-workflow.html"/>
+  <link rel="canonical" href="http://www.coderyang.com/blog/2017/01/gitlab-workflow.html"/>
 
 
 
@@ -355,7 +355,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/01/gitlab-workflow.html">
+    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/01/gitlab-workflow.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="YangYi">
@@ -634,7 +634,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">46</span>
+                <span class="site-state-item-count">45</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
