@@ -1882,7 +1882,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-压缩列表ziplist.html">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/child/blog/2017/07/redis源码阅读-整数集合.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="YangYi">
@@ -1904,8 +1904,8 @@
             
               
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-压缩列表ziplist.html" itemprop="url">
-                  redis源码阅读-压缩列表ziplist
+                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-整数集合.html" itemprop="url">
+                  redis源码阅读-整数集合
                 </a>
               
             
@@ -1921,7 +1921,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-08T21:49:02+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-08T15:45:11+08:00">
                 2017-07-08
               </time>
             
@@ -1963,8 +1963,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/2017/07/redis源码阅读-压缩列表ziplist.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-压缩列表ziplist.html" itemprop="commentsCount"></span>
+                <a href="/blog/2017/07/redis源码阅读-整数集合.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-整数集合.html" itemprop="commentsCount"></span>
                 </a>
               </span>
               <!--/noindex-->
@@ -1992,17 +1992,13 @@
 
       
         
-          <p>压缩列表时列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每个列表项要么是小整数，要么是长度比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。</p>
-<h2 id="压缩列表的构成"><a href="#压缩列表的构成" class="headerlink" title="压缩列表的构成"></a>压缩列表的构成</h2><p>压缩列表是redis为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。一个压缩列表可以包含任意多个节点，每个节点可以保存一个字节数组或者一个整数组。</p>
-<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">《redis设计与实现》</div><div class="line">空白 ziplist 示例图</div><div class="line"></div><div class="line">area        |<span class="string">&lt;---- ziplist header ----&gt;</span>|<span class="string">&lt;-- end --&gt;</span>|</div><div class="line"></div><div class="line">size          4 bytes   4 bytes 2 bytes  1 byte</div><div class="line">            +---------+--------+-------+-----------+</div><div class="line">component   |<span class="string"> zlbytes </span>|<span class="string"> zltail </span>|<span class="string"> zllen </span>|<span class="string"> zlend     </span>|</div><div class="line">            |<span class="string">         </span>|<span class="string">        </span>|<span class="string">       </span>|<span class="string">           </span>|</div><div class="line">value       |<span class="string">  1011   </span>|<span class="string">  1010  </span>|<span class="string">   0   </span>|<span class="string"> 1111 1111 </span>|</div><div class="line">            +---------+--------+-------+-----------+</div><div class="line">                                       ^</div><div class="line">                                       |<span class="string"></div><div class="line">                               ZIPLIST_ENTRY_HEAD</div><div class="line">                                       &amp;</div><div class="line">address                        ZIPLIST_ENTRY_TAIL</div><div class="line">                                       &amp;</div><div class="line">                               ZIPLIST_ENTRY_END</div><div class="line"></div><div class="line">非空 ziplist 示例图</div><div class="line"></div><div class="line">area        </span>|<span class="string">&lt;---- ziplist header ----&gt;</span>|<span class="string">&lt;----------- entries -------------&gt;</span>|<span class="string">&lt;-end-&gt;</span>|</div><div class="line"></div><div class="line">size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte</div><div class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</div><div class="line">component   |<span class="string"> zlbytes </span>|<span class="string"> zltail </span>|<span class="string"> zllen </span>|<span class="string"> entry1 </span>|<span class="string"> entry2 </span>|<span class="string">  ...   </span>|<span class="string"> entryN </span>|<span class="string"> zlend </span>|</div><div class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</div><div class="line">                                       ^                          ^        ^</div><div class="line">address                                |<span class="string">                          </span>|<span class="string">        </span>|</div><div class="line">                                ZIPLIST_ENTRY_HEAD                |<span class="string">   ZIPLIST_ENTRY_END</div><div class="line">                                                                  </span>|</div><div class="line">                                                        ZIPLIST_ENTRY_TAIL</div></pre></td></tr></table></figure>
-<p>zlbytes记录整个压缩列表占用的字节数。</p>
-<p>zltail记录压缩列表尾节点距离压缩列表的起始地址有多少字节。</p>
-<p>zzlen记录压缩列表包含的节点数量。</p>
-<p>entryX列表节点，数量不定。</p>
-<p>zlend特殊值0xff，标记压缩列表末端。</p>
+          <p>创建一个只包含整数值元素的集合，同时元素数量不多时，redis会使用整数集合作为键的底层实现。</p>
+<h2 id="整数集合的实现"><a href="#整数集合的实现" class="headerlink" title="整数集合的实现"></a>整数集合的实现</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> intset &#123;</div><div class="line">    <span class="keyword">uint32_t</span> encoding; <span class="comment">// 编码方式</span></div><div class="line">    <span class="keyword">uint32_t</span> length; <span class="comment">// 元素数量</span></div><div class="line">    <span class="keyword">int8_t</span> contents[]; <span class="comment">// 保存元素的数组</span></div><div class="line">&#125; intset;</div></pre></td></tr></table></figure>
+<p>encoding表示整数集合的编码模式，目前提供三种模式</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT16 (sizeof(int16_t))</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT32 (sizeof(int32_t))</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT64 (sizeof(int64_t))</span></div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-压缩列表ziplist.html#more" rel="contents">
+            <a class="btn" href="/blog/2017/07/redis源码阅读-整数集合.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2088,7 +2084,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">46</span>
+                <span class="site-state-item-count">45</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
