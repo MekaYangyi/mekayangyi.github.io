@@ -1,20 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 
 
 
   
 
 
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
+
 
 
 
@@ -37,38 +45,27 @@
 
 
 
-  
-  
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-    
-    
-    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-  
-
-
-
 
 
 
 <link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -77,27 +74,18 @@
 
 
 
-  <link rel="alternate" href="/atom.xml" title="鉴心" type="application/atom+xml" />
-
-
-
-
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
 
 
 
 
 
-
-<meta name="description" content="YangYi">
 <meta property="og:type" content="website">
 <meta property="og:title" content="鉴心">
-<meta property="og:url" content="http://www.coderyang.com/page/5/index.html">
+<meta property="og:url" content="http://yoursite.com/page/5/index.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="YangYi">
+<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="鉴心">
-<meta name="twitter:description" content="YangYi">
 
 
 
@@ -105,10 +93,12 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Mist',
-    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
-    motion: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
       userId: '0',
       author: '博主'
@@ -125,41 +115,25 @@
 
 
 
-  <link rel="canonical" href="http://www.coderyang.com/page/5/"/>
+  <link rel="canonical" href="http://yoursite.com/page/5/"/>
 
 
 
 
 
-  <title> 鉴心 </title>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
-
+  <title>鉴心</title>
   
 
 
 
 
 
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?7f324988b3db76841dfdbe38d09d8603";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
 
 
 
+</head>
 
-
-
-
-
-
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
@@ -167,8 +141,7 @@
   
 
   <div class="container sidebar-position-left 
-   page-home 
- ">
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -184,7 +157,7 @@
       </a>
     </div>
       
-        <h1 class="site-subtitle" itemprop="description"></h1>
+        <p class="site-subtitle"></p>
       
   </div>
 
@@ -215,7 +188,7 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
@@ -223,75 +196,11 @@
           </a>
         </li>
       
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-commonweal">
-          <a href="/404.html" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
-            
-            公益404
-          </a>
-        </li>
-      
 
-      
-        <li class="menu-item menu-item-search">
-          
-            <a href="javascript:;" class="popup-trigger">
-          
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
-            
-            搜索
-          </a>
-        </li>
       
     </ul>
   
 
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocapitalize="off" autocomplete="off" autocorrect="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
-    </div>
-  </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
   
 </nav>
 
@@ -315,13 +224,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/07/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -333,17 +246,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="url">
-                  [读书笔记]深入理解C++对象模型 第二章 构造函数的语意学
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/08/07/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学/" itemprop="url">[读书笔记]深入理解C++对象模型 第二章 构造函数的语意学</a></h1>
         
 
         <div class="post-meta">
@@ -391,18 +296,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -418,7 +311,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -427,11 +322,11 @@
       
         
           <h1 id="第二章：构造函数语意学"><a href="#第二章：构造函数语意学" class="headerlink" title="第二章：构造函数语意学"></a>第二章：构造函数语意学</h1><p>由于C++的编译器在程序员之外做了太多事情，导致会产生很多意料之外的错误。<br>例子 Conversion运算符。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//为了支持</span></div><div class="line"><span class="keyword">if</span>(<span class="built_in">cin</span>);</div><div class="line"><span class="comment">//定义了一个perator int()</span></div><div class="line"><span class="comment">//但是导致了以下错误的代码能够正常运行</span></div><div class="line"><span class="keyword">int</span> inVal;</div><div class="line"><span class="built_in">cin</span> &lt;&lt; inVal;</div><div class="line"><span class="comment">//此处&lt;&lt;被解释为左移操作符</span></div><div class="line"><span class="keyword">int</span> temp = <span class="built_in">cin</span>.<span class="keyword">operator</span> <span class="keyword">int</span>();</div><div class="line">temp &lt;&lt; intVal;</div></pre></td></tr></table></figure></p>
-<h1 id="Default-Constructor的构建操作"><a href="#Default-Constructor的构建操作" class="headerlink" title="Default Constructor的构建操作"></a>Default Constructor的构建操作</h1><p>默认构造函数只在编译器认为需要的时候才创建。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> Foo&#123;<span class="keyword">public</span>: <span class="keyword">int</span> val; Foo *pnext&#125;;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></div><div class="line"></span>&#123;</div><div class="line">    Foo test;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">]</div></pre></td></tr></table></figure></p>
+<h1 id="Default-Constructor的构建操作"><a href="#Default-Constructor的构建操作" class="headerlink" title="Default Constructor的构建操作"></a>Default Constructor的构建操作</h1><p>默认构造函数只在编译器认为需要的时候才创建。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>&#123;</span><span class="keyword">public</span>: <span class="keyword">int</span> val; Foo *pnext&#125;;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    Foo test;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">]</div></pre></td></tr></table></figure></p>
 <p>这种情况实际没有默认构造函数，编译器什么都没做。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/08/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学.html#more" rel="contents">
+            <a class="btn" href="/2016/08/07/读书笔记-深入理解C-对象模型-第二章 构造函数的语意学/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -439,18 +334,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -464,6 +356,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -476,13 +372,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/07/读书笔记-深入探索C-对象模型-第一章-关于对象/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -494,17 +394,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html" itemprop="url">
-                  [读书笔记]深入探索C++ 对象模型 第一章 关于对象
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/08/07/读书笔记-深入探索C-对象模型-第一章-关于对象/" itemprop="url">[读书笔记]深入探索C++ 对象模型 第一章 关于对象</a></h1>
         
 
         <div class="post-meta">
@@ -552,18 +444,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -579,7 +459,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -588,11 +470,11 @@
       
         
           <h1 id="阅读的目的"><a href="#阅读的目的" class="headerlink" title="阅读的目的"></a>阅读的目的</h1><p>在阅读《C++ primer》的时候，书里面写了各种各样的情况下，C++的处理方式。囫囵吞枣的记下后，也就不求甚解了。而C++在工作中的使用已经有了那么一段时间。但是对于C++的很多现象，却依旧是只知道是这样，却不知道为什么是这样。<br>那么阅读这本同样是 Lippman的书籍，就是为了解惑，为什么C++会导致我们看到的现象，而不是其他情况。<br>我希望，通过这么本书，能够解答我的一部分疑问。</p>
-<h1 id="序"><a href="#序" class="headerlink" title="序"></a>序</h1><p>工作里常听到的对于C++的抱怨是C++的编译器为程序员做了太多的服务，导致很多情况不受控制。不像C,大部分都需要手动去执行，可以明确的知道，什么时候做了什么。<br>我想这部分抱怨一方面来源于对于C++的不熟悉，一方面又来源于C++的特性。那么当对C++怎么实现各种特性了解后，对于编译器的行为有了概念后，我相信我应该能够解答很多疑问了。<br>就像Lippman在本书贴出的一封信件一般<br><img src="/img/20160807 inside C++ 0.jpg" alt=""/></p>
+<h1 id="序"><a href="#序" class="headerlink" title="序"></a>序</h1><p>工作里常听到的对于C++的抱怨是C++的编译器为程序员做了太多的服务，导致很多情况不受控制。不像C,大部分都需要手动去执行，可以明确的知道，什么时候做了什么。<br>我想这部分抱怨一方面来源于对于C++的不熟悉，一方面又来源于C++的特性。那么当对C++怎么实现各种特性了解后，对于编译器的行为有了概念后，我相信我应该能够解答很多疑问了。<br>就像Lippman在本书贴出的一封信件一般<br><img src="/img/20160807 inside C++ 0.jpg" alt=""></p>
 <p>他希望这本书是这些问题的解答。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/08/读书笔记-深入探索C-对象模型-第一章-关于对象.html#more" rel="contents">
+            <a class="btn" href="/2016/08/07/读书笔记-深入探索C-对象模型-第一章-关于对象/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -600,18 +482,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -625,6 +504,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -637,13 +520,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/08/读书笔记-《如何阅读一本书》.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/06/读书笔记-《如何阅读一本书》/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -655,17 +542,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/08/读书笔记-《如何阅读一本书》.html" itemprop="url">
-                  [读书笔记] 《如何阅读一本书》
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/08/06/读书笔记-《如何阅读一本书》/" itemprop="url">[读书笔记] 《如何阅读一本书》</a></h1>
         
 
         <div class="post-meta">
@@ -713,18 +592,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/08/读书笔记-《如何阅读一本书》.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/08/读书笔记-《如何阅读一本书》.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -740,7 +607,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -754,7 +623,7 @@
 <h1 id="检视阅读"><a href="#检视阅读" class="headerlink" title="检视阅读"></a>检视阅读</h1><p>这一个层次要求能够快速的、准确的通过各种方式抓住一本书的重点。<br>分为两类<br>有系统的略读：<br>1、看书名、序言。了解整个书讲的什么。<br>2、研究目录，对书的骨架有了了解。<br>3、看索引，能够快速的知道本书内容的范围。<br>4、阅读其他人写的介绍。<br>5、抽取部分篇章阅读。<br>6、不要忽略最后几页<br>粗浅的阅读：<br>1、快速的阅读，即使对很多内容不理解也要将书籍读完。这样才不会停滞不前。<br>2、提高阅读速度的方式，不断移动眼球，不要后退暂停。大脑要跟上阅读的速度。<br>3、需要判断不同的书籍类型，不同的种类使用不同的阅读速度。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/08/读书笔记-《如何阅读一本书》.html#more" rel="contents">
+            <a class="btn" href="/2016/08/06/读书笔记-《如何阅读一本书》/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -762,18 +631,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -787,6 +653,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -799,13 +669,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/08/读书笔记-多任务下的数据结构与算法.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/06/读书笔记-多任务下的数据结构与算法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -817,17 +691,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html" itemprop="url">
-                  [读书笔记]多任务下的数据结构与算法 序章
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/08/06/读书笔记-多任务下的数据结构与算法/" itemprop="url">[读书笔记]多任务下的数据结构与算法 序章</a></h1>
         
 
         <div class="post-meta">
@@ -875,18 +741,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -902,7 +756,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -913,7 +769,7 @@
           <p>序章部分都是周先生之前的一些经验之谈，感觉在实际编程过程中还是比较有用的，程序里经常遇到这么些问题。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/08/读书笔记-多任务下的数据结构与算法.html#more" rel="contents">
+            <a class="btn" href="/2016/08/06/读书笔记-多任务下的数据结构与算法/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -921,18 +777,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -946,6 +799,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -958,13 +815,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/07/《The-Last-Of-Us》.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/07/26/《The-Last-Of-Us》/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -976,17 +837,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/07/《The-Last-Of-Us》.html" itemprop="url">
-                  《The Last Of Us》
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/07/26/《The-Last-Of-Us》/" itemprop="url">《The Last Of Us》</a></h1>
         
 
         <div class="post-meta">
@@ -1034,18 +887,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/07/《The-Last-Of-Us》.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/07/《The-Last-Of-Us》.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1061,7 +902,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1074,7 +917,7 @@
 <h2 id="3、汤米的村落才是人类的希望。"><a href="#3、汤米的村落才是人类的希望。" class="headerlink" title="3、汤米的村落才是人类的希望。"></a>3、汤米的村落才是人类的希望。</h2><p>汤米的村落才是真正的人类希望。不论是军事管理区、猎人、还是火萤，都让这个国家的秩序不再存在了。从整个游戏的不断对抗之中我们能够发现的是，往往人类比感染者更加难缠，乔尔与爱丽最惊险的时刻还是在与猎人、军政府、火萤的对抗的时候。实际上感染者，可能并没有那么可怕。汤米的小村落，在回归秩序之后，需要担心的更多是猎人，而不是感染者能够说明，如果社会重新回归秩序，那么感染者并没有那么可怕，可怕的更多的是人心。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/07/《The-Last-Of-Us》.html#more" rel="contents">
+            <a class="btn" href="/2016/07/26/《The-Last-Of-Us》/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1082,18 +925,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1107,6 +947,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1119,13 +963,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/07/hello-world.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/07/24/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1137,17 +985,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/07/hello-world.html" itemprop="url">
-                  Hello World
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/07/24/hello-world/" itemprop="url">Hello World</a></h1>
         
 
         <div class="post-meta">
@@ -1173,18 +1013,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/07/hello-world.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/07/hello-world.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1200,7 +1028,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1215,18 +1045,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1240,6 +1067,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1272,108 +1103,73 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="/img/avatar.jpg"
-               alt="YangYi" />
-          <p class="site-author-name" itemprop="name">YangYi</p>
-           
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Yang Yi</p>
               <p class="site-description motion-element" itemprop="description"></p>
-           
-        </div>
-        <nav class="site-state motion-element">
-
-          
-            <div class="site-state-item site-state-posts">
-              <a href="/archives">
-                <span class="site-state-item-count">46</span>
-                <span class="site-state-item-name">日志</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-categories">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">7</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">20</span>
-                <span class="site-state-item-name">标签</span>
-              </a>
-            </div>
-          
-
-        </nav>
-
-        
-          <div class="feed-link motion-element">
-            <a href="/atom.xml" rel="alternate">
-              <i class="fa fa-rss"></i>
-              RSS
-            </a>
           </div>
-        
 
-        <div class="links-of-author motion-element">
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
           
+
+          <div class="links-of-author motion-element">
             
-              <span class="links-of-author-item">
-                <a href="https://github.com/MekaYangyi" target="_blank" title="GitHub">
-                  
-                    <i class="fa fa-fw fa-github"></i>
-                  
-                  GitHub
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="https://www.zhihu.com/people/yang1" target="_blank" title="知乎">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  知乎
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="https://www.douban.com/people/mekay" target="_blank" title="豆瓣">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  豆瓣
-                </a>
-              </span>
-            
+          </div>
+
           
+          
+
+          
+          
+
+          
+
         </div>
-
-        
-        
-
-        
-        
-
-        
-
-
       </section>
 
       
@@ -1390,49 +1186,35 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
-    <i class="fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">YangYi</span>
+  <span class="author" itemprop="copyrightHolder">Yang Yi</span>
+
+  
 </div>
 
 
-<div class="powered-by">
-  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
-</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Mist
-  </a>
-</div>
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
 
 
         
-<div class="busuanzi-count">
-  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
-  
-    <span class="site-uv">
-      本站访客数
-      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
-      人次
-    </span>
-  
 
-  
-    <span class="site-pv">
-      本站总访问量
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
-      次
-    </span>
-  
-</div>
+
+
+
 
 
         
@@ -1444,6 +1226,8 @@
         <i class="fa fa-arrow-up"></i>
         
       </div>
+    
+
     
 
   </div>
@@ -1471,43 +1255,61 @@
 
 
 
-  
-  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
 
 
 
   
   
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
 
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
   
 
   
 
+  
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
 
 
 
@@ -1521,25 +1323,17 @@
 
 	
 
-		<script type="text/javascript">
-		_hcwp = window._hcwp || [];
 
-		_hcwp.push({widget:"Bloggerstream", widget_id: 88745, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
-		
 
-		(function() {
-		if("HC_LOAD_INIT" in window)return;
-		HC_LOAD_INIT = true;
-		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
-		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
-		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/88745/"+lang+"/widget.js";
-		var s = document.getElementsByTagName("script")[0];
-		s.parentNode.insertBefore(hcc, s.nextSibling);
-		})();
-		</script>
 
-	
+  
+
+
+
+
+
+  
 
 
 
@@ -1554,132 +1348,6 @@
 
   
 
-  <script type="text/javascript">
-    // Popup Window;
-    var isfetched = false;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length == 0) {
-      search_path = "search.xml";
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.popup').toggle();
-    }
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-      $.ajax({
-        url: path,
-        dataType: "xml",
-        async: true,
-        success: function( xmlResponse ) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = $( "entry", xmlResponse ).map(function() {
-            return {
-              title: $( "title", this ).text(),
-              content: $("content",this).text(),
-              url: $( "url" , this).text()
-            };
-          }).get();
-          var $input = document.getElementById(search_id);
-          var $resultContent = document.getElementById(content_id);
-          $input.addEventListener('input', function(){
-            var matchcounts = 0;
-            var str='<ul class=\"search-result-list\">';
-            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-            $resultContent.innerHTML = "";
-            if (this.value.trim().length > 1) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var content_index = [];
-                var data_title = data.title.trim().toLowerCase();
-                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
-                var data_url = decodeURIComponent(data.url);
-                var index_title = -1;
-                var index_content = -1;
-                var first_occur = -1;
-                // only match artiles with not empty titles and contents
-                if(data_title != '') {
-                  keywords.forEach(function(keyword, i) {
-                    index_title = data_title.indexOf(keyword);
-                    index_content = data_content.indexOf(keyword);
-                    if( index_title >= 0 || index_content >= 0 ){
-                      isMatch = true;
-                      if (i == 0) {
-                        first_occur = index_content;
-                      }
-                    }
-
-                  });
-                }
-                // show search results
-                if (isMatch) {
-                  matchcounts += 1;
-                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
-                  var content = data.content.trim().replace(/<[^>]+>/g,"");
-                  if (first_occur >= 0) {
-                    // cut out 100 characters
-                    var start = first_occur - 20;
-                    var end = first_occur + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if(start == 0){
-                      end = 50;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    var match_content = content.substring(start, end);
-                    // highlight all keywords
-                    keywords.forEach(function(keyword){
-                      var regS = new RegExp(keyword, "gi");
-                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
-                    });
-
-                    str += "<p class=\"search-result\">" + match_content +"...</p>"
-                  }
-                  str += "</li>";
-                }
-              })};
-            str += "</ul>";
-            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
-            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
-            $resultContent.innerHTML = str;
-          });
-          proceedsearch();
-        }
-      });}
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched == false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(function(e){
-      $('.popup').hide();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    });
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-  </script>
-
 
 
 
@@ -1687,21 +1355,11 @@
   
 
   
-<script>
-(function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-})();
-</script>
 
+  
+  
+
+  
 
   
 

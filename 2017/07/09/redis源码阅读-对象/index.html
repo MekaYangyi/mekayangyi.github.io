@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,源码阅读," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。 redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。 对象的类型与编码redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一">
+<meta name="keywords" content="redis,源码阅读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis源码阅读-对象">
+<meta property="og:url" content="http://yoursite.com/2017/07/09/redis源码阅读-对象/index.html">
+<meta property="og:site_name" content="鉴心">
+<meta property="og:description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。 redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。 对象的类型与编码redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-18T00:19:58.276Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis源码阅读-对象">
+<meta name="twitter:description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。 redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。 对象的类型与编码redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/07/09/redis源码阅读-对象/"/>
+
+
+
+
+
+  <title>redis源码阅读-对象 | 鉴心</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鉴心</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/09/redis源码阅读-对象/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yang Yi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">redis源码阅读-对象</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-09T22:55:14+08:00">
+                2017-07-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。</p>
+<p>redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。</p>
+<h2 id="对象的类型与编码"><a href="#对象的类型与编码" class="headerlink" title="对象的类型与编码"></a>对象的类型与编码</h2><p>redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一个对象用作键值对的键，一个对象用作键值对的值。</p>
+<h3 id="对象的结构体"><a href="#对象的结构体" class="headerlink" title="对象的结构体"></a>对象的结构体</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisObject</span> &#123;</span></div><div class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>; <span class="comment">// 类型</span></div><div class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>; <span class="comment">// 编码</span></div><div class="line">    <span class="keyword">unsigned</span> lru:REDIS_LRU_BITS; <span class="comment">/* lru time (relative to server.lruclock) */</span></div><div class="line">    <span class="keyword">int</span> refcount; <span class="comment">// 引用计数</span></div><div class="line">    <span class="keyword">void</span> *ptr; <span class="comment">// 值</span></div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+<p>redis结构体使用位段结构节省空间</p>
+<h4 id="类型type"><a href="#类型type" class="headerlink" title="类型type"></a>类型type</h4><p>记录redis对象类型，五种类型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_STRING 0 <span class="comment">// 字符串对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_LIST 1 <span class="comment">// 列表对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_SET 2 <span class="comment">// 哈希对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ZSET 3 <span class="comment">// 集合对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_HASH 4 <span class="comment">// 有序集合对象</span></span></div></pre></td></tr></table></figure>
+<h4 id="编码encoding"><a href="#编码encoding" class="headerlink" title="编码encoding"></a>编码encoding</h4><p>记录redis对象的编码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 对象编码</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_RAW 0     <span class="comment">/* 简单动态字符串 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_INT 1     <span class="comment">/* long类型的整数 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_HT 2      <span class="comment">/* 字典 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_ZIPMAP 3  <span class="comment">/* zipmap 3.2.5不再使用 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_LINKEDLIST 4 <span class="comment">/* 双端队列 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_ZIPLIST 5 <span class="comment">/* 压缩列表 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_INTSET 6  <span class="comment">/* 整数集合 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_SKIPLIST 7  <span class="comment">/* 跳跃表 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ENCODING_EMBSTR 8  <span class="comment">/* EMBSTR编码的简单字符串 */</span></span></div></pre></td></tr></table></figure>
+<p>每种类型对应至少两种不同的编码。</p>
+<table>
+<thead>
+<tr>
+<th>对象类型</th>
+<th>编码方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REDIS_STRING</td>
+<td>REDIS_ENCODING_RAW ,REDIS_ENCODING_INT ,REDIS_ENCODING_EMBSTR</td>
+</tr>
+<tr>
+<td>REDIS_LIST</td>
+<td>REDIS_ENCODING_LINKEDLIST ,REDIS_ENCODING_ZIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_SET</td>
+<td>REDIS_ENCODING_INTSET ,REDIS_ENCODING_HT</td>
+</tr>
+<tr>
+<td>REDIS_ZSET</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_SKIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_HASH</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_HT</td>
+</tr>
+</tbody>
+</table>
+<h4 id="访问时间"><a href="#访问时间" class="headerlink" title="访问时间"></a>访问时间</h4><p>表示对象的最后一次访问时间。</p>
+<h4 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h4><p>常见的管理方式，引用计数为0时回收。</p>
+<a id="more"></a>
+<h2 id="对象的API"><a href="#对象的API" class="headerlink" title="对象的API"></a>对象的API</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrRefCount</span><span class="params">(robj *o)</span></span>; <span class="comment">// 引用计数-1，降为0时释放对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrRefCountVoid</span><span class="params">(<span class="keyword">void</span> *o)</span></span>; <span class="comment">// 用于特定数据结构的释放</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">incrRefCount</span><span class="params">(robj *o)</span></span>; <span class="comment">// 引用计数+1</span></div><div class="line"><span class="function">robj *<span class="title">resetRefCount</span><span class="params">(robj *obj)</span></span>; <span class="comment">// 设置引用计数为0</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeStringObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放字符串对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeListObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放列表对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeSetObject</span><span class="params">(robj *o)</span></span>;  <span class="comment">// 释放集合对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeZsetObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放有序集合对象</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeHashObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 释放hash对象</span></div><div class="line"><span class="function">robj *<span class="title">createObject</span><span class="params">(<span class="keyword">int</span> type, <span class="keyword">void</span> *ptr)</span></span>; <span class="comment">// 创建一个新robj对象</span></div><div class="line"><span class="function">robj *<span class="title">createStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span></span>; <span class="comment">// 创建一个字符串对象，根据大小选择编码</span></div><div class="line"><span class="function">robj *<span class="title">createRawStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span></span>;<span class="comment">// 创建一个 REDIS_ENCODING_RAW 编码的字符对象</span></div><div class="line"><span class="function">robj *<span class="title">createEmbeddedStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span></span>;<span class="comment">// 创建一个 REDIS_ENCODING_EMBSTR 编码的字符对象</span></div><div class="line"><span class="function">robj *<span class="title">dupStringObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 复制一个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">isObjectRepresentableAsLongLong</span><span class="params">(robj *o, <span class="keyword">long</span> <span class="keyword">long</span> *llongval)</span></span>; <span class="comment">// 检查对象的值是否为Long long</span></div><div class="line"><span class="function">robj *<span class="title">tryObjectEncoding</span><span class="params">(robj *o)</span></span>; <span class="comment">// 尝试对字符串对象编码，以节约内存</span></div><div class="line"><span class="function">robj *<span class="title">getDecodedObject</span><span class="params">(robj *o)</span></span>; <span class="comment">// 返回一个对象的编码版本</span></div><div class="line"><span class="keyword">size_t</span> stringObjectLen(robj *o); <span class="comment">// 返回字符串对象的字符串值的长度</span></div><div class="line"><span class="function">robj *<span class="title">createStringObjectFromLongLong</span><span class="params">(<span class="keyword">long</span> <span class="keyword">long</span> value)</span></span>; <span class="comment">// 根据传入的值，创建一个字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createStringObjectFromLongDouble</span><span class="params">(<span class="keyword">long</span> <span class="keyword">double</span> value, <span class="keyword">int</span> humanfriendly)</span></span>; <span class="comment">// 根据传入的值，创建一个字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createListObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个linkedlist编码的列表对象</span></div><div class="line"><span class="function">robj *<span class="title">createZiplistObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ziplist编码的列表对象</span></div><div class="line"><span class="function">robj *<span class="title">createSetObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ht编码的集合对象</span></div><div class="line"><span class="function">robj *<span class="title">createIntsetObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个intset编码的集合对象</span></div><div class="line"><span class="function">robj *<span class="title">createHashObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ziplist编码的哈希对象</span></div><div class="line"><span class="function">robj *<span class="title">createZsetObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个skiplist编码的有序集合</span></div><div class="line"><span class="function">robj *<span class="title">createZsetZiplistObject</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">// 创建一个ziplist编码的有序集合</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">long</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象中获取Long类型值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">checkType</span><span class="params">(redisClient *c, robj *o, <span class="keyword">int</span> type)</span></span>; <span class="comment">// 检查对象0的类型是否和type相同</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongLongFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">long</span> <span class="keyword">long</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象中取出整数值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getDoubleFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">double</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象中取出double值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongLongFromObject</span><span class="params">(robj *o, <span class="keyword">long</span> <span class="keyword">long</span> *target)</span></span>; <span class="comment">// 尝试从对象中获取整数值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongDoubleFromObject</span><span class="params">(robj *o, <span class="keyword">long</span> <span class="keyword">double</span> *target)</span></span>; <span class="comment">// 尝试从对象获取long double值</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getLongDoubleFromObjectOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">long</span> <span class="keyword">double</span> *target, <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span></span>; <span class="comment">// 尝试从对象获取long double值</span></div><div class="line"><span class="function"><span class="keyword">char</span> *<span class="title">strEncoding</span><span class="params">(<span class="keyword">int</span> encoding)</span></span>; <span class="comment">// 返回编码的字符串表示</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">compareStringObjects</span><span class="params">(robj *a, robj *b)</span></span>; <span class="comment">// 二进制方式比较两个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">collateStringObjects</span><span class="params">(robj *a, robj *b)</span></span>; <span class="comment">// 以collation方式比较两个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">equalStringObjects</span><span class="params">(robj *a, robj *b)</span></span>; <span class="comment">// 判断是否相同两个字符串对象</span></div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="title">estimateObjectIdleTime</span><span class="params">(robj *o)</span></span>; <span class="comment">// 计算对象的闲置时间</span></div></pre></td></tr></table></figure>
+<h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><p>对象的创建都比较类似，一般创建底层数据结构，然后创建对象。然后初始化。</p>
+<p>以string对象为例</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 创建字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</div><div class="line">    <span class="comment">// 长度小于39时使用EMBSTR</span></div><div class="line">    <span class="keyword">if</span> (len &lt;= REDIS_ENCODING_EMBSTR_SIZE_LIMIT)</div><div class="line">        <span class="keyword">return</span> createEmbeddedStringObject(ptr,len);</div><div class="line">    <span class="keyword">else</span></div><div class="line">        <span class="keyword">return</span> createRawStringObject(ptr,len);</div><div class="line">&#125;</div><div class="line"></div><div class="line"> <span class="comment">// 创建一个embstr编码的字符串对象</span></div><div class="line"><span class="function">robj *<span class="title">createEmbeddedStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</div><div class="line">    <span class="comment">// 直接分配一个连续空间长度为redis和字符串结构+字符串保存内存</span></div><div class="line">    robj *o = zmalloc(<span class="keyword">sizeof</span>(robj)+<span class="keyword">sizeof</span>(struct sdshdr)+len+<span class="number">1</span>);</div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sdshdr</span> *<span class="title">sh</span> = (<span class="title">void</span>*)(<span class="title">o</span>+1);</span> <span class="comment">// 找到字符串的起始位置</span></div><div class="line"></div><div class="line">    <span class="comment">// 初始化字符串</span></div><div class="line">    o-&gt;type = REDIS_STRING;</div><div class="line">    o-&gt;encoding = REDIS_ENCODING_EMBSTR;</div><div class="line">    o-&gt;ptr = sh+<span class="number">1</span>;</div><div class="line">    o-&gt;refcount = <span class="number">1</span>;</div><div class="line">    o-&gt;lru = LRU_CLOCK();</div><div class="line"></div><div class="line">    sh-&gt;len = len;</div><div class="line">    sh-&gt;<span class="built_in">free</span> = <span class="number">0</span>;</div><div class="line">    <span class="keyword">if</span> (ptr) &#123;</div><div class="line">        <span class="built_in">memcpy</span>(sh-&gt;buf,ptr,len);</div><div class="line">        sh-&gt;buf[len] = <span class="string">'\0'</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="built_in">memset</span>(sh-&gt;buf,<span class="number">0</span>,len+<span class="number">1</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> o;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 创建一个 REDIS_ENCODING_RAW 编码的字符对象</span></div><div class="line"><span class="comment">// 对象的指针指向一个 sds 结构</span></div><div class="line"><span class="function">robj *<span class="title">createRawStringObject</span><span class="params">(<span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</div><div class="line">  	<span class="comment">// sdsnewlen新建字符串</span></div><div class="line">    <span class="keyword">return</span> createObject(REDIS_STRING,sdsnewlen(ptr,len));</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 创建一个新对象</span></div><div class="line"><span class="function">robj *<span class="title">createObject</span><span class="params">(<span class="keyword">int</span> type, <span class="keyword">void</span> *ptr)</span> </span>&#123;</div><div class="line"></div><div class="line">    robj *o = zmalloc(<span class="keyword">sizeof</span>(*o));</div><div class="line"></div><div class="line">    o-&gt;type = type;</div><div class="line">    o-&gt;encoding = REDIS_ENCODING_RAW;</div><div class="line">    o-&gt;ptr = ptr;</div><div class="line">    o-&gt;refcount = <span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* Set the LRU to the current lruclock (minutes resolution). */</span></div><div class="line">    o-&gt;lru = LRU_CLOCK();</div><div class="line">    <span class="keyword">return</span> o;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="对象的释放"><a href="#对象的释放" class="headerlink" title="对象的释放"></a>对象的释放</h3><p>以字符串对象为例子，redis采用引用计数进行对象的释放，当对象不再使用时调用decrRefCount减少引用计数，在引用计数减到0后，释放对象。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrRefCount</span><span class="params">(robj *o)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount &lt;= <span class="number">0</span>) redisPanic(<span class="string">"decrRefCount against refcount &lt;= 0"</span>);</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount == <span class="number">1</span>) &#123;</div><div class="line">        <span class="keyword">switch</span>(o-&gt;type) &#123;</div><div class="line">        <span class="comment">// 根据类型释放 各个函数会调用各自的释放函数释放</span></div><div class="line">        <span class="keyword">case</span> REDIS_STRING: freeStringObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_LIST: freeListObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_SET: freeSetObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_ZSET: freeZsetObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">case</span> REDIS_HASH: freeHashObject(o); <span class="keyword">break</span>;</div><div class="line">        <span class="keyword">default</span>: redisPanic(<span class="string">"Unknown object type"</span>); <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">        zfree(o); <span class="comment">// 释放对象内存</span></div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        o-&gt;refcount--;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 如果时RAW编码调用sdsfree释放，否则在释放robj时就释放了，因为采用了embstr编码</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeStringObject</span><span class="params">(robj *o)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;encoding == REDIS_ENCODING_RAW) &#123;</div><div class="line">        sdsfree(o-&gt;ptr);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="字符串对象"><a href="#字符串对象" class="headerlink" title="字符串对象"></a>字符串对象</h2><p>字符串编码可以是Int、raw或者embstr。</p>
+<p>字符串对象为整数值，可以用long long类型表示，则为int编码。</p>
+<p>字符串对象为浮点数，能够用long double类型表示，使用embstr还是raw根据长度来定。</p>
+<p>如果一个字符串对象小于等于REDIS_ENCODING_EMBSTR_SIZE_LIMIT则用embstr编码。</p>
+<p>大于REDIS_ENCODING_EMBSTR_SIZE_LIMIT采用raw编码。</p>
+<p>int编码在执行一个会将int转变为字符串值时，编码变为raw。</p>
+<p>embstr为只读的，当尝试修改时会转换为raw。</p>
+<h2 id="列表对象"><a href="#列表对象" class="headerlink" title="列表对象"></a>列表对象</h2><p>列表对象编码是ziplist或者linkedlist。</p>
+<p>满足以下两个条件使用ziplist：</p>
+<ul>
+<li>保存的字符串长度都小于64</li>
+<li>元素数量小于512</li>
+</ul>
+<h2 id="哈希对象"><a href="#哈希对象" class="headerlink" title="哈希对象"></a>哈希对象</h2><p>哈希对象编码是ziplist或者hashtable。</p>
+<p>如果采用的是ziplist那么添加键值时，先将键推入压缩列表表尾部，再将值推入压缩列表表尾。</p>
+<p>如果采用hashtable编码，那么字典的键就是键值对的键的字符串对象，字典的值时键值对的值。</p>
+<p>满足以下两个条件使用ziplist：</p>
+<ul>
+<li>保存的字符串长度都小于64</li>
+<li>元素数量小于512</li>
+</ul>
+<h2 id="集合对象"><a href="#集合对象" class="headerlink" title="集合对象"></a>集合对象</h2><p>集合的编码是inset或者hashtable</p>
+<p>满足以下条件使用intset编码：</p>
+<ul>
+<li>集合对象保存的值都为整数</li>
+<li>集合对象保存的元素不超过512个</li>
+</ul>
+<h2 id="有序集合对象"><a href="#有序集合对象" class="headerlink" title="有序集合对象"></a>有序集合对象</h2><p>有序集合编码是ziplist或者skiplist。</p>
+<p>skiplist编码使用一个zskiplist和dict作为底层实现。zskiplist按照分值从大到小保存集合元素。dict保存从成员到分值的映射。</p>
+<p>满足以下条件使用ziplist编码：</p>
+<ul>
+<li>有序集合保存的元素小于128个。</li>
+<li>有序集合保存的所有元素成员的长度都小于64字节。</li>
+</ul>
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><p>对象的命令处理在redis.h中。<br>执行命令之前会检查对象的类型，是否能够执行该命令。<br>如果能就调用对象的命令处理函数,否则返回错误。</p>
+<p>在调用了对象的命令处理函数之后，则根据命令具体的编码，去选择使用什么底层数据结构的接口来实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">/* Commands prototypes */</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">authCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pingCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">echoCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setnxCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setexCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">psetexCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">getCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">delCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">existsCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setbitCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">getbitCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setrangeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">getrangeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">incrCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">incrbyCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">decrbyCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">incrbyfloatCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">selectCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">randomkeyCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">keysCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">scanCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbsizeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lastsaveCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">saveCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bgsaveCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bgrewriteaofCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">shutdownCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">moveCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">renameCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">renamenxCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lpushCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">rpushCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lpushxCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">rpushxCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">linsertCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lpopCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">rpopCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">llenCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lindexCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lrangeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">ltrimCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">typeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lsetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">saddCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sremCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">smoveCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sismemberCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">scardCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">spopCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">srandmemberCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sinterCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sinterstoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sunionCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sunionstoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sdiffCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sdiffstoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sscanCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">syncCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">flushdbCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">flushallCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">sortCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">lremCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">rpoplpushCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">infoCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">mgetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">monitorCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">expireCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">expireatCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pexpireCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pexpireatCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">getsetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">ttlCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pttlCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">persistCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">slaveofCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">debugCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">msetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">msetnxCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zaddCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zincrbyCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrangeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrangebyscoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrevrangebyscoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrangebylexCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrevrangebylexCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zcountCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zlexcountCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrevrangeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zcardCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zremCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zscoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zremrangebyscoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zremrangebylexCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">multiCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">execCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">discardCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">blpopCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">brpopCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">brpoplpushCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">appendCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">strlenCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrankCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zrevrankCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hsetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hsetnxCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hgetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hmsetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hmgetCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hdelCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hlenCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zremrangebyrankCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zunionstoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zinterstoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">zscanCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hkeysCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hvalsCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hgetallCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hexistsCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hscanCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">configCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hincrbyCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">hincrbyfloatCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">subscribeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">unsubscribeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">psubscribeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">punsubscribeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">publishCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pubsubCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">watchCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">unwatchCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">clusterCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">restoreCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">migrateCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">askingCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">readonlyCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">readwriteCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dumpCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">objectCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">clientCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">evalCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">evalShaCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">scriptCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">timeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bitopCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bitcountCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bitposCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">replconfCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">waitCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pfselftestCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pfaddCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pfcountCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pfmergeCommand</span><span class="params">(redisClient *c)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">pfdebugCommand</span><span class="params">(redisClient *c)</span></span>;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+            <a href="/tags/源码阅读/" rel="tag"># 源码阅读</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/08/redis源码阅读-压缩列表ziplist/" rel="next" title="redis源码阅读-压缩列表ziplist">
+                <i class="fa fa-chevron-left"></i> redis源码阅读-压缩列表ziplist
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/10/redis源码阅读-数据库/" rel="prev" title="redis源码阅读-服务器">
+                redis源码阅读-服务器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Yang Yi</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#对象的类型与编码"><span class="nav-number">1.</span> <span class="nav-text">对象的类型与编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的结构体"><span class="nav-number">1.1.</span> <span class="nav-text">对象的结构体</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#类型type"><span class="nav-number">1.1.1.</span> <span class="nav-text">类型type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编码encoding"><span class="nav-number">1.1.2.</span> <span class="nav-text">编码encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#访问时间"><span class="nav-number">1.1.3.</span> <span class="nav-text">访问时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#引用计数"><span class="nav-number">1.1.4.</span> <span class="nav-text">引用计数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象的API"><span class="nav-number">2.</span> <span class="nav-text">对象的API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的创建"><span class="nav-number">2.1.</span> <span class="nav-text">对象的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的释放"><span class="nav-number">2.2.</span> <span class="nav-text">对象的释放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字符串对象"><span class="nav-number">3.</span> <span class="nav-text">字符串对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#列表对象"><span class="nav-number">4.</span> <span class="nav-text">列表对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#哈希对象"><span class="nav-number">5.</span> <span class="nav-text">哈希对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集合对象"><span class="nav-number">6.</span> <span class="nav-text">集合对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有序集合对象"><span class="nav-number">7.</span> <span class="nav-text">有序集合对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令"><span class="nav-number">8.</span> <span class="nav-text">命令</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yang Yi</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

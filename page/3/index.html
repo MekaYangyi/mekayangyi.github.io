@@ -1,20 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 
 
 
   
 
 
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
+
 
 
 
@@ -37,38 +45,27 @@
 
 
 
-  
-  
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-    
-    
-    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-  
-
-
-
 
 
 
 <link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -77,27 +74,18 @@
 
 
 
-  <link rel="alternate" href="/atom.xml" title="鉴心" type="application/atom+xml" />
-
-
-
-
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
 
 
 
 
 
-
-<meta name="description" content="YangYi">
 <meta property="og:type" content="website">
 <meta property="og:title" content="鉴心">
-<meta property="og:url" content="http://www.coderyang.com/page/3/index.html">
+<meta property="og:url" content="http://yoursite.com/page/3/index.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="YangYi">
+<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="鉴心">
-<meta name="twitter:description" content="YangYi">
 
 
 
@@ -105,10 +93,12 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Mist',
-    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
-    motion: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
       userId: '0',
       author: '博主'
@@ -125,41 +115,25 @@
 
 
 
-  <link rel="canonical" href="http://www.coderyang.com/page/3/"/>
+  <link rel="canonical" href="http://yoursite.com/page/3/"/>
 
 
 
 
 
-  <title> 鉴心 </title>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
-
+  <title>鉴心</title>
   
 
 
 
 
 
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?7f324988b3db76841dfdbe38d09d8603";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
 
 
 
+</head>
 
-
-
-
-
-
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
@@ -167,8 +141,7 @@
   
 
   <div class="container sidebar-position-left 
-   page-home 
- ">
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -184,7 +157,7 @@
       </a>
     </div>
       
-        <h1 class="site-subtitle" itemprop="description"></h1>
+        <p class="site-subtitle"></p>
       
   </div>
 
@@ -215,7 +188,7 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
@@ -223,75 +196,11 @@
           </a>
         </li>
       
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-commonweal">
-          <a href="/404.html" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
-            
-            公益404
-          </a>
-        </li>
-      
 
-      
-        <li class="menu-item menu-item-search">
-          
-            <a href="javascript:;" class="popup-trigger">
-          
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
-            
-            搜索
-          </a>
-        </li>
       
     </ul>
   
 
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocapitalize="off" autocomplete="off" autocorrect="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
-    </div>
-  </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
   
 </nav>
 
@@ -315,13 +224,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/03/redis源码阅读-开始.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/21/redis源码阅读-开始/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -333,17 +246,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/03/redis源码阅读-开始.html" itemprop="url">
-                  redis源码阅读-开始
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/03/21/redis源码阅读-开始/" itemprop="url">redis源码阅读-开始</a></h1>
         
 
         <div class="post-meta">
@@ -391,18 +296,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/03/redis源码阅读-开始.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/03/redis源码阅读-开始.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -418,7 +311,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -443,18 +338,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -468,6 +360,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -480,13 +376,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/01/gitlab-workflow.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/01/29/gitlab-workflow/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -498,17 +398,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/01/gitlab-workflow.html" itemprop="url">
-                  gitlab workflow
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/01/29/gitlab-workflow/" itemprop="url">gitlab workflow</a></h1>
         
 
         <div class="post-meta">
@@ -556,18 +448,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/01/gitlab-workflow.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/01/gitlab-workflow.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -583,7 +463,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -592,11 +474,11 @@
       
         
           <p>建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。<br>整个工作流程如下。<br>第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。<br>第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。<br>第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话机制，大家一起评审和讨论你的代码。对话过程中，你还可以不断提交代码。<br>第四步：你的Pull Request被接受，合并进master，重新部署后，原来你拉出来的那个分支就被删除。（先部署再合并也可。）</p>
-<h1 id="建立测试项目"><a href="#建立测试项目" class="headerlink" title="建立测试项目"></a>建立测试项目</h1><p>新建一个项目用于测试工作流。<br>演示项目地址：<a href="http://10.10.10.98/MekaYangyi/workflow">http://10.10.10.98/MekaYangyi/workflow</a><br><img src="/img/gitlab工作流程/10-21-42.jpg" alt=""/></p>
-<h1 id="设置分支保护"><a href="#设置分支保护" class="headerlink" title="设置分支保护"></a>设置分支保护</h1><p>新建项目默认master用户才能够push和merge。<br>其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。<br><img src="/img/gitlab工作流程/10-32-56.jpg" alt=""/></p>
+<h1 id="建立测试项目"><a href="#建立测试项目" class="headerlink" title="建立测试项目"></a>建立测试项目</h1><p>新建一个项目用于测试工作流。<br>演示项目地址：<a href="http://10.10.10.98/MekaYangyi/workflow" target="_blank" rel="external">http://10.10.10.98/MekaYangyi/workflow</a><br><img src="/img/gitlab工作流程/10-21-42.jpg" alt=""></p>
+<h1 id="设置分支保护"><a href="#设置分支保护" class="headerlink" title="设置分支保护"></a>设置分支保护</h1><p>新建项目默认master用户才能够push和merge。<br>其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。<br><img src="/img/gitlab工作流程/10-32-56.jpg" alt=""></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/01/gitlab-workflow.html#more" rel="contents">
+            <a class="btn" href="/2017/01/29/gitlab-workflow/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -604,18 +486,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -629,6 +508,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -641,13 +524,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/01/第一次使用gitlab.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/01/28/第一次使用gitlab/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -659,17 +546,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/01/第一次使用gitlab.html" itemprop="url">
-                  第一次使用gitlab
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/01/28/第一次使用gitlab/" itemprop="url">第一次使用gitlab</a></h1>
         
 
         <div class="post-meta">
@@ -717,18 +596,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/01/第一次使用gitlab.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/01/第一次使用gitlab.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -744,7 +611,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -761,10 +630,10 @@
 <p>email：账户email，内网联系email。</p>
 <p>password：密码，牢记，root用户可修改。</p>
 </blockquote>
-<h2 id="登录"><a href="#登录" class="headerlink" title="登录"></a>登录</h2><p>登陆内网gitlab，目前网址：10.10.10.98。<br><img src="/img/第一次使用gitlab/22-04-07.jpg" alt=""/></p>
+<h2 id="登录"><a href="#登录" class="headerlink" title="登录"></a>登录</h2><p>登陆内网gitlab，目前网址：10.10.10.98。<br><img src="/img/第一次使用gitlab/22-04-07.jpg" alt=""></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/01/第一次使用gitlab.html#more" rel="contents">
+            <a class="btn" href="/2017/01/28/第一次使用gitlab/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -772,18 +641,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -797,6 +663,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -809,13 +679,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/11/读书笔记-stl源码剖析.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/21/读书笔记-stl源码剖析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -827,17 +701,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析.html" itemprop="url">
-                  [读书笔记] stl源码剖析 总结
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/11/21/读书笔记-stl源码剖析/" itemprop="url">[读书笔记] stl源码剖析 总结</a></h1>
         
 
         <div class="post-meta">
@@ -885,18 +751,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/11/读书笔记-stl源码剖析.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/11/读书笔记-stl源码剖析.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -912,7 +766,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -927,18 +783,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -952,6 +805,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -964,13 +821,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/11/读书笔记-stl源码剖析-第四章-序列式容器.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/20/读书笔记-stl源码剖析-第四章-序列式容器/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -982,17 +843,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析-第四章-序列式容器.html" itemprop="url">
-                  [读书笔记] stl源码剖析 第四章 序列式容器
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/11/20/读书笔记-stl源码剖析-第四章-序列式容器/" itemprop="url">[读书笔记] stl源码剖析 第四章 序列式容器</a></h1>
         
 
         <div class="post-meta">
@@ -1040,18 +893,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/11/读书笔记-stl源码剖析-第四章-序列式容器.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/11/读书笔记-stl源码剖析-第四章-序列式容器.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1067,7 +908,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1075,12 +918,12 @@
 
       
         
-          <p>容器分类<br><img src="/img/20161120124915.png" alt=""/></p>
+          <p>容器分类<br><img src="/img/20161120124915.png" alt=""></p>
 <h1 id="vector"><a href="#vector" class="headerlink" title="vector"></a>vector</h1><p>vector还是比较简单，也就是一个动态数组，提供了些操作，带三个指针，start/finish/end<br>核心就是动态调整内存的方法，也就是满了开大一倍空间，拷贝过去。<br>push_back等操作都是值语义的，拷贝传进来的内容放入到vector中。<br>因为是连续的空间，所有元素连续存储在一整块内存上，迭代器直接用的原始指针。</p>
-<h1 id="list"><a href="#list" class="headerlink" title="list"></a>list</h1><p>list复杂些.<br>模型和常见的list是一致的，动态创建节点，插入。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> _List_node_base &#123;</div><div class="line">  _List_node_base* _M_next;</div><div class="line">  _List_node_base* _M_prev;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> _Tp&gt;</div><div class="line"><span class="keyword">struct</span> _List_node : <span class="keyword">public</span> _List_node_base &#123;</div><div class="line">  _Tp _M_data;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//迭代器base</span></div><div class="line"><span class="keyword">struct</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">size_t</span>                     size_type;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">ptrdiff_t</span>                  difference_type;</div><div class="line">  <span class="keyword">typedef</span> bidirectional_iterator_tag iterator_category;</div><div class="line"></div><div class="line">  _List_node_base* _M_node;<span class="comment">//节点指针</span></div><div class="line"></div><div class="line">  _List_iterator_base(_List_node_base* __x) : _M_node(__x) &#123;&#125;</div><div class="line">  _List_iterator_base() &#123;&#125;</div><div class="line"></div><div class="line">  <span class="keyword">void</span> _M_incr() &#123; _M_node = _M_node-&gt;_M_next; &#125;</div><div class="line">  <span class="keyword">void</span> _M_decr() &#123; _M_node = _M_node-&gt;_M_prev; &#125;</div><div class="line"></div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node == __x._M_node;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>!=(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node != __x._M_node;</div><div class="line">  &#125;</div><div class="line">&#125;;  </div><div class="line"></div><div class="line"><span class="comment">//迭代器,重载了++ -- == * -&gt;等操作</span></div><div class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> _Tp, <span class="keyword">class</span> _Ref, <span class="keyword">class</span> _Ptr&gt;</div><div class="line"><span class="keyword">struct</span> _List_iterator : <span class="keyword">public</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Tp&amp;,_Tp*&gt;             iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,<span class="keyword">const</span> _Tp&amp;,<span class="keyword">const</span> _Tp*&gt; const_iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Ref,_Ptr&gt;             _Self;</div><div class="line"></div><div class="line">  <span class="keyword">typedef</span> _Tp value_type;</div><div class="line">  <span class="keyword">typedef</span> _Ptr pointer;</div><div class="line">  <span class="keyword">typedef</span> _Ref reference;</div><div class="line">  <span class="keyword">typedef</span> _List_node&lt;_Tp&gt; _Node;</div><div class="line"></div><div class="line">  _List_iterator(_Node* __x) : _List_iterator_base(__x) &#123;&#125;</div><div class="line">  _List_iterator() &#123;&#125;</div><div class="line">  _List_iterator(<span class="keyword">const</span> iterator&amp; __x) : _List_iterator_base(__x._M_node) &#123;&#125;</div><div class="line"></div><div class="line">  reference <span class="keyword">operator</span>*() <span class="keyword">const</span> &#123; <span class="keyword">return</span> ((_Node*) _M_node)-&gt;_M_data; &#125;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __SGI_STL_NO_ARROW_OPERATOR</span></div><div class="line">  pointer <span class="keyword">operator</span>-&gt;() <span class="keyword">const</span> &#123; <span class="keyword">return</span> &amp;(<span class="keyword">operator</span>*()); &#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* __SGI_STL_NO_ARROW_OPERATOR */</span></span></div><div class="line"></div><div class="line">  _Self&amp; <span class="keyword">operator</span>++() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  _Self <span class="keyword">operator</span>++(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">  _Self&amp; <span class="keyword">operator</span>--() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  _Self <span class="keyword">operator</span>--(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h1 id="list"><a href="#list" class="headerlink" title="list"></a>list</h1><p>list复杂些.<br>模型和常见的list是一致的，动态创建节点，插入。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">List_node_base</span> &#123;</span></div><div class="line">  _List_node_base* _M_next;</div><div class="line">  _List_node_base* _M_prev;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="keyword">template</span> &lt;<span class="class"><span class="keyword">class</span> _<span class="title">Tp</span>&gt;</span></div><div class="line"><span class="class"><span class="title">struct</span> _<span class="title">List_node</span> :</span> <span class="keyword">public</span> _List_node_base &#123;</div><div class="line">  _Tp _M_data;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//迭代器base</span></div><div class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">List_iterator_base</span> &#123;</span></div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">size_t</span>                     size_type;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">ptrdiff_t</span>                  difference_type;</div><div class="line">  <span class="keyword">typedef</span> bidirectional_iterator_tag iterator_category;</div><div class="line"></div><div class="line">  _List_node_base* _M_node;<span class="comment">//节点指针</span></div><div class="line"></div><div class="line">  _List_iterator_base(_List_node_base* __x) : _M_node(__x) &#123;&#125;</div><div class="line">  _List_iterator_base() &#123;&#125;</div><div class="line"></div><div class="line">  <span class="keyword">void</span> _M_incr() &#123; _M_node = _M_node-&gt;_M_next; &#125;</div><div class="line">  <span class="keyword">void</span> _M_decr() &#123; _M_node = _M_node-&gt;_M_prev; &#125;</div><div class="line"></div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node == __x._M_node;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>!=(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node != __x._M_node;</div><div class="line">  &#125;</div><div class="line">&#125;;  </div><div class="line"></div><div class="line"><span class="comment">//迭代器,重载了++ -- == * -&gt;等操作</span></div><div class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> _<span class="title">Tp</span>, <span class="title">class</span> _<span class="title">Ref</span>, <span class="title">class</span> _<span class="title">Ptr</span>&gt;</span></div><div class="line"><span class="class"><span class="title">struct</span> _<span class="title">List_iterator</span> :</span> <span class="keyword">public</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Tp&amp;,_Tp*&gt;             iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,<span class="keyword">const</span> _Tp&amp;,<span class="keyword">const</span> _Tp*&gt; const_iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Ref,_Ptr&gt;             _Self;</div><div class="line"></div><div class="line">  <span class="keyword">typedef</span> _Tp value_type;</div><div class="line">  <span class="keyword">typedef</span> _Ptr pointer;</div><div class="line">  <span class="keyword">typedef</span> _Ref reference;</div><div class="line">  <span class="keyword">typedef</span> _List_node&lt;_Tp&gt; _Node;</div><div class="line"></div><div class="line">  _List_iterator(_Node* __x) : _List_iterator_base(__x) &#123;&#125;</div><div class="line">  _List_iterator() &#123;&#125;</div><div class="line">  _List_iterator(<span class="keyword">const</span> iterator&amp; __x) : _List_iterator_base(__x._M_node) &#123;&#125;</div><div class="line"></div><div class="line">  reference <span class="keyword">operator</span>*() <span class="keyword">const</span> &#123; <span class="keyword">return</span> ((_Node*) _M_node)-&gt;_M_data; &#125;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __SGI_STL_NO_ARROW_OPERATOR</span></div><div class="line">  pointer <span class="keyword">operator</span>-&gt;() <span class="keyword">const</span> &#123; <span class="keyword">return</span> &amp;(<span class="keyword">operator</span>*()); &#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* __SGI_STL_NO_ARROW_OPERATOR */</span></span></div><div class="line"></div><div class="line">  _Self&amp; <span class="keyword">operator</span>++() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  _Self <span class="keyword">operator</span>++(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">  _Self&amp; <span class="keyword">operator</span>--() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  _Self <span class="keyword">operator</span>--(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/11/读书笔记-stl源码剖析-第四章-序列式容器.html#more" rel="contents">
+            <a class="btn" href="/2016/11/20/读书笔记-stl源码剖析-第四章-序列式容器/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1088,18 +931,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1113,6 +953,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1125,13 +969,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/17/读书笔记-stl源码剖析-第三章-迭代器/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1143,17 +991,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html" itemprop="url">
-                  [读书笔记] stl源码剖析 第三章 迭代器
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/11/17/读书笔记-stl源码剖析-第三章-迭代器/" itemprop="url">[读书笔记] stl源码剖析 第三章 迭代器</a></h1>
         
 
         <div class="post-meta">
@@ -1201,18 +1041,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1228,7 +1056,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1238,10 +1068,10 @@
         
           <p>迭代器是一种抽象的设计概念。iterator模式：提供一种方法，使能够依序寻访某个聚合物所含的各个元素，而又无需暴露该聚合物的内部表述方式。</p>
 <h1 id="迭代器的设计思维-stl关键所在"><a href="#迭代器的设计思维-stl关键所在" class="headerlink" title="迭代器的设计思维-stl关键所在"></a>迭代器的设计思维-stl关键所在</h1><p>STL的中心思想在于：将数据容器和算法分开，彼此独立设计。容器和算法的泛型化。<br>迭代器就是扮演着粘胶角色。</p>
-<h1 id="迭代器是一种smart-pointer"><a href="#迭代器是一种smart-pointer" class="headerlink" title="迭代器是一种smart pointer"></a>迭代器是一种smart pointer</h1><p>list迭代器stl的实现<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//listnode的基础类</span></div><div class="line"><span class="keyword">struct</span> _List_node_base &#123;</div><div class="line">  _List_node_base* _M_next;</div><div class="line">  _List_node_base* _M_prev;</div><div class="line">&#125;;</div><div class="line"><span class="comment">//listnode</span></div><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> _Tp&gt;</div><div class="line"><span class="keyword">struct</span> _List_node : <span class="keyword">public</span> _List_node_base &#123;</div><div class="line">  _Tp _M_data;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//迭代器基础类</span></div><div class="line"><span class="keyword">struct</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">size_t</span>                     size_type;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">ptrdiff_t</span>                  difference_type;</div><div class="line">  <span class="keyword">typedef</span> bidirectional_iterator_tag iterator_category;</div><div class="line"></div><div class="line">  _List_node_base* _M_node;<span class="comment">//包含一个node</span></div><div class="line"></div><div class="line">  _List_iterator_base(_List_node_base* __x) : _M_node(__x) &#123;&#125;</div><div class="line">  _List_iterator_base() &#123;&#125;</div><div class="line"></div><div class="line">  <span class="keyword">void</span> _M_incr() &#123; _M_node = _M_node-&gt;_M_next; &#125;</div><div class="line">  <span class="keyword">void</span> _M_decr() &#123; _M_node = _M_node-&gt;_M_prev; &#125;</div><div class="line"></div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node == __x._M_node;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>!=(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node != __x._M_node;</div><div class="line">  &#125;</div><div class="line">&#125;;  </div><div class="line"><span class="comment">//迭代器</span></div><div class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> _Tp, <span class="keyword">class</span> _Ref, <span class="keyword">class</span> _Ptr&gt;</div><div class="line"><span class="keyword">struct</span> _List_iterator : <span class="keyword">public</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Tp&amp;,_Tp*&gt;             iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,<span class="keyword">const</span> _Tp&amp;,<span class="keyword">const</span> _Tp*&gt; const_iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Ref,_Ptr&gt;             _Self;</div><div class="line"></div><div class="line">  <span class="keyword">typedef</span> _Tp value_type;</div><div class="line">  <span class="keyword">typedef</span> _Ptr pointer;</div><div class="line">  <span class="keyword">typedef</span> _Ref reference;</div><div class="line">  <span class="keyword">typedef</span> _List_node&lt;_Tp&gt; _Node;</div><div class="line"></div><div class="line">  _List_iterator(_Node* __x) : _List_iterator_base(__x) &#123;&#125;</div><div class="line">  _List_iterator() &#123;&#125;</div><div class="line">  _List_iterator(<span class="keyword">const</span> iterator&amp; __x) : _List_iterator_base(__x._M_node) &#123;&#125;</div><div class="line"></div><div class="line">  reference <span class="keyword">operator</span>*() <span class="keyword">const</span> &#123; <span class="keyword">return</span> ((_Node*) _M_node)-&gt;_M_data; &#125;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __SGI_STL_NO_ARROW_OPERATOR</span></div><div class="line">  pointer <span class="keyword">operator</span>-&gt;() <span class="keyword">const</span> &#123; <span class="keyword">return</span> &amp;(<span class="keyword">operator</span>*()); &#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* __SGI_STL_NO_ARROW_OPERATOR */</span></span></div><div class="line">  <span class="comment">//重载了几个操作实现了迭代器，不是很复杂</span></div><div class="line">  <span class="comment">//++i</span></div><div class="line">  _Self&amp; <span class="keyword">operator</span>++() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//i++</span></div><div class="line">  _Self <span class="keyword">operator</span>++(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">  _Self&amp; <span class="keyword">operator</span>--() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  _Self <span class="keyword">operator</span>--(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h1 id="迭代器是一种smart-pointer"><a href="#迭代器是一种smart-pointer" class="headerlink" title="迭代器是一种smart pointer"></a>迭代器是一种smart pointer</h1><p>list迭代器stl的实现<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//listnode的基础类</span></div><div class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">List_node_base</span> &#123;</span></div><div class="line">  _List_node_base* _M_next;</div><div class="line">  _List_node_base* _M_prev;</div><div class="line">&#125;;</div><div class="line"><span class="comment">//listnode</span></div><div class="line"><span class="keyword">template</span> &lt;<span class="class"><span class="keyword">class</span> _<span class="title">Tp</span>&gt;</span></div><div class="line"><span class="class"><span class="title">struct</span> _<span class="title">List_node</span> :</span> <span class="keyword">public</span> _List_node_base &#123;</div><div class="line">  _Tp _M_data;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//迭代器基础类</span></div><div class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">List_iterator_base</span> &#123;</span></div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">size_t</span>                     size_type;</div><div class="line">  <span class="keyword">typedef</span> <span class="keyword">ptrdiff_t</span>                  difference_type;</div><div class="line">  <span class="keyword">typedef</span> bidirectional_iterator_tag iterator_category;</div><div class="line"></div><div class="line">  _List_node_base* _M_node;<span class="comment">//包含一个node</span></div><div class="line"></div><div class="line">  _List_iterator_base(_List_node_base* __x) : _M_node(__x) &#123;&#125;</div><div class="line">  _List_iterator_base() &#123;&#125;</div><div class="line"></div><div class="line">  <span class="keyword">void</span> _M_incr() &#123; _M_node = _M_node-&gt;_M_next; &#125;</div><div class="line">  <span class="keyword">void</span> _M_decr() &#123; _M_node = _M_node-&gt;_M_prev; &#125;</div><div class="line"></div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node == __x._M_node;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">bool</span> <span class="keyword">operator</span>!=(<span class="keyword">const</span> _List_iterator_base&amp; __x) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> _M_node != __x._M_node;</div><div class="line">  &#125;</div><div class="line">&#125;;  </div><div class="line"><span class="comment">//迭代器</span></div><div class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> _<span class="title">Tp</span>, <span class="title">class</span> _<span class="title">Ref</span>, <span class="title">class</span> _<span class="title">Ptr</span>&gt;</span></div><div class="line"><span class="class"><span class="title">struct</span> _<span class="title">List_iterator</span> :</span> <span class="keyword">public</span> _List_iterator_base &#123;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Tp&amp;,_Tp*&gt;             iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,<span class="keyword">const</span> _Tp&amp;,<span class="keyword">const</span> _Tp*&gt; const_iterator;</div><div class="line">  <span class="keyword">typedef</span> _List_iterator&lt;_Tp,_Ref,_Ptr&gt;             _Self;</div><div class="line"></div><div class="line">  <span class="keyword">typedef</span> _Tp value_type;</div><div class="line">  <span class="keyword">typedef</span> _Ptr pointer;</div><div class="line">  <span class="keyword">typedef</span> _Ref reference;</div><div class="line">  <span class="keyword">typedef</span> _List_node&lt;_Tp&gt; _Node;</div><div class="line"></div><div class="line">  _List_iterator(_Node* __x) : _List_iterator_base(__x) &#123;&#125;</div><div class="line">  _List_iterator() &#123;&#125;</div><div class="line">  _List_iterator(<span class="keyword">const</span> iterator&amp; __x) : _List_iterator_base(__x._M_node) &#123;&#125;</div><div class="line"></div><div class="line">  reference <span class="keyword">operator</span>*() <span class="keyword">const</span> &#123; <span class="keyword">return</span> ((_Node*) _M_node)-&gt;_M_data; &#125;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __SGI_STL_NO_ARROW_OPERATOR</span></div><div class="line">  pointer <span class="keyword">operator</span>-&gt;() <span class="keyword">const</span> &#123; <span class="keyword">return</span> &amp;(<span class="keyword">operator</span>*()); &#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* __SGI_STL_NO_ARROW_OPERATOR */</span></span></div><div class="line">  <span class="comment">//重载了几个操作实现了迭代器，不是很复杂</span></div><div class="line">  <span class="comment">//++i</span></div><div class="line">  _Self&amp; <span class="keyword">operator</span>++() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//i++</span></div><div class="line">  _Self <span class="keyword">operator</span>++(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_incr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">  _Self&amp; <span class="keyword">operator</span>--() &#123; </div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</div><div class="line">  &#125;</div><div class="line">  _Self <span class="keyword">operator</span>--(<span class="keyword">int</span>) &#123; </div><div class="line">    _Self __tmp = *<span class="keyword">this</span>;</div><div class="line">    <span class="keyword">this</span>-&gt;_M_decr();</div><div class="line">    <span class="keyword">return</span> __tmp;</div><div class="line">  &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/11/读书笔记-stl源码剖析-第三章-迭代器.html#more" rel="contents">
+            <a class="btn" href="/2016/11/17/读书笔记-stl源码剖析-第三章-迭代器/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1249,18 +1079,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1274,6 +1101,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1286,13 +1117,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/11/读书笔记-stl源码剖析-第一、二章-概论、内存配置器.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/16/读书笔记-stl源码剖析-第一、二章-概论、内存配置器/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1304,17 +1139,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/11/读书笔记-stl源码剖析-第一、二章-概论、内存配置器.html" itemprop="url">
-                  [读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/11/16/读书笔记-stl源码剖析-第一、二章-概论、内存配置器/" itemprop="url">[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器</a></h1>
         
 
         <div class="post-meta">
@@ -1362,18 +1189,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/11/读书笔记-stl源码剖析-第一、二章-概论、内存配置器.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/11/读书笔记-stl源码剖析-第一、二章-概论、内存配置器.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1389,7 +1204,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1409,7 +1226,7 @@
 </ol>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/11/读书笔记-stl源码剖析-第一、二章-概论、内存配置器.html#more" rel="contents">
+            <a class="btn" href="/2016/11/16/读书笔记-stl源码剖析-第一、二章-概论、内存配置器/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1417,18 +1234,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1442,6 +1256,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1454,13 +1272,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/11/阅读谷歌编程规范.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/06/阅读谷歌编程规范/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1472,17 +1294,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/11/阅读谷歌编程规范.html" itemprop="url">
-                  阅读谷歌编程规范
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/11/06/阅读谷歌编程规范/" itemprop="url">阅读谷歌编程规范</a></h1>
         
 
         <div class="post-meta">
@@ -1530,18 +1344,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/11/阅读谷歌编程规范.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/11/阅读谷歌编程规范.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1557,7 +1359,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1568,7 +1372,7 @@
           <h1 id="事情的起因"><a href="#事情的起因" class="headerlink" title="事情的起因"></a>事情的起因</h1><p>好的东西就是这样，你每次看都能够有新的收获。<br>这次也一样，读了一遍谷歌编程规范，又有些新的理解，也有一些需要重新让自己记住的点。<br>遂记录下来，成此博文。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/11/阅读谷歌编程规范.html#more" rel="contents">
+            <a class="btn" href="/2016/11/06/阅读谷歌编程规范/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1576,18 +1380,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1601,6 +1402,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1613,13 +1418,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/19/windows下Pyqt-guiqwt环境的搭建/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1631,17 +1440,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html" itemprop="url">
-                  windows下Pyqt + guiqwt环境的搭建
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/10/19/windows下Pyqt-guiqwt环境的搭建/" itemprop="url">windows下Pyqt + guiqwt环境的搭建</a></h1>
         
 
         <div class="post-meta">
@@ -1689,18 +1490,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1716,7 +1505,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1727,7 +1518,7 @@
           <h1 id="事情的起因"><a href="#事情的起因" class="headerlink" title="事情的起因"></a>事情的起因</h1><p>这几天为了搭一个PyQt的生产环境遇到了好一些坑。<br>本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。<br>原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。<br>最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样达到比较高的绘图效率，才解决了问题。但是MFC界面开发复杂，在MFC界面上花费过多的时间。同时本身绘图控件的开发，可能可以利用现有开源控件进行开发来避免重复造轮子。<br>于是利用PyQt+guiqwt绘图库来开发的方案构建起来。guiqwt本身是QT下常用的绘图控件，效率足够高，经过一些优化是能够使用的。相对Python经常使用的matplotlib来说不够漂亮，但是进行实时数据的平移绘图，效率高出很多。PyQt是模仿QT写的图形库，可以利用QTCreate进行快速的界面构建，而Python相对C++来说，需要处理的坑更少，出现各类崩溃的异常的情况会更少一些。<br>本文主要讲的是PyQt+guiqwt在windows上的搭建。<br>目的是在之后能够通过本文进行快速的开发环境的搭建。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/10/windows下Pyqt-guiqwt环境的搭建.html#more" rel="contents">
+            <a class="btn" href="/2016/10/19/windows下Pyqt-guiqwt环境的搭建/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1735,18 +1526,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1760,6 +1548,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1772,13 +1564,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/10/读书笔记-sicp-第三章-模块化-对象和状态/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1790,17 +1586,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html" itemprop="url">
-                  [读书笔记] sicp 第三章 模块化 对象和状态
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2016/09/10/读书笔记-sicp-第三章-模块化-对象和状态/" itemprop="url">[读书笔记] sicp 第三章 模块化 对象和状态</a></h1>
         
 
         <div class="post-meta">
@@ -1848,18 +1636,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1875,7 +1651,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1887,7 +1665,7 @@
 <h1 id="赋值和局部状态"><a href="#赋值和局部状态" class="headerlink" title="赋值和局部状态"></a>赋值和局部状态</h1><p>一个由许多对象组成的系统里，其中的这些对象极少会是完全独立的。每个对象都可能通过交互作用，影响其他对象的状态，所谓交互就是建立起一个对象的状态变量与其他对象的状态变量之间的联系。确实如果一个系统中的状态变量可以分组，形成一些内部紧密结合的子系统，每个子系统与其他子系统之间只存在松散的练习，此时将这个系统看作是由一些独立对象组成的观点就会特别有用。<br>对于一个系统的这种观点，有可能成为组织这一系统的计算模型的有力框架。要使这样的一个模型成为模块化的，就要求它能够分解为一批计算对象，使它们能够模拟系统里的实际对象。每个计算对象必须有它自己的一些局部状态变量，用于描述实际对象的状态。对于被模拟系统里的对象的状态是随着时间的变化的，与它们对象的计算对象的状态也必须变化。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2016/09/读书笔记-sicp-第三章-模块化-对象和状态.html#more" rel="contents">
+            <a class="btn" href="/2016/09/10/读书笔记-sicp-第三章-模块化-对象和状态/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1895,18 +1673,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1920,6 +1695,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1952,108 +1731,73 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="/img/avatar.jpg"
-               alt="YangYi" />
-          <p class="site-author-name" itemprop="name">YangYi</p>
-           
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Yang Yi</p>
               <p class="site-description motion-element" itemprop="description"></p>
-           
-        </div>
-        <nav class="site-state motion-element">
-
-          
-            <div class="site-state-item site-state-posts">
-              <a href="/archives">
-                <span class="site-state-item-count">46</span>
-                <span class="site-state-item-name">日志</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-categories">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">7</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">20</span>
-                <span class="site-state-item-name">标签</span>
-              </a>
-            </div>
-          
-
-        </nav>
-
-        
-          <div class="feed-link motion-element">
-            <a href="/atom.xml" rel="alternate">
-              <i class="fa fa-rss"></i>
-              RSS
-            </a>
           </div>
-        
 
-        <div class="links-of-author motion-element">
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
           
+
+          <div class="links-of-author motion-element">
             
-              <span class="links-of-author-item">
-                <a href="https://github.com/MekaYangyi" target="_blank" title="GitHub">
-                  
-                    <i class="fa fa-fw fa-github"></i>
-                  
-                  GitHub
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="https://www.zhihu.com/people/yang1" target="_blank" title="知乎">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  知乎
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="https://www.douban.com/people/mekay" target="_blank" title="豆瓣">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  豆瓣
-                </a>
-              </span>
-            
+          </div>
+
           
+          
+
+          
+          
+
+          
+
         </div>
-
-        
-        
-
-        
-        
-
-        
-
-
       </section>
 
       
@@ -2070,49 +1814,35 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
-    <i class="fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">YangYi</span>
+  <span class="author" itemprop="copyrightHolder">Yang Yi</span>
+
+  
 </div>
 
 
-<div class="powered-by">
-  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
-</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Mist
-  </a>
-</div>
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
 
 
         
-<div class="busuanzi-count">
-  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
-  
-    <span class="site-uv">
-      本站访客数
-      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
-      人次
-    </span>
-  
 
-  
-    <span class="site-pv">
-      本站总访问量
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
-      次
-    </span>
-  
-</div>
+
+
+
 
 
         
@@ -2124,6 +1854,8 @@
         <i class="fa fa-arrow-up"></i>
         
       </div>
+    
+
     
 
   </div>
@@ -2151,43 +1883,61 @@
 
 
 
-  
-  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
 
 
 
   
   
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
 
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
   
 
   
 
+  
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
 
 
 
@@ -2201,25 +1951,17 @@
 
 	
 
-		<script type="text/javascript">
-		_hcwp = window._hcwp || [];
 
-		_hcwp.push({widget:"Bloggerstream", widget_id: 88745, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
-		
 
-		(function() {
-		if("HC_LOAD_INIT" in window)return;
-		HC_LOAD_INIT = true;
-		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
-		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
-		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/88745/"+lang+"/widget.js";
-		var s = document.getElementsByTagName("script")[0];
-		s.parentNode.insertBefore(hcc, s.nextSibling);
-		})();
-		</script>
 
-	
+  
+
+
+
+
+
+  
 
 
 
@@ -2234,132 +1976,6 @@
 
   
 
-  <script type="text/javascript">
-    // Popup Window;
-    var isfetched = false;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length == 0) {
-      search_path = "search.xml";
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.popup').toggle();
-    }
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-      $.ajax({
-        url: path,
-        dataType: "xml",
-        async: true,
-        success: function( xmlResponse ) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = $( "entry", xmlResponse ).map(function() {
-            return {
-              title: $( "title", this ).text(),
-              content: $("content",this).text(),
-              url: $( "url" , this).text()
-            };
-          }).get();
-          var $input = document.getElementById(search_id);
-          var $resultContent = document.getElementById(content_id);
-          $input.addEventListener('input', function(){
-            var matchcounts = 0;
-            var str='<ul class=\"search-result-list\">';
-            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-            $resultContent.innerHTML = "";
-            if (this.value.trim().length > 1) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var content_index = [];
-                var data_title = data.title.trim().toLowerCase();
-                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
-                var data_url = decodeURIComponent(data.url);
-                var index_title = -1;
-                var index_content = -1;
-                var first_occur = -1;
-                // only match artiles with not empty titles and contents
-                if(data_title != '') {
-                  keywords.forEach(function(keyword, i) {
-                    index_title = data_title.indexOf(keyword);
-                    index_content = data_content.indexOf(keyword);
-                    if( index_title >= 0 || index_content >= 0 ){
-                      isMatch = true;
-                      if (i == 0) {
-                        first_occur = index_content;
-                      }
-                    }
-
-                  });
-                }
-                // show search results
-                if (isMatch) {
-                  matchcounts += 1;
-                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
-                  var content = data.content.trim().replace(/<[^>]+>/g,"");
-                  if (first_occur >= 0) {
-                    // cut out 100 characters
-                    var start = first_occur - 20;
-                    var end = first_occur + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if(start == 0){
-                      end = 50;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    var match_content = content.substring(start, end);
-                    // highlight all keywords
-                    keywords.forEach(function(keyword){
-                      var regS = new RegExp(keyword, "gi");
-                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
-                    });
-
-                    str += "<p class=\"search-result\">" + match_content +"...</p>"
-                  }
-                  str += "</li>";
-                }
-              })};
-            str += "</ul>";
-            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
-            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
-            $resultContent.innerHTML = str;
-          });
-          proceedsearch();
-        }
-      });}
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched == false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(function(e){
-      $('.popup').hide();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    });
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-  </script>
-
 
 
 
@@ -2367,21 +1983,11 @@
   
 
   
-<script>
-(function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-})();
-</script>
 
+  
+  
+
+  
 
   
 

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,源码阅读," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="服务器redis运行存在一个redis服务器结构，一个服务器中保存着n个数据库。 dbnum由服务器配置决定，默认值为16。 1234567891011121314151617struct redisServer &amp;#123;    redisDb *db;  // Redis的数据库    // ...    int dbnum;  // 表明数据库的数量    // ...&amp;#125;type">
+<meta name="keywords" content="redis,源码阅读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis源码阅读-服务器">
+<meta property="og:url" content="http://yoursite.com/2017/07/10/redis源码阅读-数据库/index.html">
+<meta property="og:site_name" content="鉴心">
+<meta property="og:description" content="服务器redis运行存在一个redis服务器结构，一个服务器中保存着n个数据库。 dbnum由服务器配置决定，默认值为16。 1234567891011121314151617struct redisServer &amp;#123;    redisDb *db;  // Redis的数据库    // ...    int dbnum;  // 表明数据库的数量    // ...&amp;#125;type">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-18T00:19:58.276Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis源码阅读-服务器">
+<meta name="twitter:description" content="服务器redis运行存在一个redis服务器结构，一个服务器中保存着n个数据库。 dbnum由服务器配置决定，默认值为16。 1234567891011121314151617struct redisServer &amp;#123;    redisDb *db;  // Redis的数据库    // ...    int dbnum;  // 表明数据库的数量    // ...&amp;#125;type">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/07/10/redis源码阅读-数据库/"/>
+
+
+
+
+
+  <title>redis源码阅读-服务器 | 鉴心</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鉴心</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/10/redis源码阅读-数据库/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yang Yi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">redis源码阅读-服务器</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-10T16:21:21+08:00">
+                2017-07-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h2><p>redis运行存在一个redis服务器结构，一个服务器中保存着n个数据库。</p>
+<p>dbnum由服务器配置决定，默认值为16。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></div><div class="line">    redisDb *db;  <span class="comment">// Redis的数据库</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">    <span class="keyword">int</span> dbnum;  <span class="comment">// 表明数据库的数量</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisDb</span> &#123;</span></div><div class="line">    dict *dict;                 <span class="comment">/* 数据库键字典 */</span></div><div class="line">    dict *expires;              <span class="comment">/* 键过期时间字典 */</span></div><div class="line">    dict *blocking_keys;        <span class="comment">/* 处于阻塞状态的键 */</span></div><div class="line">    dict *ready_keys;           <span class="comment">/* 可以解除阻塞的键 */</span></div><div class="line">    dict *watched_keys;         <span class="comment">/* 被watch的键 */</span></div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">evictionPoolEntry</span> *<span class="title">eviction_pool</span>;</span>    <span class="comment">/* Eviction pool of keys */</span></div><div class="line">    <span class="keyword">int</span> id;                     <span class="comment">/* 数据库编号 */</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> avg_ttl;          <span class="comment">/* 数据库键的平均时间*/</span></div><div class="line">&#125; redisDb;</div></pre></td></tr></table></figure>
+<h2 id="切换数据库"><a href="#切换数据库" class="headerlink" title="切换数据库"></a>切换数据库</h2><p>每个redis客户端都有自己的目标数据库，当客户端执行数据库读写命令，目标数据库是这些命令的操作对象。</p>
+<p>redis提供select命令来切换数据库，redisClient</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisClient</span> &#123;</span> </div><div class="line">    <span class="keyword">int</span> fd;  <span class="comment">// 套接字描述符</span></div><div class="line">    redisDb *db; <span class="comment">// 当前正在使用的数据库</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">selectDb</span><span class="params">(redisClient *c, <span class="keyword">int</span> id)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 校验id</span></div><div class="line">    <span class="keyword">if</span> (id &lt; <span class="number">0</span> || id &gt;= server.dbnum)</div><div class="line">        <span class="keyword">return</span> REDIS_ERR;</div><div class="line"></div><div class="line">    <span class="comment">// 切换客户端数据库</span></div><div class="line">    c-&gt;db = &amp;server.db[id];</div><div class="line"></div><div class="line">    <span class="keyword">return</span> REDIS_OK;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="数据库键空间"><a href="#数据库键空间" class="headerlink" title="数据库键空间"></a>数据库键空间</h2><p>Redis数据库存放的数据都是以键值对形式存在，redisDB结构的dict字典保存数据库中的所有键值对，这个字典被成为键空间。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisDb</span> &#123;</span></div><div class="line">    dict *dict;                 <span class="comment">/* 数据库键字典 */</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125; redisDb;</div></pre></td></tr></table></figure>
+<p>键空间的键就是数据库的键，每个键都是一个字符串对象。</p>
+<p>键空间的值就是数据库的值，每个值可以是字符串对象、列表对象、哈希表对象、集合对象、有序集合对象中任意一种。</p>
+<h2 id="键空间的操作"><a href="#键空间的操作" class="headerlink" title="键空间的操作"></a>键空间的操作</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* db.c -- Keyspace access API */</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">removeExpire</span><span class="params">(redisDb *db, robj *key)</span></span>;<span class="comment">// 移除键的过期时间</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">propagateExpire</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// </span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">expireIfNeeded</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 检查是否过期，是则删除键</span></div><div class="line"><span class="function"><span class="keyword">long</span> <span class="keyword">long</span> <span class="title">getExpire</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 获取过期时间</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setExpire</span><span class="params">(redisDb *db, robj *key, <span class="keyword">long</span> <span class="keyword">long</span> when)</span></span>; <span class="comment">// 设定过期时间</span></div><div class="line"><span class="function">robj *<span class="title">lookupKey</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyRead</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyWrite</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyReadOrReply</span><span class="params">(redisClient *c, robj *key, robj *reply)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyWriteOrReply</span><span class="params">(redisClient *c, robj *key, robj *reply)</span></span>;<span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbAdd</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>;<span class="comment">// 尝试将键值对key\val添加到数据库中</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbOverwrite</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>; <span class="comment">// 重写指定键的值,键不存在的话终止</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setKey</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>;<span class="comment">// 设定指定键的值，不管存不存在</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">dbExists</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 判断指定键是否存在  </span></div><div class="line"><span class="function">robj *<span class="title">dbRandomKey</span><span class="params">(redisDb *db)</span></span>; <span class="comment">// 随机从数据库中取出一个键，并以字符串对象的方式返回这个键</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">dbDelete</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从数据库中删除给定的键</span></div><div class="line"><span class="function">robj *<span class="title">dbUnshareStringValue</span><span class="params">(redisDb *db, robj *key, robj *o)</span></span>;</div><div class="line">long long emptyDb(void(callback)(void*));// 情况所有数据</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">selectDb</span><span class="params">(redisClient *c, <span class="keyword">int</span> id)</span></span>; <span class="comment">// 切换db</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">signalModifiedKey</span><span class="params">(redisDb *db, robj *key)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">signalFlushedDb</span><span class="params">(<span class="keyword">int</span> dbid)</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">getKeysInSlot</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> hashslot, robj **keys, <span class="keyword">unsigned</span> <span class="keyword">int</span> count)</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">countKeysInSlot</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> hashslot)</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">delKeysInSlot</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> hashslot)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">verifyClusterConfigWithData</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">scanGenericCommand</span><span class="params">(redisClient *c, robj *o, <span class="keyword">unsigned</span> <span class="keyword">long</span> cursor)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">parseScanCursorOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">unsigned</span> <span class="keyword">long</span> *cursor)</span></span>;</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h3 id="键空间的初始化"><a href="#键空间的初始化" class="headerlink" title="键空间的初始化"></a>键空间的初始化</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* Db-&gt;dict, keys are sds strings, vals are Redis objects. */</span></div><div class="line"><span class="comment">// 键空间的类型</span></div><div class="line">dictType dbDictType = &#123;</div><div class="line">    dictSdsHash,                <span class="comment">/* hash function */</span></div><div class="line">    <span class="literal">NULL</span>,                       <span class="comment">/* key dup */</span></div><div class="line">    <span class="literal">NULL</span>,                       <span class="comment">/* val dup */</span></div><div class="line">    dictSdsKeyCompare,          <span class="comment">/* key compare */</span></div><div class="line">    dictSdsDestructor,          <span class="comment">/* key destructor */</span></div><div class="line">    dictRedisObjectDestructor   <span class="comment">/* val destructor */</span></div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">// 服务器初始化的同时初始化键空间</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">initServer</span><span class="params">()</span> </span>&#123;</div><div class="line">	<span class="comment">// ...</span></div><div class="line">    <span class="comment">/* Create the Redis databases, and initialize other internal state. */</span></div><div class="line">    <span class="comment">// 创建并初始化数据库结构</span></div><div class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; server.dbnum; j++) &#123;</div><div class="line">        server.db[j].dict = dictCreate(&amp;dbDictType,<span class="literal">NULL</span>);</div><div class="line">		<span class="comment">// ...</span></div><div class="line">        server.db[j].id = j;</div><div class="line">		<span class="comment">// ...</span></div><div class="line">    &#125;</div><div class="line">	<span class="comment">// ...</span></div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h3><p>有五个和查找相关的接口，代码如下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line"><span class="function">robj *<span class="title">lookupKeyWriteOrReply</span><span class="params">(redisClient *c, robj *key, robj *reply)</span> </span>&#123;</div><div class="line"></div><div class="line">    robj *o = lookupKeyWrite(c-&gt;db, key);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (!o) addReply(c,reply);</div><div class="line"></div><div class="line">    <span class="keyword">return</span> o;</div><div class="line">&#125;</div><div class="line"><span class="function">robj *<span class="title">lookupKeyReadOrReply</span><span class="params">(redisClient *c, robj *key, robj *reply)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 查找</span></div><div class="line">    robj *o = lookupKeyRead(c-&gt;db, key);</div><div class="line"></div><div class="line">    <span class="comment">// 发送信息</span></div><div class="line">    <span class="keyword">if</span> (!o) addReply(c,reply);</div><div class="line"></div><div class="line">    <span class="keyword">return</span> o;</div><div class="line">&#125;</div><div class="line"><span class="function">robj *<span class="title">lookupKeyWrite</span><span class="params">(redisDb *db, robj *key)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 删除过期键</span></div><div class="line">    expireIfNeeded(db,key);</div><div class="line"></div><div class="line">    <span class="comment">// 查找并返回对象</span></div><div class="line">    <span class="keyword">return</span> lookupKey(db,key);</div><div class="line">&#125;</div><div class="line"><span class="function">robj *<span class="title">lookupKeyRead</span><span class="params">(redisDb *db, robj *key)</span> </span>&#123;</div><div class="line">    robj *val;</div><div class="line"></div><div class="line">    <span class="comment">// 删除过期键</span></div><div class="line">    expireIfNeeded(db,key);</div><div class="line"></div><div class="line">    <span class="comment">// 查找对象</span></div><div class="line">    val = lookupKey(db,key);</div><div class="line"></div><div class="line">    <span class="comment">// 更新命中/不命中信息</span></div><div class="line">    <span class="keyword">if</span> (val == <span class="literal">NULL</span>)</div><div class="line">        server.stat_keyspace_misses++;</div><div class="line">    <span class="keyword">else</span></div><div class="line">        server.stat_keyspace_hits++;</div><div class="line"></div><div class="line">    <span class="comment">// 返回值</span></div><div class="line">    <span class="keyword">return</span> val;</div><div class="line">&#125;</div><div class="line"><span class="function">robj *<span class="title">lookupKey</span><span class="params">(redisDb *db, robj *key)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 查找</span></div><div class="line">    dictEntry *de = dictFind(db-&gt;dict,key-&gt;ptr);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (de) &#123;</div><div class="line"></div><div class="line">        <span class="comment">// 取出值</span></div><div class="line">        robj *val = dictGetVal(de);</div><div class="line"></div><div class="line">        <span class="comment">// 更新时间信息</span></div><div class="line">        <span class="keyword">if</span> (server.rdb_child_pid == <span class="number">-1</span> &amp;&amp; server.aof_child_pid == <span class="number">-1</span>)</div><div class="line">            val-&gt;lru = LRU_CLOCK();</div><div class="line"></div><div class="line">        <span class="comment">// 返回值</span></div><div class="line">        <span class="keyword">return</span> val;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="添加新键"><a href="#添加新键" class="headerlink" title="添加新键"></a>添加新键</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbAdd</span><span class="params">(redisDb *db, robj *key, robj *val)</span> </span>&#123;</div><div class="line">    sds copy = sdsdup(key-&gt;ptr); <span class="comment">// 复制键名</span></div><div class="line">    <span class="keyword">int</span> retval = dictAdd(db-&gt;dict, copy, val); <span class="comment">// 尝试添加</span></div><div class="line"></div><div class="line">    redisAssertWithInfo(<span class="literal">NULL</span>,key,retval == REDIS_OK); <span class="comment">// 已经存在则停止</span></div><div class="line">    <span class="keyword">if</span> (val-&gt;type == REDIS_LIST) signalListAsReady(db, key);</div><div class="line">    <span class="keyword">if</span> (server.cluster_enabled) slotToKeyAdd(key);</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<h3 id="修改键"><a href="#修改键" class="headerlink" title="修改键"></a>修改键</h3><p>两种方式一种重写，一种设定不管存不存在。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbOverwrite</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>; <span class="comment">// 重写指定键的值,键不存在的话终止</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setKey</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>;<span class="comment">// 设定指定键的值，不管存不存在</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbOverwrite</span><span class="params">(redisDb *db, robj *key, robj *val)</span> </span>&#123;</div><div class="line">    dictEntry *de = dictFind(db-&gt;dict,key-&gt;ptr); <span class="comment">// 查找</span></div><div class="line"></div><div class="line">    redisAssertWithInfo(<span class="literal">NULL</span>,key,de != <span class="literal">NULL</span>); <span class="comment">// 不存在，终止</span></div><div class="line">    dictReplace(db-&gt;dict, key-&gt;ptr, val); <span class="comment">// 修改旧值</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setKey</span><span class="params">(redisDb *db, robj *key, robj *val)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (lookupKeyWrite(db,key) == <span class="literal">NULL</span>) &#123;</div><div class="line">        dbAdd(db,key,val); <span class="comment">// 找不到就添加</span></div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        dbOverwrite(db,key,val); <span class="comment">// 找到就重写</span></div><div class="line">    &#125;</div><div class="line">    incrRefCount(val); <span class="comment">// 增加引用计数</span></div><div class="line">    removeExpire(db,key); <span class="comment">// 移除过期时间</span></div><div class="line">    signalModifiedKey(db,key); <span class="comment">// 发送键修改通知</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="删除键"><a href="#删除键" class="headerlink" title="删除键"></a>删除键</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">dbDelete</span><span class="params">(redisDb *db, robj *key)</span> </span>&#123;</div><div class="line">    <span class="comment">/* Deleting an entry from the expires dict will not free the sds of</span></div><div class="line"><span class="comment">     * the key, because it is shared with the main dictionary. */</span></div><div class="line">    <span class="comment">// 删除键的过期时间</span></div><div class="line">    <span class="keyword">if</span> (dictSize(db-&gt;expires) &gt; <span class="number">0</span>) dictDelete(db-&gt;expires,key-&gt;ptr);</div><div class="line"></div><div class="line">    <span class="comment">// 删除键值对</span></div><div class="line">    <span class="keyword">if</span> (dictDelete(db-&gt;dict,key-&gt;ptr) == DICT_OK) &#123;</div><div class="line">        <span class="keyword">if</span> (server.cluster_enabled) slotToKeyDel(key);</div><div class="line">        <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="键的生存时间或过期时间"><a href="#键的生存时间或过期时间" class="headerlink" title="键的生存时间或过期时间"></a>键的生存时间或过期时间</h2><p>与键空间类似redis建立了一个字典，存放每个键的对应的过期时间。在初始化的时候创建</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">dictType keyptrDictType = &#123;</div><div class="line">    dictSdsHash,               <span class="comment">/* hash function */</span></div><div class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* key dup */</span></div><div class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* val dup */</span></div><div class="line">    dictSdsKeyCompare,         <span class="comment">/* key compare */</span></div><div class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* key destructor */</span></div><div class="line">    <span class="literal">NULL</span>                       <span class="comment">/* val destructor */</span></div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">initServer</span><span class="params">()</span> </span>&#123;</div><div class="line">	<span class="comment">// ...</span></div><div class="line">    <span class="comment">// 创建并初始化数据库结构</span></div><div class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; server.dbnum; j++) &#123;</div><div class="line">        server.db[j].expires = dictCreate(&amp;keyptrDictType,<span class="literal">NULL</span>);</div><div class="line">		<span class="comment">// ...</span></div><div class="line">        server.db[j].id = j;</div><div class="line">		<span class="comment">// ...</span></div><div class="line">    &#125;</div><div class="line">	<span class="comment">// ...</span></div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="设定键的过期时间"><a href="#设定键的过期时间" class="headerlink" title="设定键的过期时间"></a>设定键的过期时间</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setExpire</span><span class="params">(redisDb *db, robj *key, <span class="keyword">long</span> <span class="keyword">long</span> when)</span> </span>&#123;</div><div class="line">    dictEntry *kde, *de;</div><div class="line"></div><div class="line">    kde = dictFind(db-&gt;dict,key-&gt;ptr); <span class="comment">// 查找键</span></div><div class="line">    redisAssertWithInfo(<span class="literal">NULL</span>,key,kde != <span class="literal">NULL</span>);</div><div class="line">    <span class="comment">// 在过期时间字典中查找，没有则添加</span></div><div class="line">    de = dictReplaceRaw(db-&gt;expires,dictGetKey(kde));</div><div class="line">    dictSetSignedIntegerVal(de,when); <span class="comment">// 设置过期时间</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="获取键的过期时间"><a href="#获取键的过期时间" class="headerlink" title="获取键的过期时间"></a>获取键的过期时间</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">long</span> <span class="keyword">long</span> <span class="title">getExpire</span><span class="params">(redisDb *db, robj *key)</span> </span>&#123;</div><div class="line">    dictEntry *de;</div><div class="line"></div><div class="line">    <span class="comment">//  如果不存在直接返回</span></div><div class="line">    <span class="keyword">if</span> (dictSize(db-&gt;expires) == <span class="number">0</span> ||</div><div class="line">       (de = dictFind(db-&gt;expires,key-&gt;ptr)) == <span class="literal">NULL</span>) <span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line"></div><div class="line">    redisAssertWithInfo(<span class="literal">NULL</span>,key,dictFind(db-&gt;dict,key-&gt;ptr) != <span class="literal">NULL</span>);</div><div class="line"></div><div class="line">    <span class="comment">// 返回过期时间</span></div><div class="line">    <span class="keyword">return</span> dictGetSignedIntegerVal(de);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="删除键的过期时间"><a href="#删除键的过期时间" class="headerlink" title="删除键的过期时间"></a>删除键的过期时间</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">removeExpire</span><span class="params">(redisDb *db, robj *key)</span> </span>&#123;</div><div class="line">     <span class="comment">// 确保键有过期时间</span></div><div class="line">    redisAssertWithInfo(<span class="literal">NULL</span>,key,dictFind(db-&gt;dict,key-&gt;ptr) != <span class="literal">NULL</span>);</div><div class="line">    <span class="keyword">return</span> dictDelete(db-&gt;expires,key-&gt;ptr) == DICT_OK; <span class="comment">// 删除</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="过期键的删除策略"><a href="#过期键的删除策略" class="headerlink" title="过期键的删除策略"></a>过期键的删除策略</h3><p>三种策略：</p>
+<ul>
+<li>定时删除。定时删除占用cpu，可能使服务器长期无响应。但是对内存友好。</li>
+<li>惰性删除，对键进行操作时，才删除。缺点是对内存不友好，过期键过多的话，没有及时清理。</li>
+<li>定期删除。间隔依据算法确定。两者结合，主要看算法选择。</li>
+</ul>
+<p>redis采用定期和惰性两种删除方式。</p>
+<h4 id="惰性删除"><a href="#惰性删除" class="headerlink" title="惰性删除"></a>惰性删除</h4><p>redis在很多操作前都会调用expireIfNeeded进行惰性删除。例如lookupKeyRead。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">expireIfNeeded</span><span class="params">(redisDb *db, robj *key)</span> </span>&#123;</div><div class="line">    <span class="keyword">mstime_t</span> when = getExpire(db,key);</div><div class="line">    <span class="keyword">mstime_t</span> now;</div><div class="line"></div><div class="line">    <span class="comment">// 无过期时间</span></div><div class="line">    <span class="keyword">if</span> (when &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">/* No expire for this key */</span></div><div class="line"></div><div class="line">    <span class="comment">// 正在加载不删除</span></div><div class="line">    <span class="keyword">if</span> (server.loading) <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* If we are in the context of a Lua script, we claim that time is</span></div><div class="line"><span class="comment">     * blocked to when the Lua script started. This way a key can expire</span></div><div class="line"><span class="comment">     * only the first time it is accessed and not in the middle of the</span></div><div class="line"><span class="comment">     * script execution, making propagation to slaves / AOF consistent.</span></div><div class="line"><span class="comment">     * See issue #1525 on Github for more information. */</span></div><div class="line">    now = server.lua_caller ? server.lua_time_start : mstime();</div><div class="line"></div><div class="line">    <span class="comment">/* If we are running in the context of a slave, return ASAP:</span></div><div class="line"><span class="comment">     * the slave key expiration is controlled by the master that will</span></div><div class="line"><span class="comment">     * send us synthesized DEL operations for expired keys.</span></div><div class="line"><span class="comment">     *</span></div><div class="line"><span class="comment">     * Still we try to return the right information to the caller,</span></div><div class="line"><span class="comment">     * that is, 0 if we think the key should be still valid, 1 if</span></div><div class="line"><span class="comment">     * we think the key is expired at this time. */</span></div><div class="line">    <span class="keyword">if</span> (server.masterhost != <span class="literal">NULL</span>) <span class="keyword">return</span> now &gt; when;</div><div class="line"></div><div class="line">    <span class="comment">// 没过期，返回0</span></div><div class="line">    <span class="keyword">if</span> (now &lt;= when) <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line"></div><div class="line">    <span class="comment">// 删除</span></div><div class="line">    server.stat_expiredkeys++;</div><div class="line">    propagateExpire(db,key);</div><div class="line">    notifyKeyspaceEvent(REDIS_NOTIFY_EXPIRED,</div><div class="line">        <span class="string">"expired"</span>,key,db-&gt;id);</div><div class="line">    <span class="keyword">return</span> dbDelete(db,key);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="定期删除"><a href="#定期删除" class="headerlink" title="定期删除"></a>定期删除</h4><p>redis服务器周期性操作serverCron函数执行时，activeExpireCycle被调用，它在规定时间内分多次遍历服务器中的各个数据库，从数据库的expires字典中随机检查一部分键的过期时间，并删除其中的过期键。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+            <a href="/tags/源码阅读/" rel="tag"># 源码阅读</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/09/redis源码阅读-对象/" rel="next" title="redis源码阅读-对象">
+                <i class="fa fa-chevron-left"></i> redis源码阅读-对象
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/12/redis源码阅读-RDB持久化/" rel="prev" title="redis源码阅读-RDB持久化">
+                redis源码阅读-RDB持久化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Yang Yi</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器"><span class="nav-number">1.</span> <span class="nav-text">服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#切换数据库"><span class="nav-number">2.</span> <span class="nav-text">切换数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库键空间"><span class="nav-number">3.</span> <span class="nav-text">数据库键空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#键空间的操作"><span class="nav-number">4.</span> <span class="nav-text">键空间的操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#键空间的初始化"><span class="nav-number">4.1.</span> <span class="nav-text">键空间的初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查找"><span class="nav-number">4.2.</span> <span class="nav-text">查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加新键"><span class="nav-number">4.3.</span> <span class="nav-text">添加新键</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改键"><span class="nav-number">4.4.</span> <span class="nav-text">修改键</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除键"><span class="nav-number">4.5.</span> <span class="nav-text">删除键</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#键的生存时间或过期时间"><span class="nav-number">5.</span> <span class="nav-text">键的生存时间或过期时间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设定键的过期时间"><span class="nav-number">5.1.</span> <span class="nav-text">设定键的过期时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取键的过期时间"><span class="nav-number">5.2.</span> <span class="nav-text">获取键的过期时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除键的过期时间"><span class="nav-number">5.3.</span> <span class="nav-text">删除键的过期时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#过期键的删除策略"><span class="nav-number">5.4.</span> <span class="nav-text">过期键的删除策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#惰性删除"><span class="nav-number">5.4.1.</span> <span class="nav-text">惰性删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#定期删除"><span class="nav-number">5.4.2.</span> <span class="nav-text">定期删除</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yang Yi</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

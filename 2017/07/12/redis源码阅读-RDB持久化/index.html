@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,源码阅读," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。 Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。 RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。 RDB文件的保存命令Redis有两个命令可以生成RDB">
+<meta name="keywords" content="redis,源码阅读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis源码阅读-RDB持久化">
+<meta property="og:url" content="http://yoursite.com/2017/07/12/redis源码阅读-RDB持久化/index.html">
+<meta property="og:site_name" content="鉴心">
+<meta property="og:description" content="Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。 Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。 RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。 RDB文件的保存命令Redis有两个命令可以生成RDB">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-18T00:19:58.278Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis源码阅读-RDB持久化">
+<meta name="twitter:description" content="Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。 Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。 RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。 RDB文件的保存命令Redis有两个命令可以生成RDB">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/07/12/redis源码阅读-RDB持久化/"/>
+
+
+
+
+
+  <title>redis源码阅读-RDB持久化 | 鉴心</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鉴心</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/12/redis源码阅读-RDB持久化/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yang Yi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">redis源码阅读-RDB持久化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-12T16:04:59+08:00">
+                2017-07-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。</p>
+<p>Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。</p>
+<p>RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。</p>
+<h2 id="RDB文件的保存命令"><a href="#RDB文件的保存命令" class="headerlink" title="RDB文件的保存命令"></a>RDB文件的保存命令</h2><p>Redis有两个命令可以生成RDB文件一个是SAVE，一个是BGSAVE。<br>SAVE命令调用saveCommand进行处理</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">saveCommand</span><span class="params">(redisClient *c)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 判断是否正在执行BGSAVE，是则退出</span></div><div class="line">    <span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span>) &#123;</div><div class="line">        addReplyError(c,<span class="string">"Background save already in progress"</span>);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//调用rdbSave生成RDB文件</span></div><div class="line">    <span class="keyword">if</span> (rdbSave(server.rdb_filename) == REDIS_OK) &#123;</div><div class="line">        addReply(c,shared.ok);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        addReply(c,shared.err);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>BGSAVE调用bgsaveCommand进行处理</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bgsaveCommand</span><span class="params">(redisClient *c)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 判断是否已经在执行BGSAVE</span></div><div class="line">    <span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span>) &#123;</div><div class="line">        addReplyError(c,<span class="string">"Background save already in progress"</span>);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (server.aof_child_pid != <span class="number">-1</span>) &#123;</div><div class="line">        </div><div class="line">    <span class="comment">// 判断是否在执行BGREWRIEAOF</span></div><div class="line">        addReplyError(c,<span class="string">"Can't BGSAVE while AOF log rewriting is in progress"</span>);</div><div class="line">    </div><div class="line">    <span class="comment">// 执行rdbSaveBackground 生成RDB文件</span></div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (rdbSaveBackground(server.rdb_filename) == REDIS_OK) &#123;</div><div class="line">        addReplyStatus(c,<span class="string">"Background saving started"</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        addReply(c,shared.err);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">rdbSaveBackground</span><span class="params">(<span class="keyword">char</span> *filename)</span> </span>&#123;</div><div class="line">    <span class="keyword">pid_t</span> childpid;</div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> start;</div><div class="line"></div><div class="line">    <span class="comment">// 如果BGSAVE正在执行直接返回</span></div><div class="line">    <span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span>) <span class="keyword">return</span> REDIS_ERR;</div><div class="line"></div><div class="line">    <span class="comment">// 获取dirty数据 执行时间</span></div><div class="line">    server.dirty_before_bgsave = server.dirty;</div><div class="line">    server.lastbgsave_try = time(<span class="literal">NULL</span>);</div><div class="line"></div><div class="line">    <span class="comment">// fork() 开始前时间</span></div><div class="line">    start = ustime();</div><div class="line"></div><div class="line">    <span class="comment">// 调用fork，克隆该进程</span></div><div class="line">    <span class="keyword">if</span> ((childpid = fork()) == <span class="number">0</span>) &#123;</div><div class="line">        <span class="keyword">int</span> retval;</div><div class="line"></div><div class="line">        <span class="comment">/* Child */</span></div><div class="line">        closeListeningSockets(<span class="number">0</span>);</div><div class="line">        redisSetProcTitle(<span class="string">"redis-rdb-bgsave"</span>);</div><div class="line"></div><div class="line">        <span class="comment">// 执行保存操作</span></div><div class="line">        retval = rdbSave(filename);</div><div class="line"></div><div class="line">        <span class="comment">// 打印 copy-on-write 时使用的内存数</span></div><div class="line">        <span class="keyword">if</span> (retval == REDIS_OK) &#123;</div><div class="line">            <span class="keyword">size_t</span> private_dirty = zmalloc_get_private_dirty();</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (private_dirty) &#123;</div><div class="line">                redisLog(REDIS_NOTICE,</div><div class="line">                    <span class="string">"RDB: %zu MB of memory used by copy-on-write"</span>,</div><div class="line">                    private_dirty/(<span class="number">1024</span>*<span class="number">1024</span>));</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">// 向父进程发送信号</span></div><div class="line">        exitFromChild((retval == REDIS_OK) ? <span class="number">0</span> : <span class="number">1</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">/* Parent */</span></div><div class="line"></div><div class="line">        <span class="comment">// 计算 fork() 执行的时间</span></div><div class="line">        server.stat_fork_time = ustime()-start;</div><div class="line">        server.stat_fork_rate = (<span class="keyword">double</span>) zmalloc_used_memory() * <span class="number">1000000</span> / server.stat_fork_time / (<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">1024</span>); <span class="comment">/* GB per second. */</span></div><div class="line">        latencyAddSampleIfNeeded(<span class="string">"fork"</span>,server.stat_fork_time/<span class="number">1000</span>);</div><div class="line">        </div><div class="line">        <span class="comment">// 执行fork()错误信息</span></div><div class="line">        <span class="keyword">if</span> (childpid == <span class="number">-1</span>) &#123;</div><div class="line">            server.lastbgsave_status = REDIS_ERR;</div><div class="line">            redisLog(REDIS_WARNING,<span class="string">"Can't save in background: fork: %s"</span>,</div><div class="line">                strerror(errno));</div><div class="line">            <span class="keyword">return</span> REDIS_ERR;</div><div class="line">        &#125;</div><div class="line">        redisLog(REDIS_NOTICE,<span class="string">"Background saving started by pid %d"</span>,childpid);</div><div class="line">        </div><div class="line">        <span class="comment">// 记录数据库开始BGSAVE时间</span></div><div class="line">        server.rdb_save_time_start = time(<span class="literal">NULL</span>);</div><div class="line"></div><div class="line">        <span class="comment">// 子进程ID 类型</span></div><div class="line">        server.rdb_child_pid = childpid;</div><div class="line">        server.rdb_child_type = REDIS_RDB_CHILD_TYPE_DISK;</div><div class="line"></div><div class="line">        <span class="comment">// 关闭自动Rehash</span></div><div class="line">        updateDictResizePolicy();</div><div class="line">        <span class="keyword">return</span> REDIS_OK;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> REDIS_OK; <span class="comment">/* unreached */</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>那么怎么才能够知道BGSAVE执行完毕，BGSAVE执行完毕后使用exitFromChild((retval == REDIS_OK) ? 0 : 1);向父进程发送信号。父进程调用serverCron接收该信号。</p>
+<p>以下是处理函数的部分代码，处理BGREWRITEAOF与BGSAVE的完成信号。最终调用backgroundSaveDoneHandler根据返回信号信息进行对应处理。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">serverCron</span><span class="params">(struct aeEventLoop *eventLoop, <span class="keyword">long</span> <span class="keyword">long</span> id, <span class="keyword">void</span> *clientData)</span> </span>&#123;</div><div class="line">\\ ...</div><div class="line">    <span class="comment">// 检查 BGSAVE 或者 BGREWRITEAOF 是否已经执行完毕</span></div><div class="line">    <span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span> || server.aof_child_pid != <span class="number">-1</span>) &#123;</div><div class="line">        <span class="keyword">int</span> statloc;</div><div class="line">        <span class="keyword">pid_t</span> pid;</div><div class="line"></div><div class="line">        <span class="comment">// 接收子进程发来的信号</span></div><div class="line">        <span class="keyword">if</span> ((pid = wait3(&amp;statloc,WNOHANG,<span class="literal">NULL</span>)) != <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">int</span> exitcode = WEXITSTATUS(statloc);</div><div class="line">            <span class="keyword">int</span> bysignal = <span class="number">0</span>;</div><div class="line">            </div><div class="line">            <span class="keyword">if</span> (WIFSIGNALED(statloc)) bysignal = WTERMSIG(statloc);</div><div class="line"></div><div class="line">            <span class="comment">// BGSAVE 执行完毕</span></div><div class="line">            <span class="keyword">if</span> (pid == server.rdb_child_pid) &#123;</div><div class="line">                backgroundSaveDoneHandler(exitcode,bysignal);</div><div class="line"></div><div class="line">            <span class="comment">// BGREWRITEAOF 执行完毕</span></div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid == server.aof_child_pid) &#123;</div><div class="line">                backgroundRewriteDoneHandler(exitcode,bysignal);</div><div class="line"></div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                redisLog(REDIS_WARNING,</div><div class="line">                    <span class="string">"Warning, detected child with unmatched pid: %ld"</span>,</div><div class="line">                    (<span class="keyword">long</span>)pid);</div><div class="line">            &#125;</div><div class="line">            updateDictResizePolicy();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">\\ ...</div><div class="line">  </div><div class="line"><span class="comment">/* A background saving child (BGSAVE) terminated its work. Handle this.</span></div><div class="line"><span class="comment"> * This function covers the case of actual BGSAVEs. */</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">backgroundSaveDoneHandlerDisk</span><span class="params">(<span class="keyword">int</span> exitcode, <span class="keyword">int</span> bysignal)</span> </span>&#123;</div><div class="line">    </div><div class="line">    <span class="comment">// 成功</span></div><div class="line">    <span class="keyword">if</span> (!bysignal &amp;&amp; exitcode == <span class="number">0</span>) &#123;</div><div class="line">        redisLog(REDIS_NOTICE,</div><div class="line">            <span class="string">"Background saving terminated with success"</span>);</div><div class="line">        server.dirty = server.dirty - server.dirty_before_bgsave;</div><div class="line">        server.lastsave = time(<span class="literal">NULL</span>);</div><div class="line">        server.lastbgsave_status = REDIS_OK;</div><div class="line"></div><div class="line">    <span class="comment">// 出错</span></div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!bysignal &amp;&amp; exitcode != <span class="number">0</span>) &#123;</div><div class="line">        redisLog(REDIS_WARNING, <span class="string">"Background saving error"</span>);</div><div class="line">        server.lastbgsave_status = REDIS_ERR;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">mstime_t</span> latency;</div><div class="line"></div><div class="line">        redisLog(REDIS_WARNING,</div><div class="line">            <span class="string">"Background saving terminated by signal %d"</span>, bysignal);</div><div class="line">        latencyStartMonitor(latency);</div><div class="line">        rdbRemoveTempFile(server.rdb_child_pid);</div><div class="line">        latencyEndMonitor(latency);</div><div class="line">        latencyAddSampleIfNeeded(<span class="string">"rdb-unlink-temp-file"</span>,latency);</div><div class="line">        <span class="comment">/* SIGUSR1 is whitelisted, so we have a way to kill a child without</span></div><div class="line"><span class="comment">         * tirggering an error conditon. */</span></div><div class="line">        <span class="keyword">if</span> (bysignal != SIGUSR1)</div><div class="line">            server.lastbgsave_status = REDIS_ERR;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 更新状态</span></div><div class="line">    server.rdb_child_pid = <span class="number">-1</span>;</div><div class="line">    server.rdb_child_type = REDIS_RDB_CHILD_TYPE_NONE;</div><div class="line">    server.rdb_save_time_last = time(<span class="literal">NULL</span>)-server.rdb_save_time_start;</div><div class="line">    server.rdb_save_time_start = <span class="number">-1</span>;</div><div class="line">    <span class="comment">/* Possibly there are slaves waiting for a BGSAVE in order to be served</span></div><div class="line"><span class="comment">     * (the first stage of SYNC is a bulk transfer of dump.rdb) */</span></div><div class="line">    updateSlavesWaitingBgsave((!bysignal &amp;&amp; exitcode == <span class="number">0</span>) ? REDIS_OK : REDIS_ERR, REDIS_RDB_CHILD_TYPE_DISK);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="rdbSave"><a href="#rdbSave" class="headerlink" title="rdbSave"></a>rdbSave</h3><p>int rdbSave(char *filename);是SAVE与BGSAVE命令执行时正在用来生成RDB文件的函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">rdbSave</span><span class="params">(<span class="keyword">char</span> *filename)</span> </span>&#123;</div><div class="line">    <span class="keyword">char</span> tmpfile[<span class="number">256</span>];</div><div class="line">    FILE *fp;</div><div class="line">    rio rdb;</div><div class="line">    <span class="keyword">int</span> error;</div><div class="line"></div><div class="line">    <span class="comment">// 生成临时文件</span></div><div class="line">    <span class="built_in">snprintf</span>(tmpfile,<span class="number">256</span>,<span class="string">"temp-%d.rdb"</span>, (<span class="keyword">int</span>) getpid());</div><div class="line">    fp = fopen(tmpfile,<span class="string">"w"</span>);</div><div class="line">    <span class="keyword">if</span> (!fp) &#123;</div><div class="line">        redisLog(REDIS_WARNING, <span class="string">"Failed opening .rdb for saving: %s"</span>,</div><div class="line">            strerror(errno));</div><div class="line">        <span class="keyword">return</span> REDIS_ERR;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 初始化I/O</span></div><div class="line">    rioInitWithFile(&amp;rdb,fp);</div><div class="line">    </div><div class="line">    <span class="comment">// 生成RDB文件</span></div><div class="line">    <span class="keyword">if</span> (rdbSaveRio(&amp;rdb,&amp;error) == REDIS_ERR) &#123;</div><div class="line">        errno = error;</div><div class="line">        <span class="keyword">goto</span> werr;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 确保缓存中没有数据</span></div><div class="line">    <span class="keyword">if</span> (fflush(fp) == EOF) <span class="keyword">goto</span> werr;</div><div class="line">    <span class="keyword">if</span> (fsync(fileno(fp)) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</div><div class="line">    <span class="keyword">if</span> (fclose(fp) == EOF) <span class="keyword">goto</span> werr;</div><div class="line"></div><div class="line">    <span class="comment">// 使用RENAME改名</span></div><div class="line">    <span class="keyword">if</span> (rename(tmpfile,filename) == <span class="number">-1</span>) &#123;</div><div class="line">        redisLog(REDIS_WARNING,<span class="string">"Error moving temp DB file on the final destination: %s"</span>, strerror(errno));</div><div class="line">        unlink(tmpfile);</div><div class="line">        <span class="keyword">return</span> REDIS_ERR;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 日志 设置状态</span></div><div class="line">    redisLog(REDIS_NOTICE,<span class="string">"DB saved on disk"</span>);</div><div class="line">    server.dirty = <span class="number">0</span>;</div><div class="line">    server.lastsave = time(<span class="literal">NULL</span>);</div><div class="line">    server.lastbgsave_status = REDIS_OK;</div><div class="line">    <span class="keyword">return</span> REDIS_OK;</div><div class="line"></div><div class="line">werr:</div><div class="line"></div><div class="line">    <span class="comment">// 异常处理</span></div><div class="line">    fclose(fp);</div><div class="line">    unlink(tmpfile);</div><div class="line">    redisLog(REDIS_WARNING,<span class="string">"Write error saving DB on disk: %s"</span>, strerror(errno));</div><div class="line">    <span class="keyword">return</span> REDIS_ERR;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>实际是调用rdbSaveRio执行写入</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">rdbSaveRio</span><span class="params">(rio *rdb, <span class="keyword">int</span> *error)</span> </span>&#123;</div><div class="line">    dictIterator *di = <span class="literal">NULL</span>;</div><div class="line">    dictEntry *de;</div><div class="line">    <span class="keyword">char</span> magic[<span class="number">10</span>];</div><div class="line">    <span class="keyword">int</span> j;</div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> now = mstime();</div><div class="line">    <span class="keyword">uint64_t</span> cksum;</div><div class="line"></div><div class="line">    <span class="comment">// 设置校验和</span></div><div class="line">    <span class="keyword">if</span> (server.rdb_checksum)</div><div class="line">        rdb-&gt;update_cksum = rioGenericUpdateChecksum;</div><div class="line"></div><div class="line">    <span class="comment">// 写入REDIS版本号</span></div><div class="line">    <span class="built_in">snprintf</span>(magic,<span class="keyword">sizeof</span>(magic),<span class="string">"REDIS%04d"</span>,REDIS_RDB_VERSION);</div><div class="line">    <span class="keyword">if</span> (rdbWriteRaw(rdb,magic,<span class="number">9</span>) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</div><div class="line"></div><div class="line">    <span class="comment">// 遍历数据库</span></div><div class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; server.dbnum; j++) &#123;</div><div class="line">        redisDb *db = server.db+j;</div><div class="line">        dict *d = db-&gt;dict;</div><div class="line"></div><div class="line">        <span class="comment">// 跳过空数据库</span></div><div class="line">        <span class="keyword">if</span> (dictSize(d) == <span class="number">0</span>) <span class="keyword">continue</span>;</div><div class="line"></div><div class="line">        <span class="comment">// 键空间迭代器</span></div><div class="line">        di = dictGetSafeIterator(d);</div><div class="line">        <span class="keyword">if</span> (!di) <span class="keyword">return</span> REDIS_ERR;</div><div class="line"></div><div class="line">        <span class="comment">/* Write the SELECT DB opcode */</span></div><div class="line">        <span class="comment">// 写入DB选择器</span></div><div class="line">        <span class="keyword">if</span> (rdbSaveType(rdb,REDIS_RDB_OPCODE_SELECTDB) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</div><div class="line">        <span class="keyword">if</span> (rdbSaveLen(rdb,j) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</div><div class="line"></div><div class="line">        <span class="comment">/* Iterate this DB writing every entry */</span></div><div class="line">      <span class="comment">// 遍历数据库，写入键值对</span></div><div class="line">        <span class="keyword">while</span>((de = dictNext(di)) != <span class="literal">NULL</span>) &#123;</div><div class="line">            sds keystr = dictGetKey(de);</div><div class="line">            robj key, *o = dictGetVal(de);</div><div class="line">            <span class="keyword">long</span> <span class="keyword">long</span> expire;</div><div class="line"></div><div class="line">            initStaticStringObject(key,keystr);</div><div class="line">            expire = getExpire(db,&amp;key);</div><div class="line"></div><div class="line">            <span class="comment">// 写入键值对</span></div><div class="line">            <span class="keyword">if</span> (rdbSaveKeyValuePair(rdb,&amp;key,o,expire,now) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</div><div class="line">        &#125;</div><div class="line">        dictReleaseIterator(di);</div><div class="line">    &#125;</div><div class="line">    di = <span class="literal">NULL</span>; <span class="comment">/* So that we don't release it again on error. */</span></div><div class="line"></div><div class="line">    <span class="comment">/* EOF opcode */</span></div><div class="line">    <span class="comment">// 写入 EOF 代码</span></div><div class="line">    <span class="keyword">if</span> (rdbSaveType(rdb,REDIS_RDB_OPCODE_EOF) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</div><div class="line"></div><div class="line">    <span class="comment">/* CRC64 checksum. It will be zero if checksum computation is disabled, the</span></div><div class="line"><span class="comment">     * loading code skips the check in this case. */</span></div><div class="line">    <span class="comment">// CRC64 校验和。</span></div><div class="line">    cksum = rdb-&gt;cksum;</div><div class="line">    memrev64ifbe(&amp;cksum);</div><div class="line">    <span class="keyword">if</span> (rioWrite(rdb,&amp;cksum,<span class="number">8</span>) == <span class="number">0</span>) <span class="keyword">goto</span> werr;</div><div class="line">    <span class="keyword">return</span> REDIS_OK;</div><div class="line"></div><div class="line">werr:</div><div class="line">    <span class="keyword">if</span> (error) *error = errno;</div><div class="line">    <span class="keyword">if</span> (di) dictReleaseIterator(di);</div><div class="line">    <span class="keyword">return</span> REDIS_ERR;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="自动保存"><a href="#自动保存" class="headerlink" title="自动保存"></a>自动保存</h2><p>redis能够配置自动保存条件，当满足的情况下执行BGSAVE。</p>
+<p>依赖上次保存时间和dirty计数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// serverCron函数</span></div><div class="line"><span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span> || server.aof_child_pid != <span class="number">-1</span> ||</div><div class="line">    ldbPendingChildren())</div><div class="line">&#123;</div><div class="line">  <span class="comment">// 为之前处理BGSAVE完成的部分的代码</span></div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">  <span class="comment">// 检查所有保存条件</span></div><div class="line">  <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; server.saveparamslen; j++) &#123;</div><div class="line">    struct saveparam *sp = server.saveparams+j;</div><div class="line">    <span class="comment">// 检查某个保存条件是否符合</span></div><div class="line">    <span class="keyword">if</span> (server.dirty &gt;= sp-&gt;changes &amp;&amp;</div><div class="line">        server.unixtime-server.lastsave &gt; sp-&gt;seconds &amp;&amp;</div><div class="line">        (server.unixtime-server.lastbgsave_try &gt;</div><div class="line">         CONFIG_BGSAVE_RETRY_DELAY ||</div><div class="line">         server.lastbgsave_status == C_OK))</div><div class="line">    &#123;</div><div class="line">      serverLog(LL_NOTICE,<span class="string">"%d changes in %d seconds. Saving..."</span>,</div><div class="line">                sp-&gt;changes, (<span class="keyword">int</span>)sp-&gt;seconds);</div><div class="line">      </div><div class="line">      <span class="comment">// 保存</span></div><div class="line">      rdbSaveBackground(server.rdb_filename);</div><div class="line">      <span class="keyword">break</span>;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">// ...</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="RDB的文件载入"><a href="#RDB的文件载入" class="headerlink" title="RDB的文件载入"></a>RDB的文件载入</h2><p>rdbload()用于将RDB文件从硬盘载入</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">rdbLoad</span><span class="params">(<span class="keyword">char</span> *filename)</span> </span>&#123;</div><div class="line">    <span class="keyword">uint32_t</span> dbid;</div><div class="line">    <span class="keyword">int</span> type, rdbver;</div><div class="line">    redisDb *db = server.db+<span class="number">0</span>;</div><div class="line">    <span class="keyword">char</span> buf[<span class="number">1024</span>];</div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> expiretime, now = mstime();</div><div class="line">    FILE *fp;</div><div class="line">    rio rdb;</div><div class="line"></div><div class="line">    <span class="comment">// 打开rdb文件</span></div><div class="line">    <span class="keyword">if</span> ((fp = fopen(filename,<span class="string">"r"</span>)) == <span class="literal">NULL</span>) <span class="keyword">return</span> REDIS_ERR;</div><div class="line"></div><div class="line">    <span class="comment">// 初始化rio</span></div><div class="line">    rioInitWithFile(&amp;rdb,fp);</div><div class="line">    rdb.update_cksum = rdbLoadProgressCallback;</div><div class="line">    rdb.max_processing_chunk = server.loading_process_events_interval_bytes;</div><div class="line">    <span class="keyword">if</span> (rioRead(&amp;rdb,buf,<span class="number">9</span>) == <span class="number">0</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">    buf[<span class="number">9</span>] = <span class="string">'\0'</span>;</div><div class="line"></div><div class="line">    <span class="comment">// 校验版本号</span></div><div class="line">    <span class="keyword">if</span> (<span class="built_in">memcmp</span>(buf,<span class="string">"REDIS"</span>,<span class="number">5</span>) != <span class="number">0</span>) &#123;</div><div class="line">        fclose(fp);</div><div class="line">        redisLog(REDIS_WARNING,<span class="string">"Wrong signature trying to load DB from file"</span>);</div><div class="line">        errno = EINVAL;</div><div class="line">        <span class="keyword">return</span> REDIS_ERR;</div><div class="line">    &#125;</div><div class="line">    rdbver = atoi(buf+<span class="number">5</span>);</div><div class="line">    <span class="keyword">if</span> (rdbver &lt; <span class="number">1</span> || rdbver &gt; REDIS_RDB_VERSION) &#123;</div><div class="line">        fclose(fp);</div><div class="line">        redisLog(REDIS_WARNING,<span class="string">"Can't handle RDB format version %d"</span>,rdbver);</div><div class="line">        errno = EINVAL;</div><div class="line">        <span class="keyword">return</span> REDIS_ERR;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 标记开始载入</span></div><div class="line">    startLoading(fp);</div><div class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</div><div class="line">        robj *key, *val;</div><div class="line">        expiretime = <span class="number">-1</span>;</div><div class="line"></div><div class="line">        <span class="comment">/* Read type. */</span></div><div class="line">        <span class="comment">// 读取类型</span></div><div class="line">        <span class="keyword">if</span> ((type = rdbLoadType(&amp;rdb)) == <span class="number">-1</span>) <span class="keyword">goto</span> eoferr;</div><div class="line"></div><div class="line">        <span class="comment">// 过期时间 秒为单位</span></div><div class="line">        <span class="keyword">if</span> (type == REDIS_RDB_OPCODE_EXPIRETIME) &#123;</div><div class="line"></div><div class="line">            <span class="comment">// 过期时间</span></div><div class="line">            <span class="keyword">if</span> ((expiretime = rdbLoadTime(&amp;rdb)) == <span class="number">-1</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">            <span class="comment">/* We read the time so we need to read the object type again. */</span></div><div class="line"></div><div class="line">            <span class="comment">// 键值对</span></div><div class="line">            <span class="keyword">if</span> ((type = rdbLoadType(&amp;rdb)) == <span class="number">-1</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">            <span class="comment">/* the EXPIRETIME opcode specifies time in seconds, so convert</span></div><div class="line"><span class="comment">             * into milliseconds. */</span></div><div class="line">            expiretime *= <span class="number">1000</span>;</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (type == REDIS_RDB_OPCODE_EXPIRETIME_MS) &#123;</div><div class="line">            <span class="comment">/* Milliseconds precision expire times introduced with RDB</span></div><div class="line"><span class="comment">             * version 3. */</span></div><div class="line">             <span class="comment">// 过期时间 毫秒但闻</span></div><div class="line">            <span class="keyword">if</span> ((expiretime = rdbLoadMillisecondTime(&amp;rdb)) == <span class="number">-1</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">            <span class="comment">/* We read the time so we need to read the object type again. */</span></div><div class="line">            <span class="keyword">if</span> ((type = rdbLoadType(&amp;rdb)) == <span class="number">-1</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// EOF</span></div><div class="line">        <span class="keyword">if</span> (type == REDIS_RDB_OPCODE_EOF)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line"></div><div class="line">        <span class="comment">/* Handle SELECT DB opcode as a special case */</span></div><div class="line">        <span class="comment">// 读取切换数据库指示</span></div><div class="line">        <span class="keyword">if</span> (type == REDIS_RDB_OPCODE_SELECTDB) &#123;</div><div class="line"></div><div class="line">            <span class="comment">// 数据库号</span></div><div class="line">            <span class="keyword">if</span> ((dbid = rdbLoadLen(&amp;rdb,<span class="literal">NULL</span>)) == REDIS_RDB_LENERR)</div><div class="line">                <span class="keyword">goto</span> eoferr;</div><div class="line"></div><div class="line">            <span class="comment">// 校验</span></div><div class="line">            <span class="keyword">if</span> (dbid &gt;= (<span class="keyword">unsigned</span>)server.dbnum) &#123;</div><div class="line">                redisLog(REDIS_WARNING,<span class="string">"FATAL: Data file was created with a Redis server configured to handle more than %d databases. Exiting\n"</span>, server.dbnum);</div><div class="line">                <span class="built_in">exit</span>(<span class="number">1</span>);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="comment">// 切换数据库</span></div><div class="line">            db = server.db+dbid;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">/* Read key */</span></div><div class="line">        <span class="comment">// 读取键</span></div><div class="line">        <span class="keyword">if</span> ((key = rdbLoadStringObject(&amp;rdb)) == <span class="literal">NULL</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">        <span class="comment">/* Read value */</span></div><div class="line">        <span class="comment">// 读取值</span></div><div class="line">        <span class="keyword">if</span> ((val = rdbLoadObject(type,&amp;rdb)) == <span class="literal">NULL</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">        <span class="comment">/* Check if the key already expired. This function is used when loading</span></div><div class="line"><span class="comment">         * an RDB file from disk, either at startup, or when an RDB was</span></div><div class="line"><span class="comment">         * received from the master. In the latter case, the master is</span></div><div class="line"><span class="comment">         * responsible for key expiry. If we would expire keys here, the</span></div><div class="line"><span class="comment">         * snapshot taken by the master may not be reflected on the slave. */</span></div><div class="line">        <span class="keyword">if</span> (server.masterhost == <span class="literal">NULL</span> &amp;&amp; expiretime != <span class="number">-1</span> &amp;&amp; expiretime &lt; now) &#123;</div><div class="line">            decrRefCount(key);</div><div class="line">            decrRefCount(val);</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">/* Add the new object in the hash table */</span></div><div class="line">        <span class="comment">// 将键值关联到数据库内</span></div><div class="line">        dbAdd(db,key,val);</div><div class="line"></div><div class="line">        <span class="comment">/* Set the expire time if needed */</span></div><div class="line">        <span class="comment">// 设置过期时间</span></div><div class="line">        <span class="keyword">if</span> (expiretime != <span class="number">-1</span>) setExpire(db,key,expiretime);</div><div class="line"></div><div class="line">        decrRefCount(key);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">/* Verify the checksum if RDB version is &gt;= 5 */</span></div><div class="line">    <span class="comment">// 校验和比较</span></div><div class="line">    <span class="keyword">if</span> (rdbver &gt;= <span class="number">5</span> &amp;&amp; server.rdb_checksum) &#123;</div><div class="line">        <span class="keyword">uint64_t</span> cksum, expected = rdb.cksum;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (rioRead(&amp;rdb,&amp;cksum,<span class="number">8</span>) == <span class="number">0</span>) <span class="keyword">goto</span> eoferr;</div><div class="line">        memrev64ifbe(&amp;cksum);</div><div class="line">        <span class="keyword">if</span> (cksum == <span class="number">0</span>) &#123;</div><div class="line">            redisLog(REDIS_WARNING,<span class="string">"RDB file was saved with checksum disabled: no check performed."</span>);</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cksum != expected) &#123;</div><div class="line">            redisLog(REDIS_WARNING,<span class="string">"Wrong RDB checksum. Aborting now."</span>);</div><div class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 结束</span></div><div class="line">    fclose(fp);</div><div class="line">    stopLoading();</div><div class="line">    <span class="keyword">return</span> REDIS_OK;</div><div class="line"></div><div class="line">eoferr: <span class="comment">/* unexpected end of file is handled here with a fatal exit */</span></div><div class="line">    redisLog(REDIS_WARNING,<span class="string">"Short read or OOM loading DB. Unrecoverable error, aborting now."</span>);</div><div class="line">    <span class="built_in">exit</span>(<span class="number">1</span>);</div><div class="line">    <span class="keyword">return</span> REDIS_ERR; <span class="comment">/* Just to avoid warning */</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+            <a href="/tags/源码阅读/" rel="tag"># 源码阅读</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/10/redis源码阅读-数据库/" rel="next" title="redis源码阅读-服务器">
+                <i class="fa fa-chevron-left"></i> redis源码阅读-服务器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/12/Redis源码阅读-订阅与发布/" rel="prev" title="Redis源码阅读-订阅与发布">
+                Redis源码阅读-订阅与发布 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Yang Yi</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RDB文件的保存命令"><span class="nav-number">1.</span> <span class="nav-text">RDB文件的保存命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rdbSave"><span class="nav-number">1.1.</span> <span class="nav-text">rdbSave</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动保存"><span class="nav-number">2.</span> <span class="nav-text">自动保存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDB的文件载入"><span class="nav-number">3.</span> <span class="nav-text">RDB的文件载入</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yang Yi</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

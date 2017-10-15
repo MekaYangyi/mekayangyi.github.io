@@ -1,20 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 
 
 
   
 
 
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
+
 
 
 
@@ -37,38 +45,27 @@
 
 
 
-  
-  
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-    
-    
-    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-  
-
-
-
 
 
 
 <link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -77,27 +74,18 @@
 
 
 
-  <link rel="alternate" href="/atom.xml" title="鉴心" type="application/atom+xml" />
-
-
-
-
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
 
 
 
 
 
-
-<meta name="description" content="YangYi">
 <meta property="og:type" content="website">
 <meta property="og:title" content="鉴心">
-<meta property="og:url" content="http://www.coderyang.com/index.html">
+<meta property="og:url" content="http://yoursite.com/index.html">
 <meta property="og:site_name" content="鉴心">
-<meta property="og:description" content="YangYi">
+<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="鉴心">
-<meta name="twitter:description" content="YangYi">
 
 
 
@@ -105,10 +93,12 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Mist',
-    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
-    motion: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
       userId: '0',
       author: '博主'
@@ -125,41 +115,25 @@
 
 
 
-  <link rel="canonical" href="http://www.coderyang.com/"/>
+  <link rel="canonical" href="http://yoursite.com/"/>
 
 
 
 
 
-  <title> 鉴心 </title>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
-
+  <title>鉴心</title>
   
 
 
 
 
 
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?7f324988b3db76841dfdbe38d09d8603";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
 
 
 
+</head>
 
-
-
-
-
-
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
@@ -167,8 +141,7 @@
   
 
   <div class="container sidebar-position-left 
-   page-home 
- ">
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -184,7 +157,7 @@
       </a>
     </div>
       
-        <h1 class="site-subtitle" itemprop="description"></h1>
+        <p class="site-subtitle"></p>
       
   </div>
 
@@ -215,7 +188,7 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
@@ -223,75 +196,11 @@
           </a>
         </li>
       
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-commonweal">
-          <a href="/404.html" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
-            
-            公益404
-          </a>
-        </li>
-      
 
-      
-        <li class="menu-item menu-item-search">
-          
-            <a href="javascript:;" class="popup-trigger">
-          
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
-            
-            搜索
-          </a>
-        </li>
       
     </ul>
   
 
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocapitalize="off" autocomplete="off" autocorrect="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
-    </div>
-  </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
   
 </nav>
 
@@ -315,13 +224,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/Redis源码阅读-总结.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/18/Redis源码阅读-总结/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -333,17 +246,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/Redis源码阅读-总结.html" itemprop="url">
-                  Redis源码阅读-总结
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/18/Redis源码阅读-总结/" itemprop="url">Redis源码阅读-总结</a></h1>
         
 
         <div class="post-meta">
@@ -391,18 +296,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/Redis源码阅读-总结.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/Redis源码阅读-总结.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -418,7 +311,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -445,18 +340,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -470,6 +362,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -482,13 +378,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/redis源码阅读-一个命令的旅程.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/18/redis源码阅读-一个命令的旅程/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -500,17 +400,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-一个命令的旅程.html" itemprop="url">
-                  redis源码阅读-一个命令的旅程
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/18/redis源码阅读-一个命令的旅程/" itemprop="url">redis源码阅读-一个命令的旅程</a></h1>
         
 
         <div class="post-meta">
@@ -558,18 +450,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-一个命令的旅程.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-一个命令的旅程.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -585,7 +465,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -607,7 +489,7 @@
 </ul>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-一个命令的旅程.html#more" rel="contents">
+            <a class="btn" href="/2017/07/18/redis源码阅读-一个命令的旅程/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -615,18 +497,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -640,6 +519,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -652,13 +535,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/redis源码阅读-事件.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/16/redis源码阅读-事件/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -670,17 +557,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-事件.html" itemprop="url">
-                  redis源码阅读-事件
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/16/redis源码阅读-事件/" itemprop="url">redis源码阅读-事件</a></h1>
         
 
         <div class="post-meta">
@@ -728,18 +607,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-事件.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-事件.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -755,7 +622,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -768,10 +637,10 @@
 <p>文件事件：文件事件是对套接字操作的抽象，当服务器与客户端进行通讯，会产生出各种文件事件，而服务器则通过监听并处理这些事件来完成一系列网络通讯操作。</p>
 <p>时间事件：redis一些操作是需要定时进行执行的，而时间事件就是对这类操作的抽象。</p>
 <h2 id="事件的实现"><a href="#事件的实现" class="headerlink" title="事件的实现"></a>事件的实现</h2><p>以下是事件结构体定义。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* File event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeFileEvent &#123;</div><div class="line">    <span class="keyword">int</span> mask; <span class="comment">// one of AE_(READABLE|WRITABLE) 类型</span></div><div class="line">    aeFileProc *rfileProc; <span class="comment">// 读事件处理器</span></div><div class="line">    aeFileProc *wfileProc; <span class="comment">// 写事件处理器</span></div><div class="line">    <span class="keyword">void</span> *clientData; <span class="comment">// 多路复用库的私有数据</span></div><div class="line">&#125; aeFileEvent;</div><div class="line"></div><div class="line"><span class="comment">/* Time event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeTimeEvent &#123;</div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> id;  <span class="comment">// 唯一标志</span></div><div class="line">    <span class="keyword">long</span> when_sec; <span class="comment">// 事件到达事件s</span></div><div class="line">    <span class="keyword">long</span> when_ms;  <span class="comment">// 事件到达事件ms</span></div><div class="line">    aeTimeProc *timeProc; <span class="comment">// 事件处理函数</span></div><div class="line">    aeEventFinalizerProc *finalizerProc; <span class="comment">// 事件释放函数</span></div><div class="line">    <span class="keyword">void</span> *clientData; <span class="comment">// 多路复用库的私有数据</span></div><div class="line">    <span class="keyword">struct</span> aeTimeEvent *next; <span class="comment">//　指向下一个时间事件结构，形成链表</span></div><div class="line">&#125; aeTimeEvent;</div><div class="line"></div><div class="line"><span class="comment">/* A fired event */</span></div><div class="line"><span class="comment">// 触发的事件结构体</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeFiredEvent &#123;</div><div class="line">    <span class="keyword">int</span> fd; <span class="comment">// 文件事件描述符</span></div><div class="line">    <span class="keyword">int</span> mask;　<span class="comment">// one of AE_(READABLE|WRITABLE) 类型</span></div><div class="line">&#125; aeFiredEvent;</div><div class="line"></div><div class="line"><span class="comment">// 事件循环结构体</span></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> aeEventLoop &#123;</div><div class="line">    <span class="keyword">int</span> maxfd;   <span class="comment">// 当前注册的最大描述符</span></div><div class="line">    <span class="keyword">int</span> setsize; <span class="comment">// 需要监听的描述符个数</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> timeEventNextId; <span class="comment">// 下一个时间事件ID</span></div><div class="line">    <span class="keyword">time_t</span> lastTime;     <span class="comment">// 上一次时间循环时间</span></div><div class="line">    aeFileEvent *events; <span class="comment">// 注册要使用的文件时间</span></div><div class="line">    aeFiredEvent *fired; <span class="comment">// 已准备好，待处理事件</span></div><div class="line">    aeTimeEvent *timeEventHead; <span class="comment">// 时间事件</span></div><div class="line">    <span class="keyword">int</span> stop; <span class="comment">// 事件处理器开关</span></div><div class="line">    <span class="keyword">void</span> *apidata; <span class="comment">// 处理多路服用库的私有数据</span></div><div class="line">    aeBeforeSleepProc *beforesleep; <span class="comment">// 处理事件前要执行的函数</span></div><div class="line">&#125; aeEventLoop;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* File event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">aeFileEvent</span> &#123;</span></div><div class="line">    <span class="keyword">int</span> mask; <span class="comment">// one of AE_(READABLE|WRITABLE) 类型</span></div><div class="line">    aeFileProc *rfileProc; <span class="comment">// 读事件处理器</span></div><div class="line">    aeFileProc *wfileProc; <span class="comment">// 写事件处理器</span></div><div class="line">    <span class="keyword">void</span> *clientData; <span class="comment">// 多路复用库的私有数据</span></div><div class="line">&#125; aeFileEvent;</div><div class="line"></div><div class="line"><span class="comment">/* Time event structure */</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">aeTimeEvent</span> &#123;</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> id;  <span class="comment">// 唯一标志</span></div><div class="line">    <span class="keyword">long</span> when_sec; <span class="comment">// 事件到达事件s</span></div><div class="line">    <span class="keyword">long</span> when_ms;  <span class="comment">// 事件到达事件ms</span></div><div class="line">    aeTimeProc *timeProc; <span class="comment">// 事件处理函数</span></div><div class="line">    aeEventFinalizerProc *finalizerProc; <span class="comment">// 事件释放函数</span></div><div class="line">    <span class="keyword">void</span> *clientData; <span class="comment">// 多路复用库的私有数据</span></div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">aeTimeEvent</span> *<span class="title">next</span>;</span> <span class="comment">//　指向下一个时间事件结构，形成链表</span></div><div class="line">&#125; aeTimeEvent;</div><div class="line"></div><div class="line"><span class="comment">/* A fired event */</span></div><div class="line"><span class="comment">// 触发的事件结构体</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">aeFiredEvent</span> &#123;</span></div><div class="line">    <span class="keyword">int</span> fd; <span class="comment">// 文件事件描述符</span></div><div class="line">    <span class="keyword">int</span> mask;　<span class="comment">// one of AE_(READABLE|WRITABLE) 类型</span></div><div class="line">&#125; aeFiredEvent;</div><div class="line"></div><div class="line"><span class="comment">// 事件循环结构体</span></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">aeEventLoop</span> &#123;</span></div><div class="line">    <span class="keyword">int</span> maxfd;   <span class="comment">// 当前注册的最大描述符</span></div><div class="line">    <span class="keyword">int</span> setsize; <span class="comment">// 需要监听的描述符个数</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> timeEventNextId; <span class="comment">// 下一个时间事件ID</span></div><div class="line">    <span class="keyword">time_t</span> lastTime;     <span class="comment">// 上一次时间循环时间</span></div><div class="line">    aeFileEvent *events; <span class="comment">// 注册要使用的文件时间</span></div><div class="line">    aeFiredEvent *fired; <span class="comment">// 已准备好，待处理事件</span></div><div class="line">    aeTimeEvent *timeEventHead; <span class="comment">// 时间事件</span></div><div class="line">    <span class="keyword">int</span> stop; <span class="comment">// 事件处理器开关</span></div><div class="line">    <span class="keyword">void</span> *apidata; <span class="comment">// 处理多路服用库的私有数据</span></div><div class="line">    aeBeforeSleepProc *beforesleep; <span class="comment">// 处理事件前要执行的函数</span></div><div class="line">&#125; aeEventLoop;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-事件.html#more" rel="contents">
+            <a class="btn" href="/2017/07/16/redis源码阅读-事件/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -779,18 +648,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -804,6 +670,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -816,13 +686,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/redis源码阅读-事务.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/16/redis源码阅读-事务/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -834,17 +708,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-事务.html" itemprop="url">
-                  redis源码阅读-事务
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/16/redis源码阅读-事务/" itemprop="url">redis源码阅读-事务</a></h1>
         
 
         <div class="post-meta">
@@ -892,18 +758,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-事务.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-事务.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -919,7 +773,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -968,7 +824,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">multiCommand</span><span class="params">(redisClient *c)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 已经开启事务</span></div><div class="line">    <span class="keyword">if</span> (c-&gt;flags &amp; REDIS_MULTI) &#123;</div><div class="line">        addReplyError(c,<span class="string">"MULTI calls can not be nested"</span>);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 标记事务开启</span></div><div class="line">    c-&gt;flags |= REDIS_MULTI;</div><div class="line">    addReply(c,shared.ok);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-事务.html#more" rel="contents">
+            <a class="btn" href="/2017/07/16/redis源码阅读-事务/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -976,18 +832,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1001,6 +854,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1013,13 +870,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/Redis源码阅读-AOF持久化.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/16/Redis源码阅读-AOF持久化/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1031,17 +892,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/Redis源码阅读-AOF持久化.html" itemprop="url">
-                  Redis源码阅读-AOF持久化
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/16/Redis源码阅读-AOF持久化/" itemprop="url">Redis源码阅读-AOF持久化</a></h1>
         
 
         <div class="post-meta">
@@ -1089,18 +942,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/Redis源码阅读-AOF持久化.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/Redis源码阅读-AOF持久化.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1116,7 +957,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1133,12 +976,12 @@
 <li>文件同步：将系统IO缓冲区的数据同步到磁盘文件</li>
 </ul>
 <h3 id="命令追加"><a href="#命令追加" class="headerlink" title="命令追加"></a>命令追加</h3><p>AOF持久化打开时，服务器在执行一个写命令之后，会以协议的格式将执行的命令追加倒服务器状态aof_buf缓冲区尾部。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> redisServer &#123; </div><div class="line">  <span class="comment">// ...</span></div><div class="line">  sds aof_buf;  <span class="comment">// aof缓冲区</span></div><div class="line">  <span class="comment">// ....</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span> </div><div class="line">  <span class="comment">// ...</span></div><div class="line">  sds aof_buf;  <span class="comment">// aof缓冲区</span></div><div class="line">  <span class="comment">// ....</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>命令追加的实现</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 将命令追加到AOF缓冲区中</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">feedAppendOnlyFile</span><span class="params">(<span class="keyword">struct</span> redisCommand *cmd, <span class="keyword">int</span> dictid, robj **argv, <span class="keyword">int</span> argc)</span> </span>&#123;</div><div class="line">    sds buf = sdsempty();</div><div class="line">    robj *tmpargv[<span class="number">3</span>];</div><div class="line"></div><div class="line">    <span class="comment">// 如果没切换到正确的数据库，则追加切换数据库命令</span></div><div class="line">    <span class="keyword">if</span> (dictid != server.aof_selected_db) &#123;</div><div class="line">        <span class="keyword">char</span> seldb[<span class="number">64</span>];</div><div class="line"></div><div class="line">        <span class="built_in">snprintf</span>(seldb,<span class="keyword">sizeof</span>(seldb),<span class="string">"%d"</span>,dictid);</div><div class="line">        buf = sdscatprintf(buf,<span class="string">"*2\r\n$6\r\nSELECT\r\n$%lu\r\n%s\r\n"</span>,</div><div class="line">            (<span class="keyword">unsigned</span> <span class="keyword">long</span>)<span class="built_in">strlen</span>(seldb),seldb);</div><div class="line">        server.aof_selected_db = dictid;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 根据命令类型追加命令</span></div><div class="line">    <span class="keyword">if</span> (cmd-&gt;proc == expireCommand || cmd-&gt;proc == pexpireCommand ||</div><div class="line">        cmd-&gt;proc == expireatCommand) &#123;</div><div class="line">        <span class="comment">// 追加过期键命令</span></div><div class="line">        buf = catAppendOnlyExpireAtCommand(buf,cmd,argv[<span class="number">1</span>],argv[<span class="number">2</span>]);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cmd-&gt;proc == setexCommand || cmd-&gt;proc == psetexCommand) &#123;</div><div class="line">        <span class="comment">// 追加setexCommand或者psetexCommand</span></div><div class="line">        tmpargv[<span class="number">0</span>] = createStringObject(<span class="string">"SET"</span>,<span class="number">3</span>);</div><div class="line">        tmpargv[<span class="number">1</span>] = argv[<span class="number">1</span>];</div><div class="line">        tmpargv[<span class="number">2</span>] = argv[<span class="number">3</span>];</div><div class="line">        buf = catAppendOnlyGenericCommand(buf,<span class="number">3</span>,tmpargv);</div><div class="line">        decrRefCount(tmpargv[<span class="number">0</span>]);</div><div class="line">        buf = catAppendOnlyExpireAtCommand(buf,cmd,argv[<span class="number">1</span>],argv[<span class="number">2</span>]);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// 追加其他一般修改数据库命令</span></div><div class="line">        buf = catAppendOnlyGenericCommand(buf,argc,argv);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 将格式化的命令字符串追加到aof_buf缓冲区中</span></div><div class="line">    <span class="keyword">if</span> (server.aof_state == REDIS_AOF_ON)</div><div class="line">        server.aof_buf = sdscatlen(server.aof_buf,buf,sdslen(buf));</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (server.aof_child_pid != <span class="number">-1</span>)</div><div class="line">        <span class="comment">// 如果在执行AOF重写，那么追加的新的AOF文件中</span></div><div class="line">        aofRewriteBufferAppend((<span class="keyword">unsigned</span> <span class="keyword">char</span>*)buf,sdslen(buf));</div><div class="line"></div><div class="line">    sdsfree(buf);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 根据参数，格式化命令</span></div><div class="line"><span class="function">sds <span class="title">catAppendOnlyGenericCommand</span><span class="params">(sds dst, <span class="keyword">int</span> argc, robj **argv)</span> </span>&#123;</div><div class="line">    <span class="keyword">char</span> buf[<span class="number">32</span>];</div><div class="line">    <span class="keyword">int</span> len, j;</div><div class="line">    robj *o;</div><div class="line"></div><div class="line">    buf[<span class="number">0</span>] = <span class="string">'*'</span>;</div><div class="line">    len = <span class="number">1</span>+ll2string(buf+<span class="number">1</span>,<span class="keyword">sizeof</span>(buf)<span class="number">-1</span>,argc);</div><div class="line">    buf[len++] = <span class="string">'\r'</span>;</div><div class="line">    buf[len++] = <span class="string">'\n'</span>;</div><div class="line">    dst = sdscatlen(dst,buf,len);</div><div class="line"></div><div class="line">    <span class="comment">// 遍历每一个参数，支架到AOF缓冲区中</span></div><div class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; argc; j++) &#123;</div><div class="line">        o = getDecodedObject(argv[j]);</div><div class="line">        buf[<span class="number">0</span>] = <span class="string">'$'</span>;</div><div class="line">        len = <span class="number">1</span>+ll2string(buf+<span class="number">1</span>,<span class="keyword">sizeof</span>(buf)<span class="number">-1</span>,sdslen(o-&gt;ptr));</div><div class="line">        buf[len++] = <span class="string">'\r'</span>;</div><div class="line">        buf[len++] = <span class="string">'\n'</span>;</div><div class="line">        dst = sdscatlen(dst,buf,len);</div><div class="line">        dst = sdscatlen(dst,o-&gt;ptr,sdslen(o-&gt;ptr));</div><div class="line">        dst = sdscatlen(dst,<span class="string">"\r\n"</span>,<span class="number">2</span>);</div><div class="line">        decrRefCount(o);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> dst;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 将命令追加到AOF缓冲区中</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">feedAppendOnlyFile</span><span class="params">(struct redisCommand *cmd, <span class="keyword">int</span> dictid, robj **argv, <span class="keyword">int</span> argc)</span> </span>&#123;</div><div class="line">    sds buf = sdsempty();</div><div class="line">    robj *tmpargv[<span class="number">3</span>];</div><div class="line"></div><div class="line">    <span class="comment">// 如果没切换到正确的数据库，则追加切换数据库命令</span></div><div class="line">    <span class="keyword">if</span> (dictid != server.aof_selected_db) &#123;</div><div class="line">        <span class="keyword">char</span> seldb[<span class="number">64</span>];</div><div class="line"></div><div class="line">        <span class="built_in">snprintf</span>(seldb,<span class="keyword">sizeof</span>(seldb),<span class="string">"%d"</span>,dictid);</div><div class="line">        buf = sdscatprintf(buf,<span class="string">"*2\r\n$6\r\nSELECT\r\n$%lu\r\n%s\r\n"</span>,</div><div class="line">            (<span class="keyword">unsigned</span> <span class="keyword">long</span>)<span class="built_in">strlen</span>(seldb),seldb);</div><div class="line">        server.aof_selected_db = dictid;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 根据命令类型追加命令</span></div><div class="line">    <span class="keyword">if</span> (cmd-&gt;proc == expireCommand || cmd-&gt;proc == pexpireCommand ||</div><div class="line">        cmd-&gt;proc == expireatCommand) &#123;</div><div class="line">        <span class="comment">// 追加过期键命令</span></div><div class="line">        buf = catAppendOnlyExpireAtCommand(buf,cmd,argv[<span class="number">1</span>],argv[<span class="number">2</span>]);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cmd-&gt;proc == setexCommand || cmd-&gt;proc == psetexCommand) &#123;</div><div class="line">        <span class="comment">// 追加setexCommand或者psetexCommand</span></div><div class="line">        tmpargv[<span class="number">0</span>] = createStringObject(<span class="string">"SET"</span>,<span class="number">3</span>);</div><div class="line">        tmpargv[<span class="number">1</span>] = argv[<span class="number">1</span>];</div><div class="line">        tmpargv[<span class="number">2</span>] = argv[<span class="number">3</span>];</div><div class="line">        buf = catAppendOnlyGenericCommand(buf,<span class="number">3</span>,tmpargv);</div><div class="line">        decrRefCount(tmpargv[<span class="number">0</span>]);</div><div class="line">        buf = catAppendOnlyExpireAtCommand(buf,cmd,argv[<span class="number">1</span>],argv[<span class="number">2</span>]);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// 追加其他一般修改数据库命令</span></div><div class="line">        buf = catAppendOnlyGenericCommand(buf,argc,argv);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 将格式化的命令字符串追加到aof_buf缓冲区中</span></div><div class="line">    <span class="keyword">if</span> (server.aof_state == REDIS_AOF_ON)</div><div class="line">        server.aof_buf = sdscatlen(server.aof_buf,buf,sdslen(buf));</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (server.aof_child_pid != <span class="number">-1</span>)</div><div class="line">        <span class="comment">// 如果在执行AOF重写，那么追加的新的AOF文件中</span></div><div class="line">        aofRewriteBufferAppend((<span class="keyword">unsigned</span> <span class="keyword">char</span>*)buf,sdslen(buf));</div><div class="line"></div><div class="line">    sdsfree(buf);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 根据参数，格式化命令</span></div><div class="line"><span class="function">sds <span class="title">catAppendOnlyGenericCommand</span><span class="params">(sds dst, <span class="keyword">int</span> argc, robj **argv)</span> </span>&#123;</div><div class="line">    <span class="keyword">char</span> buf[<span class="number">32</span>];</div><div class="line">    <span class="keyword">int</span> len, j;</div><div class="line">    robj *o;</div><div class="line"></div><div class="line">    buf[<span class="number">0</span>] = <span class="string">'*'</span>;</div><div class="line">    len = <span class="number">1</span>+ll2string(buf+<span class="number">1</span>,<span class="keyword">sizeof</span>(buf)<span class="number">-1</span>,argc);</div><div class="line">    buf[len++] = <span class="string">'\r'</span>;</div><div class="line">    buf[len++] = <span class="string">'\n'</span>;</div><div class="line">    dst = sdscatlen(dst,buf,len);</div><div class="line"></div><div class="line">    <span class="comment">// 遍历每一个参数，支架到AOF缓冲区中</span></div><div class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; argc; j++) &#123;</div><div class="line">        o = getDecodedObject(argv[j]);</div><div class="line">        buf[<span class="number">0</span>] = <span class="string">'$'</span>;</div><div class="line">        len = <span class="number">1</span>+ll2string(buf+<span class="number">1</span>,<span class="keyword">sizeof</span>(buf)<span class="number">-1</span>,sdslen(o-&gt;ptr));</div><div class="line">        buf[len++] = <span class="string">'\r'</span>;</div><div class="line">        buf[len++] = <span class="string">'\n'</span>;</div><div class="line">        dst = sdscatlen(dst,buf,len);</div><div class="line">        dst = sdscatlen(dst,o-&gt;ptr,sdslen(o-&gt;ptr));</div><div class="line">        dst = sdscatlen(dst,<span class="string">"\r\n"</span>,<span class="number">2</span>);</div><div class="line">        decrRefCount(o);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> dst;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/Redis源码阅读-AOF持久化.html#more" rel="contents">
+            <a class="btn" href="/2017/07/16/Redis源码阅读-AOF持久化/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1146,18 +989,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1171,6 +1011,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1183,13 +1027,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/Redis源码阅读-订阅与发布.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/12/Redis源码阅读-订阅与发布/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1201,17 +1049,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/Redis源码阅读-订阅与发布.html" itemprop="url">
-                  Redis源码阅读-订阅与发布
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/12/Redis源码阅读-订阅与发布/" itemprop="url">Redis源码阅读-订阅与发布</a></h1>
         
 
         <div class="post-meta">
@@ -1259,18 +1099,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/Redis源码阅读-订阅与发布.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/Redis源码阅读-订阅与发布.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1286,7 +1114,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1297,12 +1127,12 @@
           <p>Redis的发布与订阅主要是实现客户端订阅一个频道或者模式，当某客户端向一个频道发送消息时，该频道或者匹配模式订阅者都能够收到消息。</p>
 <h2 id="频道的订阅与退订"><a href="#频道的订阅与退订" class="headerlink" title="频道的订阅与退订"></a>频道的订阅与退订</h2><p>Redis在服务器结构体中的pubsub_channels字典中保存了所有的频道订阅关系。pubsub_channels键为频道，值为订阅的客户端组成的链表。</p>
 <p>客户端结构体的pubsub_channels保存了客户端订阅的所有频道，pubsub_channels的键为频道，值为空。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> redisServer &#123;</div><div class="line">  <span class="comment">// ...</span></div><div class="line">  dict *pubsub_channels;  <span class="comment">// 保存所有的频道订阅关系</span></div><div class="line">  <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">struct</span> redisClient &#123;</div><div class="line">  <span class="comment">// ...</span></div><div class="line">  dict *pubsub_channels; <span class="comment">// 记录客户端订阅的频道</span></div><div class="line">  <span class="comment">// ...</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></div><div class="line">  <span class="comment">// ...</span></div><div class="line">  dict *pubsub_channels;  <span class="comment">// 保存所有的频道订阅关系</span></div><div class="line">  <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisClient</span> &#123;</span></div><div class="line">  <span class="comment">// ...</span></div><div class="line">  dict *pubsub_channels; <span class="comment">// 记录客户端订阅的频道</span></div><div class="line">  <span class="comment">// ...</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h2 id="订阅"><a href="#订阅" class="headerlink" title="订阅"></a>订阅</h2><p>源码如下</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 订阅命令处理函数</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">subscribeCommand</span><span class="params">(redisClient *c)</span> </span>&#123;</div><div class="line">    <span class="keyword">int</span> j;</div><div class="line"></div><div class="line">    <span class="comment">// 遍历指令中的所有频道</span></div><div class="line">    <span class="keyword">for</span> (j = <span class="number">1</span>; j &lt; c-&gt;argc; j++)</div><div class="line">        pubsubSubscribeChannel(c,c-&gt;argv[j]);</div><div class="line">    c-&gt;flags |= REDIS_PUBSUB;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 设置客户端c订阅频道channel</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">pubsubSubscribeChannel</span><span class="params">(redisClient *c, robj *channel)</span> </span>&#123;</div><div class="line">    dictEntry *de;</div><div class="line">    <span class="built_in">list</span> *clients = <span class="literal">NULL</span>;</div><div class="line">    <span class="keyword">int</span> retval = <span class="number">0</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* Add the channel to the client -&gt; channels hash table */</span></div><div class="line">    <span class="comment">// 将channels加倒c-&gt;c-&gt;pubsub_channels的字典里</span></div><div class="line">    <span class="keyword">if</span> (dictAdd(c-&gt;pubsub_channels,channel,<span class="literal">NULL</span>) == DICT_OK) &#123;</div><div class="line">        retval = <span class="number">1</span>;</div><div class="line">        incrRefCount(channel);</div><div class="line">        <span class="comment">/* Add the client to the channel -&gt; list of clients hash table */</span></div><div class="line">        <span class="comment">// 找出服务器中的频道</span></div><div class="line">        de = dictFind(server.pubsub_channels,channel);</div><div class="line">        </div><div class="line">        <span class="comment">// 不存在就添加一个频道</span></div><div class="line">        <span class="comment">// 获取客户端链表</span></div><div class="line">        <span class="keyword">if</span> (de == <span class="literal">NULL</span>) &#123;</div><div class="line">            clients = listCreate();</div><div class="line">            dictAdd(server.pubsub_channels,channel,clients);</div><div class="line">            incrRefCount(channel);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            clients = dictGetVal(de);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// 添加到客户端链表尾部</span></div><div class="line">        listAddNodeTail(clients,c);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">/* Notify the client */</span></div><div class="line">    <span class="comment">// 回复客户端</span></div><div class="line">    addReply(c,shared.mbulkhdr[<span class="number">3</span>]);</div><div class="line">    addReply(c,shared.subscribebulk);</div><div class="line">    addReplyBulk(c,channel);</div><div class="line">    addReplyLongLong(c,clientSubscriptionsCount(c));</div><div class="line">    <span class="keyword">return</span> retval;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/Redis源码阅读-订阅与发布.html#more" rel="contents">
+            <a class="btn" href="/2017/07/12/Redis源码阅读-订阅与发布/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1310,18 +1140,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1335,6 +1162,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1347,13 +1178,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/redis源码阅读-RDB持久化.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/12/redis源码阅读-RDB持久化/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1365,17 +1200,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-RDB持久化.html" itemprop="url">
-                  redis源码阅读-RDB持久化
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/12/redis源码阅读-RDB持久化/" itemprop="url">redis源码阅读-RDB持久化</a></h1>
         
 
         <div class="post-meta">
@@ -1423,18 +1250,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-RDB持久化.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-RDB持久化.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1450,7 +1265,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1467,7 +1284,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bgsaveCommand</span><span class="params">(redisClient *c)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 判断是否已经在执行BGSAVE</span></div><div class="line">    <span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span>) &#123;</div><div class="line">        addReplyError(c,<span class="string">"Background save already in progress"</span>);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (server.aof_child_pid != <span class="number">-1</span>) &#123;</div><div class="line">        </div><div class="line">    <span class="comment">// 判断是否在执行BGREWRIEAOF</span></div><div class="line">        addReplyError(c,<span class="string">"Can't BGSAVE while AOF log rewriting is in progress"</span>);</div><div class="line">    </div><div class="line">    <span class="comment">// 执行rdbSaveBackground 生成RDB文件</span></div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (rdbSaveBackground(server.rdb_filename) == REDIS_OK) &#123;</div><div class="line">        addReplyStatus(c,<span class="string">"Background saving started"</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        addReply(c,shared.err);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">rdbSaveBackground</span><span class="params">(<span class="keyword">char</span> *filename)</span> </span>&#123;</div><div class="line">    <span class="keyword">pid_t</span> childpid;</div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> start;</div><div class="line"></div><div class="line">    <span class="comment">// 如果BGSAVE正在执行直接返回</span></div><div class="line">    <span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span>) <span class="keyword">return</span> REDIS_ERR;</div><div class="line"></div><div class="line">    <span class="comment">// 获取dirty数据 执行时间</span></div><div class="line">    server.dirty_before_bgsave = server.dirty;</div><div class="line">    server.lastbgsave_try = time(<span class="literal">NULL</span>);</div><div class="line"></div><div class="line">    <span class="comment">// fork() 开始前时间</span></div><div class="line">    start = ustime();</div><div class="line"></div><div class="line">    <span class="comment">// 调用fork，克隆该进程</span></div><div class="line">    <span class="keyword">if</span> ((childpid = fork()) == <span class="number">0</span>) &#123;</div><div class="line">        <span class="keyword">int</span> retval;</div><div class="line"></div><div class="line">        <span class="comment">/* Child */</span></div><div class="line">        closeListeningSockets(<span class="number">0</span>);</div><div class="line">        redisSetProcTitle(<span class="string">"redis-rdb-bgsave"</span>);</div><div class="line"></div><div class="line">        <span class="comment">// 执行保存操作</span></div><div class="line">        retval = rdbSave(filename);</div><div class="line"></div><div class="line">        <span class="comment">// 打印 copy-on-write 时使用的内存数</span></div><div class="line">        <span class="keyword">if</span> (retval == REDIS_OK) &#123;</div><div class="line">            <span class="keyword">size_t</span> private_dirty = zmalloc_get_private_dirty();</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (private_dirty) &#123;</div><div class="line">                redisLog(REDIS_NOTICE,</div><div class="line">                    <span class="string">"RDB: %zu MB of memory used by copy-on-write"</span>,</div><div class="line">                    private_dirty/(<span class="number">1024</span>*<span class="number">1024</span>));</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">// 向父进程发送信号</span></div><div class="line">        exitFromChild((retval == REDIS_OK) ? <span class="number">0</span> : <span class="number">1</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">/* Parent */</span></div><div class="line"></div><div class="line">        <span class="comment">// 计算 fork() 执行的时间</span></div><div class="line">        server.stat_fork_time = ustime()-start;</div><div class="line">        server.stat_fork_rate = (<span class="keyword">double</span>) zmalloc_used_memory() * <span class="number">1000000</span> / server.stat_fork_time / (<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">1024</span>); <span class="comment">/* GB per second. */</span></div><div class="line">        latencyAddSampleIfNeeded(<span class="string">"fork"</span>,server.stat_fork_time/<span class="number">1000</span>);</div><div class="line">        </div><div class="line">        <span class="comment">// 执行fork()错误信息</span></div><div class="line">        <span class="keyword">if</span> (childpid == <span class="number">-1</span>) &#123;</div><div class="line">            server.lastbgsave_status = REDIS_ERR;</div><div class="line">            redisLog(REDIS_WARNING,<span class="string">"Can't save in background: fork: %s"</span>,</div><div class="line">                strerror(errno));</div><div class="line">            <span class="keyword">return</span> REDIS_ERR;</div><div class="line">        &#125;</div><div class="line">        redisLog(REDIS_NOTICE,<span class="string">"Background saving started by pid %d"</span>,childpid);</div><div class="line">        </div><div class="line">        <span class="comment">// 记录数据库开始BGSAVE时间</span></div><div class="line">        server.rdb_save_time_start = time(<span class="literal">NULL</span>);</div><div class="line"></div><div class="line">        <span class="comment">// 子进程ID 类型</span></div><div class="line">        server.rdb_child_pid = childpid;</div><div class="line">        server.rdb_child_type = REDIS_RDB_CHILD_TYPE_DISK;</div><div class="line"></div><div class="line">        <span class="comment">// 关闭自动Rehash</span></div><div class="line">        updateDictResizePolicy();</div><div class="line">        <span class="keyword">return</span> REDIS_OK;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> REDIS_OK; <span class="comment">/* unreached */</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-RDB持久化.html#more" rel="contents">
+            <a class="btn" href="/2017/07/12/redis源码阅读-RDB持久化/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1475,18 +1292,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1500,6 +1314,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1512,13 +1330,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/redis源码阅读-数据库.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/10/redis源码阅读-数据库/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1530,17 +1352,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-数据库.html" itemprop="url">
-                  redis源码阅读-服务器
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/10/redis源码阅读-数据库/" itemprop="url">redis源码阅读-服务器</a></h1>
         
 
         <div class="post-meta">
@@ -1588,18 +1402,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-数据库.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-数据库.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1615,7 +1417,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1625,18 +1429,18 @@
         
           <h2 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h2><p>redis运行存在一个redis服务器结构，一个服务器中保存着n个数据库。</p>
 <p>dbnum由服务器配置决定，默认值为16。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> redisServer &#123;</div><div class="line">    redisDb *db;  <span class="comment">// Redis的数据库</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">    <span class="keyword">int</span> dbnum;  <span class="comment">// 表明数据库的数量</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> redisDb &#123;</div><div class="line">    dict *dict;                 <span class="comment">/* 数据库键字典 */</span></div><div class="line">    dict *expires;              <span class="comment">/* 键过期时间字典 */</span></div><div class="line">    dict *blocking_keys;        <span class="comment">/* 处于阻塞状态的键 */</span></div><div class="line">    dict *ready_keys;           <span class="comment">/* 可以解除阻塞的键 */</span></div><div class="line">    dict *watched_keys;         <span class="comment">/* 被watch的键 */</span></div><div class="line">    <span class="keyword">struct</span> evictionPoolEntry *eviction_pool;    <span class="comment">/* Eviction pool of keys */</span></div><div class="line">    <span class="keyword">int</span> id;                     <span class="comment">/* 数据库编号 */</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> avg_ttl;          <span class="comment">/* 数据库键的平均时间*/</span></div><div class="line">&#125; redisDb;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></div><div class="line">    redisDb *db;  <span class="comment">// Redis的数据库</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">    <span class="keyword">int</span> dbnum;  <span class="comment">// 表明数据库的数量</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisDb</span> &#123;</span></div><div class="line">    dict *dict;                 <span class="comment">/* 数据库键字典 */</span></div><div class="line">    dict *expires;              <span class="comment">/* 键过期时间字典 */</span></div><div class="line">    dict *blocking_keys;        <span class="comment">/* 处于阻塞状态的键 */</span></div><div class="line">    dict *ready_keys;           <span class="comment">/* 可以解除阻塞的键 */</span></div><div class="line">    dict *watched_keys;         <span class="comment">/* 被watch的键 */</span></div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">evictionPoolEntry</span> *<span class="title">eviction_pool</span>;</span>    <span class="comment">/* Eviction pool of keys */</span></div><div class="line">    <span class="keyword">int</span> id;                     <span class="comment">/* 数据库编号 */</span></div><div class="line">    <span class="keyword">long</span> <span class="keyword">long</span> avg_ttl;          <span class="comment">/* 数据库键的平均时间*/</span></div><div class="line">&#125; redisDb;</div></pre></td></tr></table></figure>
 <h2 id="切换数据库"><a href="#切换数据库" class="headerlink" title="切换数据库"></a>切换数据库</h2><p>每个redis客户端都有自己的目标数据库，当客户端执行数据库读写命令，目标数据库是这些命令的操作对象。</p>
 <p>redis提供select命令来切换数据库，redisClient</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> redisClient &#123; </div><div class="line">    <span class="keyword">int</span> fd;  <span class="comment">// 套接字描述符</span></div><div class="line">    redisDb *db; <span class="comment">// 当前正在使用的数据库</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">selectDb</span><span class="params">(redisClient *c, <span class="keyword">int</span> id)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 校验id</span></div><div class="line">    <span class="keyword">if</span> (id &lt; <span class="number">0</span> || id &gt;= server.dbnum)</div><div class="line">        <span class="keyword">return</span> REDIS_ERR;</div><div class="line"></div><div class="line">    <span class="comment">// 切换客户端数据库</span></div><div class="line">    c-&gt;db = &amp;server.db[id];</div><div class="line"></div><div class="line">    <span class="keyword">return</span> REDIS_OK;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisClient</span> &#123;</span> </div><div class="line">    <span class="keyword">int</span> fd;  <span class="comment">// 套接字描述符</span></div><div class="line">    redisDb *db; <span class="comment">// 当前正在使用的数据库</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">selectDb</span><span class="params">(redisClient *c, <span class="keyword">int</span> id)</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 校验id</span></div><div class="line">    <span class="keyword">if</span> (id &lt; <span class="number">0</span> || id &gt;= server.dbnum)</div><div class="line">        <span class="keyword">return</span> REDIS_ERR;</div><div class="line"></div><div class="line">    <span class="comment">// 切换客户端数据库</span></div><div class="line">    c-&gt;db = &amp;server.db[id];</div><div class="line"></div><div class="line">    <span class="keyword">return</span> REDIS_OK;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h2 id="数据库键空间"><a href="#数据库键空间" class="headerlink" title="数据库键空间"></a>数据库键空间</h2><p>Redis数据库存放的数据都是以键值对形式存在，redisDB结构的dict字典保存数据库中的所有键值对，这个字典被成为键空间。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> redisDb &#123;</div><div class="line">    dict *dict;                 <span class="comment">/* 数据库键字典 */</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125; redisDb;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisDb</span> &#123;</span></div><div class="line">    dict *dict;                 <span class="comment">/* 数据库键字典 */</span></div><div class="line">    <span class="comment">// ...</span></div><div class="line">&#125; redisDb;</div></pre></td></tr></table></figure>
 <p>键空间的键就是数据库的键，每个键都是一个字符串对象。</p>
 <p>键空间的值就是数据库的值，每个值可以是字符串对象、列表对象、哈希表对象、集合对象、有序集合对象中任意一种。</p>
-<h2 id="键空间的操作"><a href="#键空间的操作" class="headerlink" title="键空间的操作"></a>键空间的操作</h2><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">/* db.c -- Keyspace access API */</div><div class="line">int removeExpire(redisDb *db, robj *key);// 移除键的过期时间</div><div class="line">void propagateExpire(redisDb *db, robj *key); // </div><div class="line">int expireIfNeeded(redisDb *db, robj *key); // 检查是否过期，是则删除键</div><div class="line">long long getExpire(redisDb *db, robj *key); // 获取过期时间</div><div class="line">void setExpire(redisDb *db, robj *key, long long when); // 设定过期时间</div><div class="line">robj *lookupKey(redisDb *db, robj *key); // 从db中取出键key的值</div><div class="line">robj *lookupKeyRead(redisDb *db, robj *key); // 从db中取出键key的值</div><div class="line">robj *lookupKeyWrite(redisDb *db, robj *key); // 从db中取出键key的值</div><div class="line">robj *lookupKeyReadOrReply(redisClient *c, robj *key, robj *reply); // 从db中取出键key的值</div><div class="line">robj *lookupKeyWriteOrReply(redisClient *c, robj *key, robj *reply);// 从db中取出键key的值</div><div class="line">void dbAdd(redisDb *db, robj *key, robj *val);// 尝试将键值对key\val添加到数据库中</div><div class="line">void dbOverwrite(redisDb *db, robj *key, robj *val); // 重写指定键的值,键不存在的话终止</div><div class="line">void setKey(redisDb *db, robj *key, robj *val);// 设定指定键的值，不管存不存在</div><div class="line">int dbExists(redisDb *db, robj *key); // 判断指定键是否存在  </div><div class="line">robj *dbRandomKey(redisDb *db); // 随机从数据库中取出一个键，并以字符串对象的方式返回这个键</div><div class="line">int dbDelete(redisDb *db, robj *key); // 从数据库中删除给定的键</div><div class="line">robj *dbUnshareStringValue(redisDb *db, robj *key, robj *o);</div><div class="line">long long emptyDb(void(callback)(void*));// 情况所有数据</div><div class="line">int selectDb(redisClient *c, int id); // 切换db</div><div class="line">void signalModifiedKey(redisDb *db, robj *key);</div><div class="line">void signalFlushedDb(int dbid);</div><div class="line">unsigned int getKeysInSlot(unsigned int hashslot, robj **keys, unsigned int count);</div><div class="line">unsigned int countKeysInSlot(unsigned int hashslot);</div><div class="line">unsigned int delKeysInSlot(unsigned int hashslot);</div><div class="line">int verifyClusterConfigWithData(void);</div><div class="line">void scanGenericCommand(redisClient *c, robj *o, unsigned long cursor);</div><div class="line">int parseScanCursorOrReply(redisClient *c, robj *o, unsigned long *cursor);</div></pre></td></tr></table></figure>
+<h2 id="键空间的操作"><a href="#键空间的操作" class="headerlink" title="键空间的操作"></a>键空间的操作</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* db.c -- Keyspace access API */</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">removeExpire</span><span class="params">(redisDb *db, robj *key)</span></span>;<span class="comment">// 移除键的过期时间</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">propagateExpire</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// </span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">expireIfNeeded</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 检查是否过期，是则删除键</span></div><div class="line"><span class="function"><span class="keyword">long</span> <span class="keyword">long</span> <span class="title">getExpire</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 获取过期时间</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setExpire</span><span class="params">(redisDb *db, robj *key, <span class="keyword">long</span> <span class="keyword">long</span> when)</span></span>; <span class="comment">// 设定过期时间</span></div><div class="line"><span class="function">robj *<span class="title">lookupKey</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyRead</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyWrite</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyReadOrReply</span><span class="params">(redisClient *c, robj *key, robj *reply)</span></span>; <span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function">robj *<span class="title">lookupKeyWriteOrReply</span><span class="params">(redisClient *c, robj *key, robj *reply)</span></span>;<span class="comment">// 从db中取出键key的值</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbAdd</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>;<span class="comment">// 尝试将键值对key\val添加到数据库中</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbOverwrite</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>; <span class="comment">// 重写指定键的值,键不存在的话终止</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">setKey</span><span class="params">(redisDb *db, robj *key, robj *val)</span></span>;<span class="comment">// 设定指定键的值，不管存不存在</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">dbExists</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 判断指定键是否存在  </span></div><div class="line"><span class="function">robj *<span class="title">dbRandomKey</span><span class="params">(redisDb *db)</span></span>; <span class="comment">// 随机从数据库中取出一个键，并以字符串对象的方式返回这个键</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">dbDelete</span><span class="params">(redisDb *db, robj *key)</span></span>; <span class="comment">// 从数据库中删除给定的键</span></div><div class="line"><span class="function">robj *<span class="title">dbUnshareStringValue</span><span class="params">(redisDb *db, robj *key, robj *o)</span></span>;</div><div class="line">long long emptyDb(void(callback)(void*));// 情况所有数据</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">selectDb</span><span class="params">(redisClient *c, <span class="keyword">int</span> id)</span></span>; <span class="comment">// 切换db</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">signalModifiedKey</span><span class="params">(redisDb *db, robj *key)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">signalFlushedDb</span><span class="params">(<span class="keyword">int</span> dbid)</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">getKeysInSlot</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> hashslot, robj **keys, <span class="keyword">unsigned</span> <span class="keyword">int</span> count)</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">countKeysInSlot</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> hashslot)</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">delKeysInSlot</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> hashslot)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">verifyClusterConfigWithData</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">scanGenericCommand</span><span class="params">(redisClient *c, robj *o, <span class="keyword">unsigned</span> <span class="keyword">long</span> cursor)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">parseScanCursorOrReply</span><span class="params">(redisClient *c, robj *o, <span class="keyword">unsigned</span> <span class="keyword">long</span> *cursor)</span></span>;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-数据库.html#more" rel="contents">
+            <a class="btn" href="/2017/07/10/redis源码阅读-数据库/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1644,18 +1448,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1669,6 +1470,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1681,13 +1486,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/redis源码阅读-对象.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/09/redis源码阅读-对象/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1699,17 +1508,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-对象.html" itemprop="url">
-                  redis源码阅读-对象
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/09/redis源码阅读-对象/" itemprop="url">redis源码阅读-对象</a></h1>
         
 
         <div class="post-meta">
@@ -1757,18 +1558,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-对象.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-对象.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1784,7 +1573,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1795,7 +1586,7 @@
           <p>之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。</p>
 <p>redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。</p>
 <h2 id="对象的类型与编码"><a href="#对象的类型与编码" class="headerlink" title="对象的类型与编码"></a>对象的类型与编码</h2><p>redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一个对象用作键值对的键，一个对象用作键值对的值。</p>
-<h3 id="对象的结构体"><a href="#对象的结构体" class="headerlink" title="对象的结构体"></a>对象的结构体</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> redisObject &#123;</div><div class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>; <span class="comment">// 类型</span></div><div class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>; <span class="comment">// 编码</span></div><div class="line">    <span class="keyword">unsigned</span> lru:REDIS_LRU_BITS; <span class="comment">/* lru time (relative to server.lruclock) */</span></div><div class="line">    <span class="keyword">int</span> refcount; <span class="comment">// 引用计数</span></div><div class="line">    <span class="keyword">void</span> *ptr; <span class="comment">// 值</span></div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+<h3 id="对象的结构体"><a href="#对象的结构体" class="headerlink" title="对象的结构体"></a>对象的结构体</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisObject</span> &#123;</span></div><div class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>; <span class="comment">// 类型</span></div><div class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>; <span class="comment">// 编码</span></div><div class="line">    <span class="keyword">unsigned</span> lru:REDIS_LRU_BITS; <span class="comment">/* lru time (relative to server.lruclock) */</span></div><div class="line">    <span class="keyword">int</span> refcount; <span class="comment">// 引用计数</span></div><div class="line">    <span class="keyword">void</span> *ptr; <span class="comment">// 值</span></div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
 <p>redis结构体使用位段结构节省空间</p>
 <h4 id="类型type"><a href="#类型type" class="headerlink" title="类型type"></a>类型type</h4><p>记录redis对象类型，五种类型</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_STRING 0 <span class="comment">// 字符串对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_LIST 1 <span class="comment">// 列表对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_SET 2 <span class="comment">// 哈希对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_ZSET 3 <span class="comment">// 集合对象</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> REDIS_HASH 4 <span class="comment">// 有序集合对象</span></span></div></pre></td></tr></table></figure>
@@ -1836,7 +1627,7 @@
 <h4 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h4><p>常见的管理方式，引用计数为0时回收。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-对象.html#more" rel="contents">
+            <a class="btn" href="/2017/07/09/redis源码阅读-对象/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1844,18 +1635,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -1869,6 +1657,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -1881,13 +1673,17 @@
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://www.coderyang.com/blog/2017/07/redis源码阅读-压缩列表ziplist.html">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/08/redis源码阅读-压缩列表ziplist/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="YangYi">
+      <meta itemprop="name" content="Yang Yi">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1899,17 +1695,9 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-            
-            
-              
+          <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/2017/07/redis源码阅读-压缩列表ziplist.html" itemprop="url">
-                  redis源码阅读-压缩列表ziplist
-                </a>
-              
-            
-          </h2>
+                <a class="post-title-link" href="/2017/07/08/redis源码阅读-压缩列表ziplist/" itemprop="url">redis源码阅读-压缩列表ziplist</a></h1>
         
 
         <div class="post-meta">
@@ -1957,18 +1745,6 @@
 
           
             
-            <!--noindex-->
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/2017/07/redis源码阅读-压缩列表ziplist.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count hc-comment-count" data-xid="/blog/2017/07/redis源码阅读-压缩列表ziplist.html" itemprop="commentsCount"></span>
-                </a>
-              </span>
-              <!--/noindex-->
-            
           
 
           
@@ -1984,7 +1760,9 @@
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -1994,7 +1772,7 @@
         
           <p>压缩列表时列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每个列表项要么是小整数，要么是长度比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。</p>
 <h2 id="压缩列表的构成"><a href="#压缩列表的构成" class="headerlink" title="压缩列表的构成"></a>压缩列表的构成</h2><p>压缩列表是redis为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。一个压缩列表可以包含任意多个节点，每个节点可以保存一个字节数组或者一个整数组。</p>
-<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">《redis设计与实现》</div><div class="line">空白 ziplist 示例图</div><div class="line"></div><div class="line">area        |<span class="string">&lt;---- ziplist header ----&gt;</span>|<span class="string">&lt;-- end --&gt;</span>|</div><div class="line"></div><div class="line">size          4 bytes   4 bytes 2 bytes  1 byte</div><div class="line">            +---------+--------+-------+-----------+</div><div class="line">component   |<span class="string"> zlbytes </span>|<span class="string"> zltail </span>|<span class="string"> zllen </span>|<span class="string"> zlend     </span>|</div><div class="line">            |<span class="string">         </span>|<span class="string">        </span>|<span class="string">       </span>|<span class="string">           </span>|</div><div class="line">value       |<span class="string">  1011   </span>|<span class="string">  1010  </span>|<span class="string">   0   </span>|<span class="string"> 1111 1111 </span>|</div><div class="line">            +---------+--------+-------+-----------+</div><div class="line">                                       ^</div><div class="line">                                       |<span class="string"></div><div class="line">                               ZIPLIST_ENTRY_HEAD</div><div class="line">                                       &amp;</div><div class="line">address                        ZIPLIST_ENTRY_TAIL</div><div class="line">                                       &amp;</div><div class="line">                               ZIPLIST_ENTRY_END</div><div class="line"></div><div class="line">非空 ziplist 示例图</div><div class="line"></div><div class="line">area        </span>|<span class="string">&lt;---- ziplist header ----&gt;</span>|<span class="string">&lt;----------- entries -------------&gt;</span>|<span class="string">&lt;-end-&gt;</span>|</div><div class="line"></div><div class="line">size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte</div><div class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</div><div class="line">component   |<span class="string"> zlbytes </span>|<span class="string"> zltail </span>|<span class="string"> zllen </span>|<span class="string"> entry1 </span>|<span class="string"> entry2 </span>|<span class="string">  ...   </span>|<span class="string"> entryN </span>|<span class="string"> zlend </span>|</div><div class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</div><div class="line">                                       ^                          ^        ^</div><div class="line">address                                |<span class="string">                          </span>|<span class="string">        </span>|</div><div class="line">                                ZIPLIST_ENTRY_HEAD                |<span class="string">   ZIPLIST_ENTRY_END</div><div class="line">                                                                  </span>|</div><div class="line">                                                        ZIPLIST_ENTRY_TAIL</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">《redis设计与实现》</div><div class="line">空白 ziplist 示例图</div><div class="line"></div><div class="line">area        |&lt;---- ziplist header ----&gt;|&lt;-- end --&gt;|</div><div class="line"></div><div class="line">size          4 bytes   4 bytes 2 bytes  1 byte</div><div class="line">            +---------+--------+-------+-----------+</div><div class="line">component   | zlbytes | zltail | zllen | zlend     |</div><div class="line">            |         |        |       |           |</div><div class="line">value       |  1011   |  1010  |   0   | 1111 1111 |</div><div class="line">            +---------+--------+-------+-----------+</div><div class="line">                                       ^</div><div class="line">                                       |</div><div class="line">                               ZIPLIST_ENTRY_HEAD</div><div class="line">                                       &amp;</div><div class="line">address                        ZIPLIST_ENTRY_TAIL</div><div class="line">                                       &amp;</div><div class="line">                               ZIPLIST_ENTRY_END</div><div class="line"></div><div class="line">非空 ziplist 示例图</div><div class="line"></div><div class="line">area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|</div><div class="line"></div><div class="line">size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte</div><div class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</div><div class="line">component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |</div><div class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</div><div class="line">                                       ^                          ^        ^</div><div class="line">address                                |                          |        |</div><div class="line">                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END</div><div class="line">                                                                  |</div><div class="line">                                                        ZIPLIST_ENTRY_TAIL</div></pre></td></tr></table></figure>
 <p>zlbytes记录整个压缩列表占用的字节数。</p>
 <p>zltail记录压缩列表尾节点距离压缩列表的起始地址有多少字节。</p>
 <p>zzlen记录压缩列表包含的节点数量。</p>
@@ -2002,7 +1780,7 @@
 <p>zlend特殊值0xff，标记压缩列表末端。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/2017/07/redis源码阅读-压缩列表ziplist.html#more" rel="contents">
+            <a class="btn" href="/2017/07/08/redis源码阅读-压缩列表ziplist/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2010,18 +1788,15 @@
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
 
     <footer class="post-footer">
       
@@ -2035,6 +1810,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -2067,108 +1846,73 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="/img/avatar.jpg"
-               alt="YangYi" />
-          <p class="site-author-name" itemprop="name">YangYi</p>
-           
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Yang Yi</p>
               <p class="site-description motion-element" itemprop="description"></p>
-           
-        </div>
-        <nav class="site-state motion-element">
-
-          
-            <div class="site-state-item site-state-posts">
-              <a href="/archives">
-                <span class="site-state-item-count">46</span>
-                <span class="site-state-item-name">日志</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-categories">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">7</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">20</span>
-                <span class="site-state-item-name">标签</span>
-              </a>
-            </div>
-          
-
-        </nav>
-
-        
-          <div class="feed-link motion-element">
-            <a href="/atom.xml" rel="alternate">
-              <i class="fa fa-rss"></i>
-              RSS
-            </a>
           </div>
-        
 
-        <div class="links-of-author motion-element">
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
           
+
+          <div class="links-of-author motion-element">
             
-              <span class="links-of-author-item">
-                <a href="https://github.com/MekaYangyi" target="_blank" title="GitHub">
-                  
-                    <i class="fa fa-fw fa-github"></i>
-                  
-                  GitHub
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="https://www.zhihu.com/people/yang1" target="_blank" title="知乎">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  知乎
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="https://www.douban.com/people/mekay" target="_blank" title="豆瓣">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  豆瓣
-                </a>
-              </span>
-            
+          </div>
+
           
+          
+
+          
+          
+
+          
+
         </div>
-
-        
-        
-
-        
-        
-
-        
-
-
       </section>
 
       
@@ -2185,49 +1929,35 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
-    <i class="fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">YangYi</span>
+  <span class="author" itemprop="copyrightHolder">Yang Yi</span>
+
+  
 </div>
 
 
-<div class="powered-by">
-  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
-</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Mist
-  </a>
-</div>
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
 
 
         
-<div class="busuanzi-count">
-  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
-  
-    <span class="site-uv">
-      本站访客数
-      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
-      人次
-    </span>
-  
 
-  
-    <span class="site-pv">
-      本站总访问量
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
-      次
-    </span>
-  
-</div>
+
+
+
 
 
         
@@ -2239,6 +1969,8 @@
         <i class="fa fa-arrow-up"></i>
         
       </div>
+    
+
     
 
   </div>
@@ -2266,43 +1998,61 @@
 
 
 
-  
-  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
 
 
 
   
   
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
 
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
   
 
   
 
+  
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
 
 
 
@@ -2316,25 +2066,17 @@
 
 	
 
-		<script type="text/javascript">
-		_hcwp = window._hcwp || [];
 
-		_hcwp.push({widget:"Bloggerstream", widget_id: 88745, selector:".hc-comment-count", label: "{\%COUNT%\}" });
 
-		
 
-		(function() {
-		if("HC_LOAD_INIT" in window)return;
-		HC_LOAD_INIT = true;
-		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
-		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
-		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/88745/"+lang+"/widget.js";
-		var s = document.getElementsByTagName("script")[0];
-		s.parentNode.insertBefore(hcc, s.nextSibling);
-		})();
-		</script>
 
-	
+  
+
+
+
+
+
+  
 
 
 
@@ -2349,132 +2091,6 @@
 
   
 
-  <script type="text/javascript">
-    // Popup Window;
-    var isfetched = false;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length == 0) {
-      search_path = "search.xml";
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.popup').toggle();
-    }
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-      $.ajax({
-        url: path,
-        dataType: "xml",
-        async: true,
-        success: function( xmlResponse ) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = $( "entry", xmlResponse ).map(function() {
-            return {
-              title: $( "title", this ).text(),
-              content: $("content",this).text(),
-              url: $( "url" , this).text()
-            };
-          }).get();
-          var $input = document.getElementById(search_id);
-          var $resultContent = document.getElementById(content_id);
-          $input.addEventListener('input', function(){
-            var matchcounts = 0;
-            var str='<ul class=\"search-result-list\">';
-            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-            $resultContent.innerHTML = "";
-            if (this.value.trim().length > 1) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var content_index = [];
-                var data_title = data.title.trim().toLowerCase();
-                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
-                var data_url = decodeURIComponent(data.url);
-                var index_title = -1;
-                var index_content = -1;
-                var first_occur = -1;
-                // only match artiles with not empty titles and contents
-                if(data_title != '') {
-                  keywords.forEach(function(keyword, i) {
-                    index_title = data_title.indexOf(keyword);
-                    index_content = data_content.indexOf(keyword);
-                    if( index_title >= 0 || index_content >= 0 ){
-                      isMatch = true;
-                      if (i == 0) {
-                        first_occur = index_content;
-                      }
-                    }
-
-                  });
-                }
-                // show search results
-                if (isMatch) {
-                  matchcounts += 1;
-                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
-                  var content = data.content.trim().replace(/<[^>]+>/g,"");
-                  if (first_occur >= 0) {
-                    // cut out 100 characters
-                    var start = first_occur - 20;
-                    var end = first_occur + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if(start == 0){
-                      end = 50;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    var match_content = content.substring(start, end);
-                    // highlight all keywords
-                    keywords.forEach(function(keyword){
-                      var regS = new RegExp(keyword, "gi");
-                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
-                    });
-
-                    str += "<p class=\"search-result\">" + match_content +"...</p>"
-                  }
-                  str += "</li>";
-                }
-              })};
-            str += "</ul>";
-            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
-            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
-            $resultContent.innerHTML = str;
-          });
-          proceedsearch();
-        }
-      });}
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched == false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(function(e){
-      $('.popup').hide();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    });
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-  </script>
-
 
 
 
@@ -2482,21 +2098,11 @@
   
 
   
-<script>
-(function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-})();
-</script>
 
+  
+  
+
+  
 
   
 
