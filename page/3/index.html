@@ -315,6 +315,153 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/21/redis源码阅读-内存分配/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yang Yi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鉴心">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/03/21/redis源码阅读-内存分配/" itemprop="url">redis源码阅读-内存分配</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-21T10:21:33+08:00">
+                2017-03-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。</p>
+<h2 id="内存分配器的选择"><a href="#内存分配器的选择" class="headerlink" title="内存分配器的选择"></a>内存分配器的选择</h2><p>redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/03/21/redis源码阅读-内存分配/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/21/redis源码阅读-开始/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1642,153 +1789,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/10/读书笔记-sicp-第三章-模块化-对象和状态/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Yang Yi">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="鉴心">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/10/读书笔记-sicp-第三章-模块化-对象和状态/" itemprop="url">[读书笔记] sicp 第三章 模块化 对象和状态</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-10T08:33:32+08:00">
-                2016-09-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>有效的程序综合还需要一些组织原则，它们能够指导我们系统化地完成系统的整体设计。特别的需要一些能够帮助我们构造起模块化的大型系统策略，也就是说，使这些系统能够“自然地”划分为一些具有内聚力的部分，使这些部分可以分别进行开发和维护。<br>有一种非常强有力的设计策略，特别适合用于构造那类模拟真实物理系统的程序，那就是基于被模拟程序的结构去设计程序的结构。那么有关的物理系统里的每一个对象，我们构造起一个与之对象的计算对象；对该系统里的每种活动，我们在自己的计算系统里顶一种符号操作。采用这一策略时的希望是，在需要针对系统中的新对象或者新活动扩充对应的计算模型时候，我们能够不必对程序的组织方面做得很成功，那么在需要添加新特城或者排除旧东西里的错误时候，就只需要在系统里的一些小局部中工作。<br>本章研究两种特点鲜明的策略。第一种策略将注意力集中在对象上，将大型系统看成一大批对象，它们的行为可能随着时间的进展而不断的变化。另一种组织策略将注意力集中在流过的系统的信息流上，非常像电子工程师观察一个信号处理系统。<br>对于对象途径而言，我们必须关注计算对象可以怎样变化而又同时保持其标识。这将迫使我们抛弃老的计算的代换模型，转向更机械式的，理论上也更不同意把握的计算的环境模型。在处理对象、变化和标识时，各种困难的基本根源在于我们需要在这一计算模型中与时间搏斗。如果允许程序并发指向的可能性，事情会变得更困难许多。流方式特别能用于松解在我们模型中对时间的模拟与计算机求值过程中的各种时间发生的顺序。我们将通过一种称为延时求值的技术做到这一点。</p>
-<h1 id="赋值和局部状态"><a href="#赋值和局部状态" class="headerlink" title="赋值和局部状态"></a>赋值和局部状态</h1><p>一个由许多对象组成的系统里，其中的这些对象极少会是完全独立的。每个对象都可能通过交互作用，影响其他对象的状态，所谓交互就是建立起一个对象的状态变量与其他对象的状态变量之间的联系。确实如果一个系统中的状态变量可以分组，形成一些内部紧密结合的子系统，每个子系统与其他子系统之间只存在松散的练习，此时将这个系统看作是由一些独立对象组成的观点就会特别有用。<br>对于一个系统的这种观点，有可能成为组织这一系统的计算模型的有力框架。要使这样的一个模型成为模块化的，就要求它能够分解为一批计算对象，使它们能够模拟系统里的实际对象。每个计算对象必须有它自己的一些局部状态变量，用于描述实际对象的状态。对于被模拟系统里的对象的状态是随着时间的变化的，与它们对象的计算对象的状态也必须变化。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/09/10/读书笔记-sicp-第三章-模块化-对象和状态/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1843,7 +1843,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-count">47</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1854,7 +1854,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -1865,7 +1865,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
