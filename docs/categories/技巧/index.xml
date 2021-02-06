@@ -863,5 +863,294 @@ C:\Program_Files_(x86)\Microsoft_Visual Studio\2017\Enterprise\Common7\IDE\Publi
 到
 C:\Windows\assembly\GAC\Microsoft.VisualStudio.Shell.Interop.8.0\8.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Shell.Interop.8.0.dll</p>
 ]]></description>
+</item><item>
+    <title>gitlab workflow</title>
+    <link>http://coderyang.com/gitlab-workflow/</link>
+    <pubDate>Sun, 29 Jan 2017 21:40:40 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/gitlab-workflow/</guid>
+    <description><![CDATA[<p>建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。
+整个工作流程如下。
+第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。
+第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。
+第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话机制，大家一起评审和讨论你的代码。对话过程中，你还可以不断提交代码。
+第四步：你的Pull Request被接受，合并进master，重新部署后，原来你拉出来的那个分支就被删除。（先部署再合并也可。）</p>
+<h1 id="建立测试项目">建立测试项目</h1>
+<p>新建一个项目用于测试工作流。
+演示项目地址：http://10.10.10.98/MekaYangyi/workflow
+</p>
+<h1 id="设置分支保护">设置分支保护</h1>
+<p>新建项目默认master用户才能够push和merge。
+其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。
+</p>
+<h1 id="设置开发成员">设置开发成员</h1>
+<p>项目创建者在项目页面选择Member。
+</p>
+<p>设置开发人员分为两种，一种是直接设置用户，一种是设置一Group都为指定权限。
+权限分为四类：</p>
+<blockquote>
+<p>Guest
+Reporter
+Developer
+Master</p>
+</blockquote>
+<p>一般开发人员指定为Developer。
+具体权限在http://10.10.10.98/help/user/permissions.md查看。
+设置用户权限
+
+设置整个Group的权限
+</p>
+<h1 id="建立本地分支">建立本地分支</h1>
+<p>在项目文件夹右键，选择TortoiseGit→Create Branch。
+
+填写信息
+</p>
+<h1 id="切换分支">切换分支</h1>
+<p>在项目文件夹右键，选择TortoiseGit→Switch/Checkout。
+
+选择OK。
+</p>
+<h1 id="commit">Commit</h1>
+<p>分出分支后，可以在本地进行Commit，知道一个功能开发完毕后，再上传到服务器。
+修改本地的文件，Commit。
+
+填写上传备注，Commit。</p>
+<h1 id="将master向test_workflow合并">将Master向Test_WorkFlow合并</h1>
+<p>先从服务器pull最新版本，然后将master向Test_WorkFlow合并，防止master在分支分出之后被修改导致的冲突。
+从服务器pull最新版本。
+
+将master向Test_WorkFlow合并。
+
+合并解决冲突。
+</p>
+<h1 id="push">push</h1>
+<p>上传成功后选择push。
+</p>
+<p>确认。
+
+成功。
+</p>
+<h1 id="发起merge-request">发起Merge Request</h1>
+<p>在项目页面找到分支，选择Merge Request
+
+填写相关信息，Submit merge request
+</p>
+<h1 id="检视代码并讨论">检视代码并讨论</h1>
+<p>选择Merge Request。
+单击测试分支合并功能这一个Merge Request
+
+弹出页面。
+
+检视代码</p>
+<h2 id="commit查看修改记录">Commit，查看修改记录。</h2>
+<p>图中红色区域单击可以Diff与查看源文件。
+
+单击任意版本提交记录，增加检视意见，在diff时，任意处可以添加讨论。或者在页面底部对整个修改进行评价。
+</p>
+
+<h2 id="changes查看版本区别">Changes，查看版本区别。</h2>
+
+## Discusion，填写建议
+填写建议后，选择Comment可以互相讨论。
+或者选择Close merge request关闭请求。
+
+## Accept merge request或者Close merge request
+
+## 合并完成
+选择Accept Merge Request,同时选择合并时将分支删除。
+
+合并结果。
+
+# 本地pull
+在本地项目进行pull,同步服务器版本。
+
+本地同步结果。
+
+# 删除本地分支
+由于远程分支与本地分支没有关系，那么当远程正式Merge之后，需要删除本地分支，防止以后分支一直增加，不减少。
+在项目文件夹右键，选择TortoiseGit→Switch/Checkout，先把分支切换到本地master。
+
+切换完成后，再次进入该界面选择....
+
+删除分支
+
+<h1 id="issue">Issue</h1>
+<p>Issue 用于 Bug追踪和需求管理。建议先新建 Issue，再新建对应的功能分支。功能分支总是为了解决一个或多个 Issue。</p>
+<h2 id="新建issue">新建Issue</h2>
+<p>选择New Issue
+
+填写相关信息。
+功能分支的名称，可以与issue的名字保持一致，并且以issue的编号起首，比如&quot;1-测试Issue&quot;。
+</p>
+<p>新建完成,每一个Issue都有一个编号，本Issue的编号为#1。
+
+在分支开发完成后，在commit message里面，可以写上&quot;fixes #14&quot;或者&quot;closes #67&quot;。
+
+Github规定，只要commit message里面有下面这些动词 + 编号，就会关闭对应的issue。</p>
+<blockquote>
+<p>close
+closes
+closed
+fix
+fixes
+fixed
+resolve
+resolves
+resolved</p>
+</blockquote>
+<p>这种方式还可以一次关闭多个issue，或者关闭其他代码库的issue，格式是username/repository#issue_number。
+Pull Request被接受以后，issue关闭，原始分支就应该删除。如果以后该issue重新打开，新分支可以复用原来的名字。</p>
+<h2 id="查看结果">查看结果</h2>
+
+]]></description>
+</item><item>
+    <title>第一次使用gitlab</title>
+    <link>http://coderyang.com/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%BD%BF%E7%94%A8gitlab/</link>
+    <pubDate>Sat, 28 Jan 2017 09:19:43 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%BD%BF%E7%94%A8gitlab/</guid>
+    <description><![CDATA[<h1 id="安装git">安装git</h1>
+<p>版本差别不大，目前使用的版本git2.11.0.3。
+一路下一步,不修改安装位置，直接使用默认设置。</p>
+<h1 id="安装tortoisegit">安装TortoiseGit</h1>
+<p>一路下一步，不修改安装位置，直接使用默认设置。</p>
+<h1 id="登录账户">登录账户</h1>
+<h2 id="管理员创建账户">管理员创建账户</h2>
+<p>Admin→New User。新建账户、并设置密码。同时设置该用户所属Group。</p>
+<blockquote>
+<p>name：上传显示的名字，可以经常更改，使用中文名好。</p>
+</blockquote>
+<blockquote>
+<p>username：登陆的用户名，不可修改，用于账户登陆。</p>
+</blockquote>
+<blockquote>
+<p>email：账户email，内网联系email。</p>
+</blockquote>
+<blockquote>
+<p>password：密码，牢记，root用户可修改。</p>
+</blockquote>
+<h2 id="登录">登录</h2>
+<p>登陆内网gitlab，目前网址：10.10.10.98。
+</p>
+<h2 id="修改密码">修改密码</h2>
+<p>登录后会要求修改密码，自己输入即可。
+</p>
+<h1 id="设置tortoisegit">设置TortoiseGit</h1>
+<p>将注册的用户填入TortoiseGit中,设置为全局账号。
+</p>
+<h1 id="添加ssh">添加ssh</h1>
+<p>如果不添加shh，每次修改都会要求输入账号密码，比较麻烦。添加后与设备绑定，修改不再需要填写账号密码。如果不再使用一个设备，请删除ssh。</p>
+<h2 id="生成ssh">生成ssh</h2>
+<p>任意空白处，选择git bash。
+
+窗口中输入，一路按回车。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">ssh-keygen -t rsa -C &#34;你注册的email地址&#34;
+</code></pre></td></tr></table>
+</div>
+</div><p>生成后的公钥会存放在 C:/Users/You_User_Name/.ssh/id_rsa.pub。
+用记事本打开，复制。
+</p>
+<h2 id="将ssh加入gitlab">将ssh加入gitlab</h2>
+<p>浏览器转到http://10.10.10.98/profile/keys。
+将复制的Key粘贴，Add key。
+</p>
+<h1 id="新建一个项目">新建一个项目</h1>
+<h2 id="新建一个私有项目">新建一个私有项目</h2>
+<p>新建一个私有项目进行实验，gitlab是否能够正常上传。
+选择new project。
+</p>
+<h2 id="填写基本信息">填写基本信息</h2>
+<blockquote>
+<p>Project name：项目名称。
+Project description：项目描述。
+Visibility Level：项目级别，内网使用只选择public与private。private除了项目成员不可见，public在内网均可见。</p>
+</blockquote>
+<p>选择Create project创建项目。
+</p>
+<h1 id="clone项目">Clone项目</h1>
+<p>项目创建完成，复制项目地址。
+复制浏览器的项目地址：http://10.10.10.98/test/test_project。
+
+选择计算机一个文件夹，右键，选择git clone。
+
+clone之前复制地址项目，确认，输入用户名与密码，clone成功，会新建一个文件夹。
+</p>
+<h1 id="第一次push">第一次push</h1>
+<p>在该文件夹中建立一个README.md文件。
+</p>
+<h2 id="add">add</h2>
+<p>右键add，确认，ok。
+</p>
+<h2 id="commit">commit</h2>
+<p>commit将修改更新到本地。
+在项目文件夹空白处右键，选择git commit。
+
+填写上传理由，commit。
+</p>
+<h2 id="push">push</h2>
+<p>选择push，push能够将修改push到服务器。
+
+确认。
+
+成功界面。
+</p>
+<h1 id="查看结果">查看结果</h1>
+<p>成功在网页端看到修改记录(之前误上传为.md.txt文件，修改为.md文件网页端会显示文字)。
+</p>]]></description>
+</item><item>
+    <title>windows下Pyqt &#43; guiqwt环境的搭建</title>
+    <link>http://coderyang.com/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/</link>
+    <pubDate>Wed, 19 Oct 2016 23:47:25 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/</guid>
+    <description><![CDATA[<h1 id="事情的起因">事情的起因</h1>
+<p>这几天为了搭一个PyQt的生产环境遇到了好一些坑。
+本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。
+原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。
+最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样达到比较高的绘图效率，才解决了问题。但是MFC界面开发复杂，在MFC界面上花费过多的时间。同时本身绘图控件的开发，可能可以利用现有开源控件进行开发来避免重复造轮子。
+于是利用PyQt+guiqwt绘图库来开发的方案构建起来。guiqwt本身是QT下常用的绘图控件，效率足够高，经过一些优化是能够使用的。相对Python经常使用的matplotlib来说不够漂亮，但是进行实时数据的平移绘图，效率高出很多。PyQt是模仿QT写的图形库，可以利用QTCreate进行快速的界面构建，而Python相对C++来说，需要处理的坑更少，出现各类崩溃的异常的情况会更少一些。
+本文主要讲的是PyQt+guiqwt在windows上的搭建。
+目的是在之后能够通过本文进行快速的开发环境的搭建。</p>
+<h1 id="开始搭建">开始搭建</h1>
+<h2 id="安装python">安装Python</h2>
+<p><a href="https://www.python.org/downloads/" target="_blank" rel="noopener noreffer">Python官网</a><br>
+通过Python官网下载相应版本的Python,我这里下载的是：python-3.5.2-amd64。
+64位版本，记住版本号，用于之后的库的选择。</p>
+<h2 id="安装pyqt">安装PyQt</h2>
+<p>PyQt有完整的安装包，过程中会自动安装PyQt+Qt等完整的依赖库。
+<a href="https://sourceforge.net/projects/pyqt/?source=directory" target="_blank" rel="noopener noreffer">PyQt下载站点</a><br>
+浏览所有文件找到对应的PyQt完整安装包。
+我下的是下面网址中的64位版本。
+PyQt5-5.6-gpl-Py3.5-Qt5.6.0-x64-2
+<a href="https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.6/" target="_blank" rel="noopener noreffer">PyQt完整安装包下载</a><br>
+安装一路下一步完成。</p>
+<h2 id="安装numpy">安装NumPy</h2>
+<p>为了能够使用guiqwt必须安装依赖的库。
+首先安装numpy，注意的是需要安装+mk1的numpy库，否则scipy无法正常安装后使用。
+<a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/" target="_blank" rel="noopener noreffer">下载地址</a><br>
+搜索Numpy找到相应的位置。
+我选择下载的是，与Python版本对应：numpy-1.11.2+mkl-cp35-cp35m-win_amd64.whl
+使用pip3.5安装</p>
+<h2 id="安装scipy">安装scipy</h2>
+<p>同上，在上面的网站找到scipy。
+版本我选择的是：scipy-0.18.1-cp35-cp35m-win_amd64
+使用pip3.5在numpy之后安装</p>
+<h2 id="安装guiqwt">安装guiqwt</h2>
+<p>安装guiqwt
+上面网站搜索guiqwt
+选择guiqwt-3.0.3-cp35-cp35m-win_amd64。
+在sicpy之后使用pip3.5安装</p>
+<h2 id="安装eric6">安装eric6</h2>
+<p><a href="https://sourceforge.net/projects/eric-ide/" target="_blank" rel="noopener noreffer">下载地址</a><br>
+我选择的是：eric6-6.1.10和eric6-i18n-zh_CN-6.1.10
+解压，放到python的安装目录下：python35/eric6
+运行python35/eric6、install.py进行安装。
+运行Python35\Scripts\eric6.bat 就打开了eric6</p>
+<p>至此开发环境搭建完成。</p>]]></description>
 </item></channel>
 </rss>
