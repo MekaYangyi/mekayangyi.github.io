@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>redis源码阅读-RDB持久化 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="redis源码阅读-RDB持久化" />
+<meta property="og:description" content="Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。
+Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。
+RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。
+RDB文件的保存命令
+Redis有两个命令可以生成RDB文件一个是SAVE，一个是BGSAVE。
+SAVE命令调用saveCommand进行处理
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+
+
+void saveCommand(redisClient *c) {
+
+    // 判断是否正在执行BGSAVE，是则退出
+    if (server.rdb_child_pid != -1) {
+        addReplyError(c,&#34;Background save already in progress&#34;);
+        return;
+    }
+
+    //调用rdbSave生成RDB文件
+    if (rdbSave(server.rdb_filename) == REDIS_OK) {
+        addReply(c,shared.ok);
+    } else {
+        addReply(c,shared.err);
+    }
+}
+
+
+BGSAVE调用bgsaveCommand进行处理
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+
+
+void bgsaveCommand(redisClient *c) {
+
+    // 判断是否已经在执行BGSAVE
+    if (server.rdb_child_pid != -1) {
+        addReplyError(c,&#34;Background save already in progress&#34;);
+    } else if (server.aof_child_pid != -1) {
+        
+    // 判断是否在执行BGREWRIEAOF
+        addReplyError(c,&#34;Can&#39;t BGSAVE while AOF log rewriting is in progress&#34;);
+    
+    // 执行rdbSaveBackground 生成RDB文件
+    } else if (rdbSaveBackground(server.rdb_filename) == REDIS_OK) {
+        addReplyStatus(c,&#34;Background saving started&#34;);
+    } else {
+        addReply(c,shared.err);
+    }
+}
+
+int rdbSaveBackground(char *filename) {
+    pid_t childpid;
+    long long start;
+
+    // 如果BGSAVE正在执行直接返回
+    if (server.rdb_child_pid != -1) return REDIS_ERR;
+
+    // 获取dirty数据 执行时间
+    server.dirty_before_bgsave = server.dirty;
+    server.lastbgsave_try = time(NULL);
+
+    // fork() 开始前时间
+    start = ustime();
+
+    // 调用fork，克隆该进程
+    if ((childpid = fork()) == 0) {
+        int retval;
+
+        /* Child */
+        closeListeningSockets(0);
+        redisSetProcTitle(&#34;redis-rdb-bgsave&#34;);
+
+        // 执行保存操作
+        retval = rdbSave(filename);
+
+        // 打印 copy-on-write 时使用的内存数
+        if (retval == REDIS_OK) {
+            size_t private_dirty = zmalloc_get_private_dirty();
+
+            if (private_dirty) {
+                redisLog(REDIS_NOTICE,
+                    &#34;RDB: %zu MB of memory used by copy-on-write&#34;,
+                    private_dirty/(1024*1024));
+            }
+        }
+        // 向父进程发送信号
+        exitFromChild((retval == REDIS_OK) ? 0 : 1);
+    } else {
+        /* Parent */
+
+        // 计算 fork() 执行的时间
+        server.stat_fork_time = ustime()-start;
+        server.stat_fork_rate = (double) zmalloc_used_memory() * 1000000 / server.stat_fork_time / (1024*1024*1024); /* GB per second. */
+        latencyAddSampleIfNeeded(&#34;fork&#34;,server.stat_fork_time/1000);
+        
+        // 执行fork()错误信息
+        if (childpid == -1) {
+            server.lastbgsave_status = REDIS_ERR;
+            redisLog(REDIS_WARNING,&#34;Can&#39;t save in background: fork: %s&#34;,
+                strerror(errno));
+            return REDIS_ERR;
+        }
+        redisLog(REDIS_NOTICE,&#34;Background saving started by pid %d&#34;,childpid);
+        
+        // 记录数据库开始BGSAVE时间
+        server.rdb_save_time_start = time(NULL);
+
+        // 子进程ID 类型
+        server.rdb_child_pid = childpid;
+        server.rdb_child_type = REDIS_RDB_CHILD_TYPE_DISK;
+
+        // 关闭自动Rehash
+        updateDictResizePolicy();
+        return REDIS_OK;
+    }
+    return REDIS_OK; /* unreached */
+}
+
+
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2017-07-12T16:04:59+00:00" />
+<meta property="article:modified_time" content="2017-07-12T16:04:59+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="redis源码阅读-RDB持久化"/>
+<meta name="twitter:description" content="Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。
+Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。
+RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。
+RDB文件的保存命令
+Redis有两个命令可以生成RDB文件一个是SAVE，一个是BGSAVE。
+SAVE命令调用saveCommand进行处理
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+
+
+void saveCommand(redisClient *c) {
+
+    // 判断是否正在执行BGSAVE，是则退出
+    if (server.rdb_child_pid != -1) {
+        addReplyError(c,&#34;Background save already in progress&#34;);
+        return;
+    }
+
+    //调用rdbSave生成RDB文件
+    if (rdbSave(server.rdb_filename) == REDIS_OK) {
+        addReply(c,shared.ok);
+    } else {
+        addReply(c,shared.err);
+    }
+}
+
+
+BGSAVE调用bgsaveCommand进行处理
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+
+
+void bgsaveCommand(redisClient *c) {
+
+    // 判断是否已经在执行BGSAVE
+    if (server.rdb_child_pid != -1) {
+        addReplyError(c,&#34;Background save already in progress&#34;);
+    } else if (server.aof_child_pid != -1) {
+        
+    // 判断是否在执行BGREWRIEAOF
+        addReplyError(c,&#34;Can&#39;t BGSAVE while AOF log rewriting is in progress&#34;);
+    
+    // 执行rdbSaveBackground 生成RDB文件
+    } else if (rdbSaveBackground(server.rdb_filename) == REDIS_OK) {
+        addReplyStatus(c,&#34;Background saving started&#34;);
+    } else {
+        addReply(c,shared.err);
+    }
+}
+
+int rdbSaveBackground(char *filename) {
+    pid_t childpid;
+    long long start;
+
+    // 如果BGSAVE正在执行直接返回
+    if (server.rdb_child_pid != -1) return REDIS_ERR;
+
+    // 获取dirty数据 执行时间
+    server.dirty_before_bgsave = server.dirty;
+    server.lastbgsave_try = time(NULL);
+
+    // fork() 开始前时间
+    start = ustime();
+
+    // 调用fork，克隆该进程
+    if ((childpid = fork()) == 0) {
+        int retval;
+
+        /* Child */
+        closeListeningSockets(0);
+        redisSetProcTitle(&#34;redis-rdb-bgsave&#34;);
+
+        // 执行保存操作
+        retval = rdbSave(filename);
+
+        // 打印 copy-on-write 时使用的内存数
+        if (retval == REDIS_OK) {
+            size_t private_dirty = zmalloc_get_private_dirty();
+
+            if (private_dirty) {
+                redisLog(REDIS_NOTICE,
+                    &#34;RDB: %zu MB of memory used by copy-on-write&#34;,
+                    private_dirty/(1024*1024));
+            }
+        }
+        // 向父进程发送信号
+        exitFromChild((retval == REDIS_OK) ? 0 : 1);
+    } else {
+        /* Parent */
+
+        // 计算 fork() 执行的时间
+        server.stat_fork_time = ustime()-start;
+        server.stat_fork_rate = (double) zmalloc_used_memory() * 1000000 / server.stat_fork_time / (1024*1024*1024); /* GB per second. */
+        latencyAddSampleIfNeeded(&#34;fork&#34;,server.stat_fork_time/1000);
+        
+        // 执行fork()错误信息
+        if (childpid == -1) {
+            server.lastbgsave_status = REDIS_ERR;
+            redisLog(REDIS_WARNING,&#34;Can&#39;t save in background: fork: %s&#34;,
+                strerror(errno));
+            return REDIS_ERR;
+        }
+        redisLog(REDIS_NOTICE,&#34;Background saving started by pid %d&#34;,childpid);
+        
+        // 记录数据库开始BGSAVE时间
+        server.rdb_save_time_start = time(NULL);
+
+        // 子进程ID 类型
+        server.rdb_child_pid = childpid;
+        server.rdb_child_type = REDIS_RDB_CHILD_TYPE_DISK;
+
+        // 关闭自动Rehash
+        updateDictResizePolicy();
+        return REDIS_OK;
+    }
+    return REDIS_OK; /* unreached */
+}
+
+
+"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" /><link rel="prev" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B0%E6%8D%AE%E5%BA%93/" /><link rel="next" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%AE%A2%E9%98%85%E4%B8%8E%E5%8F%91%E5%B8%83/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "redis源码阅读-RDB持久化",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "redis, 源码阅读","wordcount":  1954 ,
+        "url": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96\/","datePublished": "2017-07-12T16:04:59+00:00","dateModified": "2017-07-12T16:04:59+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">redis源码阅读-RDB持久化</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2017-07-12">2017-07-12</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1954 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;10 minutes&nbsp;<span id="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" class="leancloud_visitors" data-flag-title="redis源码阅读-RDB持久化">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#rdb文件的保存命令">RDB文件的保存命令</a>
+      <ul>
+        <li><a href="#rdbsave">rdbSave</a></li>
+      </ul>
+    </li>
+    <li><a href="#自动保存">自动保存</a></li>
+    <li><a href="#rdb的文件载入">RDB的文件载入</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。</p>
+<p>Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。</p>
+<p>RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。</p>
+<h2 id="rdb文件的保存命令">RDB文件的保存命令</h2>
+<p>Redis有两个命令可以生成RDB文件一个是SAVE，一个是BGSAVE。
+SAVE命令调用saveCommand进行处理</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">saveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 判断是否正在执行BGSAVE，是则退出
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Background save already in progress&#34;</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">//调用rdbSave生成RDB文件
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">rdbSave</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_filename</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">ok</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">err</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>BGSAVE调用bgsaveCommand进行处理</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">bgsaveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 判断是否已经在执行BGSAVE
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Background save already in progress&#34;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">aof_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        
+    <span class="c1">// 判断是否在执行BGREWRIEAOF
+</span><span class="c1"></span>        <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Can&#39;t BGSAVE while AOF log rewriting is in progress&#34;</span><span class="p">);</span>
+    
+    <span class="c1">// 执行rdbSaveBackground 生成RDB文件
+</span><span class="c1"></span>    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">rdbSaveBackground</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_filename</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReplyStatus</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Background saving started&#34;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">err</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">rdbSaveBackground</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">filename</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">pid_t</span> <span class="n">childpid</span><span class="p">;</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">start</span><span class="p">;</span>
+
+    <span class="c1">// 如果BGSAVE正在执行直接返回
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+
+    <span class="c1">// 获取dirty数据 执行时间
+</span><span class="c1"></span>    <span class="n">server</span><span class="p">.</span><span class="n">dirty_before_bgsave</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">dirty</span><span class="p">;</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_try</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="c1">// fork() 开始前时间
+</span><span class="c1"></span>    <span class="n">start</span> <span class="o">=</span> <span class="n">ustime</span><span class="p">();</span>
+
+    <span class="c1">// 调用fork，克隆该进程
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">((</span><span class="n">childpid</span> <span class="o">=</span> <span class="n">fork</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">retval</span><span class="p">;</span>
+
+        <span class="cm">/* Child */</span>
+        <span class="n">closeListeningSockets</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="n">redisSetProcTitle</span><span class="p">(</span><span class="s">&#34;redis-rdb-bgsave&#34;</span><span class="p">);</span>
+
+        <span class="c1">// 执行保存操作
+</span><span class="c1"></span>        <span class="n">retval</span> <span class="o">=</span> <span class="n">rdbSave</span><span class="p">(</span><span class="n">filename</span><span class="p">);</span>
+
+        <span class="c1">// 打印 copy-on-write 时使用的内存数
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">retval</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">size_t</span> <span class="n">private_dirty</span> <span class="o">=</span> <span class="n">zmalloc_get_private_dirty</span><span class="p">();</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">private_dirty</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_NOTICE</span><span class="p">,</span>
+                    <span class="s">&#34;RDB: %zu MB of memory used by copy-on-write&#34;</span><span class="p">,</span>
+                    <span class="n">private_dirty</span><span class="o">/</span><span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">// 向父进程发送信号
+</span><span class="c1"></span>        <span class="n">exitFromChild</span><span class="p">((</span><span class="n">retval</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="cm">/* Parent */</span>
+
+        <span class="c1">// 计算 fork() 执行的时间
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">stat_fork_time</span> <span class="o">=</span> <span class="n">ustime</span><span class="p">()</span><span class="o">-</span><span class="n">start</span><span class="p">;</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">stat_fork_rate</span> <span class="o">=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span> <span class="n">zmalloc_used_memory</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000000</span> <span class="o">/</span> <span class="n">server</span><span class="p">.</span><span class="n">stat_fork_time</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">);</span> <span class="cm">/* GB per second. */</span>
+        <span class="n">latencyAddSampleIfNeeded</span><span class="p">(</span><span class="s">&#34;fork&#34;</span><span class="p">,</span><span class="n">server</span><span class="p">.</span><span class="n">stat_fork_time</span><span class="o">/</span><span class="mi">1000</span><span class="p">);</span>
+        
+        <span class="c1">// 执行fork()错误信息
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">childpid</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_status</span> <span class="o">=</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+            <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Can&#39;t save in background: fork: %s&#34;</span><span class="p">,</span>
+                <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+            <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_NOTICE</span><span class="p">,</span><span class="s">&#34;Background saving started by pid %d&#34;</span><span class="p">,</span><span class="n">childpid</span><span class="p">);</span>
+        
+        <span class="c1">// 记录数据库开始BGSAVE时间
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">rdb_save_time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+
+        <span class="c1">// 子进程ID 类型
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">=</span> <span class="n">childpid</span><span class="p">;</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">rdb_child_type</span> <span class="o">=</span> <span class="n">REDIS_RDB_CHILD_TYPE_DISK</span><span class="p">;</span>
+
+        <span class="c1">// 关闭自动Rehash
+</span><span class="c1"></span>        <span class="n">updateDictResizePolicy</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span> <span class="cm">/* unreached */</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>那么怎么才能够知道BGSAVE执行完毕，BGSAVE执行完毕后使用exitFromChild((retval == REDIS_OK) ? 0 : 1);向父进程发送信号。父进程调用serverCron接收该信号。</p>
+<p>以下是处理函数的部分代码，处理BGREWRITEAOF与BGSAVE的完成信号。最终调用backgroundSaveDoneHandler根据返回信号信息进行对应处理。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">serverCron</span><span class="p">(</span><span class="k">struct</span> <span class="n">aeEventLoop</span> <span class="o">*</span><span class="n">eventLoop</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">id</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">clientData</span><span class="p">)</span> <span class="p">{</span>
+<span class="err">\\</span> <span class="p">...</span>
+    <span class="c1">// 检查 BGSAVE 或者 BGREWRITEAOF 是否已经执行完毕
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">||</span> <span class="n">server</span><span class="p">.</span><span class="n">aof_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">statloc</span><span class="p">;</span>
+        <span class="n">pid_t</span> <span class="n">pid</span><span class="p">;</span>
+
+        <span class="c1">// 接收子进程发来的信号
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">((</span><span class="n">pid</span> <span class="o">=</span> <span class="n">wait3</span><span class="p">(</span><span class="o">&amp;</span><span class="n">statloc</span><span class="p">,</span><span class="n">WNOHANG</span><span class="p">,</span><span class="nb">NULL</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">exitcode</span> <span class="o">=</span> <span class="n">WEXITSTATUS</span><span class="p">(</span><span class="n">statloc</span><span class="p">);</span>
+            <span class="kt">int</span> <span class="n">bysignal</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">WIFSIGNALED</span><span class="p">(</span><span class="n">statloc</span><span class="p">))</span> <span class="n">bysignal</span> <span class="o">=</span> <span class="n">WTERMSIG</span><span class="p">(</span><span class="n">statloc</span><span class="p">);</span>
+
+            <span class="c1">// BGSAVE 执行完毕
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">==</span> <span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">backgroundSaveDoneHandler</span><span class="p">(</span><span class="n">exitcode</span><span class="p">,</span><span class="n">bysignal</span><span class="p">);</span>
+
+            <span class="c1">// BGREWRITEAOF 执行完毕
+</span><span class="c1"></span>            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">==</span> <span class="n">server</span><span class="p">.</span><span class="n">aof_child_pid</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">backgroundRewriteDoneHandler</span><span class="p">(</span><span class="n">exitcode</span><span class="p">,</span><span class="n">bysignal</span><span class="p">);</span>
+
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span>
+                    <span class="s">&#34;Warning, detected child with unmatched pid: %ld&#34;</span><span class="p">,</span>
+                    <span class="p">(</span><span class="kt">long</span><span class="p">)</span><span class="n">pid</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">updateDictResizePolicy</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="err">\\</span> <span class="p">...</span>
+  
+<span class="cm">/* A background saving child (BGSAVE) terminated its work. Handle this.
+</span><span class="cm"> * This function covers the case of actual BGSAVEs. */</span>
+<span class="kt">void</span> <span class="n">backgroundSaveDoneHandlerDisk</span><span class="p">(</span><span class="kt">int</span> <span class="n">exitcode</span><span class="p">,</span> <span class="kt">int</span> <span class="n">bysignal</span><span class="p">)</span> <span class="p">{</span>
+    
+    <span class="c1">// 成功
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">bysignal</span> <span class="o">&amp;&amp;</span> <span class="n">exitcode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_NOTICE</span><span class="p">,</span>
+            <span class="s">&#34;Background saving terminated with success&#34;</span><span class="p">);</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">dirty</span> <span class="o">-</span> <span class="n">server</span><span class="p">.</span><span class="n">dirty_before_bgsave</span><span class="p">;</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">lastsave</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_status</span> <span class="o">=</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+
+    <span class="c1">// 出错
+</span><span class="c1"></span>    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">bysignal</span> <span class="o">&amp;&amp;</span> <span class="n">exitcode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span> <span class="s">&#34;Background saving error&#34;</span><span class="p">);</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_status</span> <span class="o">=</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">mstime_t</span> <span class="n">latency</span><span class="p">;</span>
+
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span>
+            <span class="s">&#34;Background saving terminated by signal %d&#34;</span><span class="p">,</span> <span class="n">bysignal</span><span class="p">);</span>
+        <span class="n">latencyStartMonitor</span><span class="p">(</span><span class="n">latency</span><span class="p">);</span>
+        <span class="n">rdbRemoveTempFile</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span><span class="p">);</span>
+        <span class="n">latencyEndMonitor</span><span class="p">(</span><span class="n">latency</span><span class="p">);</span>
+        <span class="n">latencyAddSampleIfNeeded</span><span class="p">(</span><span class="s">&#34;rdb-unlink-temp-file&#34;</span><span class="p">,</span><span class="n">latency</span><span class="p">);</span>
+        <span class="cm">/* SIGUSR1 is whitelisted, so we have a way to kill a child without
+</span><span class="cm">         * tirggering an error conditon. */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">bysignal</span> <span class="o">!=</span> <span class="n">SIGUSR1</span><span class="p">)</span>
+            <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_status</span> <span class="o">=</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 更新状态
+</span><span class="c1"></span>    <span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">rdb_child_type</span> <span class="o">=</span> <span class="n">REDIS_RDB_CHILD_TYPE_NONE</span><span class="p">;</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">rdb_save_time_last</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">)</span><span class="o">-</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_save_time_start</span><span class="p">;</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">rdb_save_time_start</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="cm">/* Possibly there are slaves waiting for a BGSAVE in order to be served
+</span><span class="cm">     * (the first stage of SYNC is a bulk transfer of dump.rdb) */</span>
+    <span class="n">updateSlavesWaitingBgsave</span><span class="p">((</span><span class="o">!</span><span class="n">bysignal</span> <span class="o">&amp;&amp;</span> <span class="n">exitcode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">?</span> <span class="nl">REDIS_OK</span> <span class="p">:</span> <span class="n">REDIS_ERR</span><span class="p">,</span> <span class="n">REDIS_RDB_CHILD_TYPE_DISK</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="rdbsave">rdbSave</h3>
+<p>int rdbSave(char *filename);是SAVE与BGSAVE命令执行时正在用来生成RDB文件的函数</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">rdbSave</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">filename</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">tmpfile</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
+    <span class="n">rio</span> <span class="n">rdb</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">error</span><span class="p">;</span>
+
+    <span class="c1">// 生成临时文件
+</span><span class="c1"></span>    <span class="n">snprintf</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="s">&#34;temp-%d.rdb&#34;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">getpid</span><span class="p">());</span>
+    <span class="n">fp</span> <span class="o">=</span> <span class="n">fopen</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">,</span><span class="s">&#34;w&#34;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">fp</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span> <span class="s">&#34;Failed opening .rdb for saving: %s&#34;</span><span class="p">,</span>
+            <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 初始化I/O
+</span><span class="c1"></span>    <span class="n">rioInitWithFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">,</span><span class="n">fp</span><span class="p">);</span>
+    
+    <span class="c1">// 生成RDB文件
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">rdbSaveRio</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">,</span><span class="o">&amp;</span><span class="n">error</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_ERR</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">errno</span> <span class="o">=</span> <span class="n">error</span><span class="p">;</span>
+        <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 确保缓存中没有数据
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">fflush</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span> <span class="o">==</span> <span class="n">EOF</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">fsync</span><span class="p">(</span><span class="n">fileno</span><span class="p">(</span><span class="n">fp</span><span class="p">))</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span> <span class="o">==</span> <span class="n">EOF</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+
+    <span class="c1">// 使用RENAME改名
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">rename</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Error moving temp DB file on the final destination: %s&#34;</span><span class="p">,</span> <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+        <span class="n">unlink</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 日志 设置状态
+</span><span class="c1"></span>    <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_NOTICE</span><span class="p">,</span><span class="s">&#34;DB saved on disk&#34;</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">lastsave</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_status</span> <span class="o">=</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+
+<span class="nl">werr</span><span class="p">:</span>
+
+    <span class="c1">// 异常处理
+</span><span class="c1"></span>    <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+    <span class="n">unlink</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">);</span>
+    <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Write error saving DB on disk: %s&#34;</span><span class="p">,</span> <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>实际是调用rdbSaveRio执行写入</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">rdbSaveRio</span><span class="p">(</span><span class="n">rio</span> <span class="o">*</span><span class="n">rdb</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">dictIterator</span> <span class="o">*</span><span class="n">di</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">dictEntry</span> <span class="o">*</span><span class="n">de</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">magic</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">j</span><span class="p">;</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">now</span> <span class="o">=</span> <span class="n">mstime</span><span class="p">();</span>
+    <span class="n">uint64_t</span> <span class="n">cksum</span><span class="p">;</span>
+
+    <span class="c1">// 设置校验和
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_checksum</span><span class="p">)</span>
+        <span class="n">rdb</span><span class="o">-&gt;</span><span class="n">update_cksum</span> <span class="o">=</span> <span class="n">rioGenericUpdateChecksum</span><span class="p">;</span>
+
+    <span class="c1">// 写入REDIS版本号
+</span><span class="c1"></span>    <span class="n">snprintf</span><span class="p">(</span><span class="n">magic</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">magic</span><span class="p">),</span><span class="s">&#34;REDIS%04d&#34;</span><span class="p">,</span><span class="n">REDIS_RDB_VERSION</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">rdbWriteRaw</span><span class="p">(</span><span class="n">rdb</span><span class="p">,</span><span class="n">magic</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+
+    <span class="c1">// 遍历数据库
+</span><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">server</span><span class="p">.</span><span class="n">dbnum</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">db</span><span class="o">+</span><span class="n">j</span><span class="p">;</span>
+        <span class="n">dict</span> <span class="o">*</span><span class="n">d</span> <span class="o">=</span> <span class="n">db</span><span class="o">-&gt;</span><span class="n">dict</span><span class="p">;</span>
+
+        <span class="c1">// 跳过空数据库
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">dictSize</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+
+        <span class="c1">// 键空间迭代器
+</span><span class="c1"></span>        <span class="n">di</span> <span class="o">=</span> <span class="n">dictGetSafeIterator</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">di</span><span class="p">)</span> <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+
+        <span class="cm">/* Write the SELECT DB opcode */</span>
+        <span class="c1">// 写入DB选择器
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">rdbSaveType</span><span class="p">(</span><span class="n">rdb</span><span class="p">,</span><span class="n">REDIS_RDB_OPCODE_SELECTDB</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">rdbSaveLen</span><span class="p">(</span><span class="n">rdb</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+
+        <span class="cm">/* Iterate this DB writing every entry */</span>
+      <span class="c1">// 遍历数据库，写入键值对
+</span><span class="c1"></span>        <span class="k">while</span><span class="p">((</span><span class="n">de</span> <span class="o">=</span> <span class="n">dictNext</span><span class="p">(</span><span class="n">di</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">sds</span> <span class="n">keystr</span> <span class="o">=</span> <span class="n">dictGetKey</span><span class="p">(</span><span class="n">de</span><span class="p">);</span>
+            <span class="n">robj</span> <span class="n">key</span><span class="p">,</span> <span class="o">*</span><span class="n">o</span> <span class="o">=</span> <span class="n">dictGetVal</span><span class="p">(</span><span class="n">de</span><span class="p">);</span>
+            <span class="kt">long</span> <span class="kt">long</span> <span class="n">expire</span><span class="p">;</span>
+
+            <span class="n">initStaticStringObject</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">keystr</span><span class="p">);</span>
+            <span class="n">expire</span> <span class="o">=</span> <span class="n">getExpire</span><span class="p">(</span><span class="n">db</span><span class="p">,</span><span class="o">&amp;</span><span class="n">key</span><span class="p">);</span>
+
+            <span class="c1">// 写入键值对
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">rdbSaveKeyValuePair</span><span class="p">(</span><span class="n">rdb</span><span class="p">,</span><span class="o">&amp;</span><span class="n">key</span><span class="p">,</span><span class="n">o</span><span class="p">,</span><span class="n">expire</span><span class="p">,</span><span class="n">now</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">dictReleaseIterator</span><span class="p">(</span><span class="n">di</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">di</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="cm">/* So that we don&#39;t release it again on error. */</span>
+
+    <span class="cm">/* EOF opcode */</span>
+    <span class="c1">// 写入 EOF 代码
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">rdbSaveType</span><span class="p">(</span><span class="n">rdb</span><span class="p">,</span><span class="n">REDIS_RDB_OPCODE_EOF</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+
+    <span class="cm">/* CRC64 checksum. It will be zero if checksum computation is disabled, the
+</span><span class="cm">     * loading code skips the check in this case. */</span>
+    <span class="c1">// CRC64 校验和。
+</span><span class="c1"></span>    <span class="n">cksum</span> <span class="o">=</span> <span class="n">rdb</span><span class="o">-&gt;</span><span class="n">cksum</span><span class="p">;</span>
+    <span class="n">memrev64ifbe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cksum</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">rioWrite</span><span class="p">(</span><span class="n">rdb</span><span class="p">,</span><span class="o">&amp;</span><span class="n">cksum</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">werr</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+
+<span class="nl">werr</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">error</span><span class="p">)</span> <span class="o">*</span><span class="n">error</span> <span class="o">=</span> <span class="n">errno</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">di</span><span class="p">)</span> <span class="n">dictReleaseIterator</span><span class="p">(</span><span class="n">di</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="自动保存">自动保存</h2>
+<p>redis能够配置自动保存条件，当满足的情况下执行BGSAVE。</p>
+<p>依赖上次保存时间和dirty计数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// serverCron函数
+</span><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">||</span> <span class="n">server</span><span class="p">.</span><span class="n">aof_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">||</span>
+    <span class="n">ldbPendingChildren</span><span class="p">())</span>
+<span class="p">{</span>
+  <span class="c1">// 为之前处理BGSAVE完成的部分的代码
+</span><span class="c1"></span><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="c1">// 检查所有保存条件
+</span><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">server</span><span class="p">.</span><span class="n">saveparamslen</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">saveparam</span> <span class="o">*</span><span class="n">sp</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">saveparams</span><span class="o">+</span><span class="n">j</span><span class="p">;</span>
+    <span class="c1">// 检查某个保存条件是否符合
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">dirty</span> <span class="o">&gt;=</span> <span class="n">sp</span><span class="o">-&gt;</span><span class="n">changes</span> <span class="o">&amp;&amp;</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">unixtime</span><span class="o">-</span><span class="n">server</span><span class="p">.</span><span class="n">lastsave</span> <span class="o">&gt;</span> <span class="n">sp</span><span class="o">-&gt;</span><span class="n">seconds</span> <span class="o">&amp;&amp;</span>
+        <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">unixtime</span><span class="o">-</span><span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_try</span> <span class="o">&gt;</span>
+         <span class="n">CONFIG_BGSAVE_RETRY_DELAY</span> <span class="o">||</span>
+         <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_status</span> <span class="o">==</span> <span class="n">C_OK</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="n">serverLog</span><span class="p">(</span><span class="n">LL_NOTICE</span><span class="p">,</span><span class="s">&#34;%d changes in %d seconds. Saving...&#34;</span><span class="p">,</span>
+                <span class="n">sp</span><span class="o">-&gt;</span><span class="n">changes</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">sp</span><span class="o">-&gt;</span><span class="n">seconds</span><span class="p">);</span>
+      
+      <span class="c1">// 保存
+</span><span class="c1"></span>      <span class="n">rdbSaveBackground</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_filename</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="rdb的文件载入">RDB的文件载入</h2>
+<p>rdbload()用于将RDB文件从硬盘载入</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">rdbLoad</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">filename</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">uint32_t</span> <span class="n">dbid</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="n">rdbver</span><span class="p">;</span>
+    <span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">db</span><span class="o">+</span><span class="mi">0</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">expiretime</span><span class="p">,</span> <span class="n">now</span> <span class="o">=</span> <span class="n">mstime</span><span class="p">();</span>
+    <span class="n">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
+    <span class="n">rio</span> <span class="n">rdb</span><span class="p">;</span>
+
+    <span class="c1">// 打开rdb文件
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">((</span><span class="n">fp</span> <span class="o">=</span> <span class="n">fopen</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#34;r&#34;</span><span class="p">))</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+
+    <span class="c1">// 初始化rio
+</span><span class="c1"></span>    <span class="n">rioInitWithFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">,</span><span class="n">fp</span><span class="p">);</span>
+    <span class="n">rdb</span><span class="p">.</span><span class="n">update_cksum</span> <span class="o">=</span> <span class="n">rdbLoadProgressCallback</span><span class="p">;</span>
+    <span class="n">rdb</span><span class="p">.</span><span class="n">max_processing_chunk</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">loading_process_events_interval_bytes</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">rioRead</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">,</span><span class="n">buf</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+    <span class="n">buf</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+
+    <span class="c1">// 校验版本号
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">memcmp</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="s">&#34;REDIS&#34;</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Wrong signature trying to load DB from file&#34;</span><span class="p">);</span>
+        <span class="n">errno</span> <span class="o">=</span> <span class="n">EINVAL</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">rdbver</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">buf</span><span class="o">+</span><span class="mi">5</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">rdbver</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">rdbver</span> <span class="o">&gt;</span> <span class="n">REDIS_RDB_VERSION</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Can&#39;t handle RDB format version %d&#34;</span><span class="p">,</span><span class="n">rdbver</span><span class="p">);</span>
+        <span class="n">errno</span> <span class="o">=</span> <span class="n">EINVAL</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 标记开始载入
+</span><span class="c1"></span>    <span class="n">startLoading</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">*</span><span class="n">val</span><span class="p">;</span>
+        <span class="n">expiretime</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+
+        <span class="cm">/* Read type. */</span>
+        <span class="c1">// 读取类型
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">((</span><span class="n">type</span> <span class="o">=</span> <span class="n">rdbLoadType</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">))</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+
+        <span class="c1">// 过期时间 秒为单位
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">REDIS_RDB_OPCODE_EXPIRETIME</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// 过期时间
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">((</span><span class="n">expiretime</span> <span class="o">=</span> <span class="n">rdbLoadTime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">))</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+            <span class="cm">/* We read the time so we need to read the object type again. */</span>
+
+            <span class="c1">// 键值对
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">((</span><span class="n">type</span> <span class="o">=</span> <span class="n">rdbLoadType</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">))</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+            <span class="cm">/* the EXPIRETIME opcode specifies time in seconds, so convert
+</span><span class="cm">             * into milliseconds. */</span>
+            <span class="n">expiretime</span> <span class="o">*=</span> <span class="mi">1000</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">REDIS_RDB_OPCODE_EXPIRETIME_MS</span><span class="p">)</span> <span class="p">{</span>
+            <span class="cm">/* Milliseconds precision expire times introduced with RDB
+</span><span class="cm">             * version 3. */</span>
+             <span class="c1">// 过期时间 毫秒但闻
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">((</span><span class="n">expiretime</span> <span class="o">=</span> <span class="n">rdbLoadMillisecondTime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">))</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+            <span class="cm">/* We read the time so we need to read the object type again. */</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">type</span> <span class="o">=</span> <span class="n">rdbLoadType</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">))</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// EOF
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">REDIS_RDB_OPCODE_EOF</span><span class="p">)</span>
+            <span class="k">break</span><span class="p">;</span>
+
+        <span class="cm">/* Handle SELECT DB opcode as a special case */</span>
+        <span class="c1">// 读取切换数据库指示
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">REDIS_RDB_OPCODE_SELECTDB</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// 数据库号
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">((</span><span class="n">dbid</span> <span class="o">=</span> <span class="n">rdbLoadLen</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">,</span><span class="nb">NULL</span><span class="p">))</span> <span class="o">==</span> <span class="n">REDIS_RDB_LENERR</span><span class="p">)</span>
+                <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+
+            <span class="c1">// 校验
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">dbid</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="kt">unsigned</span><span class="p">)</span><span class="n">server</span><span class="p">.</span><span class="n">dbnum</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;FATAL: Data file was created with a Redis server configured to handle more than %d databases. Exiting</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">server</span><span class="p">.</span><span class="n">dbnum</span><span class="p">);</span>
+                <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="c1">// 切换数据库
+</span><span class="c1"></span>            <span class="n">db</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">db</span><span class="o">+</span><span class="n">dbid</span><span class="p">;</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="cm">/* Read key */</span>
+        <span class="c1">// 读取键
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">((</span><span class="n">key</span> <span class="o">=</span> <span class="n">rdbLoadStringObject</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">))</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+        <span class="cm">/* Read value */</span>
+        <span class="c1">// 读取值
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">((</span><span class="n">val</span> <span class="o">=</span> <span class="n">rdbLoadObject</span><span class="p">(</span><span class="n">type</span><span class="p">,</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">))</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+        <span class="cm">/* Check if the key already expired. This function is used when loading
+</span><span class="cm">         * an RDB file from disk, either at startup, or when an RDB was
+</span><span class="cm">         * received from the master. In the latter case, the master is
+</span><span class="cm">         * responsible for key expiry. If we would expire keys here, the
+</span><span class="cm">         * snapshot taken by the master may not be reflected on the slave. */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">masterhost</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">&amp;&amp;</span> <span class="n">expiretime</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">expiretime</span> <span class="o">&lt;</span> <span class="n">now</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">decrRefCount</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+            <span class="n">decrRefCount</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="cm">/* Add the new object in the hash table */</span>
+        <span class="c1">// 将键值关联到数据库内
+</span><span class="c1"></span>        <span class="n">dbAdd</span><span class="p">(</span><span class="n">db</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">val</span><span class="p">);</span>
+
+        <span class="cm">/* Set the expire time if needed */</span>
+        <span class="c1">// 设置过期时间
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">expiretime</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">setExpire</span><span class="p">(</span><span class="n">db</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">expiretime</span><span class="p">);</span>
+
+        <span class="n">decrRefCount</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="cm">/* Verify the checksum if RDB version is &gt;= 5 */</span>
+    <span class="c1">// 校验和比较
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">rdbver</span> <span class="o">&gt;=</span> <span class="mi">5</span> <span class="o">&amp;&amp;</span> <span class="n">server</span><span class="p">.</span><span class="n">rdb_checksum</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">uint64_t</span> <span class="n">cksum</span><span class="p">,</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">rdb</span><span class="p">.</span><span class="n">cksum</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">rioRead</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rdb</span><span class="p">,</span><span class="o">&amp;</span><span class="n">cksum</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">eoferr</span><span class="p">;</span>
+        <span class="n">memrev64ifbe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cksum</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cksum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;RDB file was saved with checksum disabled: no check performed.&#34;</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cksum</span> <span class="o">!=</span> <span class="n">expected</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Wrong RDB checksum. Aborting now.&#34;</span><span class="p">);</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 结束
+</span><span class="c1"></span>    <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+    <span class="n">stopLoading</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+
+<span class="nl">eoferr</span><span class="p">:</span> <span class="cm">/* unexpected end of file is handled here with a fatal exit */</span>
+    <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Short read or OOM loading DB. Unrecoverable error, aborting now.&#34;</span><span class="p">);</span>
+    <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span> <span class="cm">/* Just to avoid warning */</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2017-07-12</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" data-title="redis源码阅读-RDB持久化" data-hashtags="redis,源码阅读"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" data-hashtag="redis"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" data-title="redis源码阅读-RDB持久化"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" data-title="redis源码阅读-RDB持久化"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/" data-title="redis源码阅读-RDB持久化"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B0%E6%8D%AE%E5%BA%93/" class="prev" rel="prev" title="redis源码阅读-服务器"><i class="fas fa-angle-left fa-fw"></i>redis源码阅读-服务器</a>
+            <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%AE%A2%E9%98%85%E4%B8%8E%E5%8F%91%E5%B8%83/" class="next" rel="next" title="Redis源码阅读-订阅与发布">Redis源码阅读-订阅与发布<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

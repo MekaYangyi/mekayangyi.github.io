@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>[读书笔记] sicp 第三章 模块化 对象和状态 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="[读书笔记] sicp 第三章 模块化 对象和状态" />
+<meta property="og:description" content="有效的程序综合还需要一些组织原则，它们能够指导我们系统化地完成系统的整体设计。特别的需要一些能够帮助我们构造起模块化的大型系统策略，也就是说，使这些系统能够“自然地”划分为一些具有内聚力的部分，使这些部分可以分别进行开发和维护。
+有一种非常强有力的设计策略，特别适合用于构造那类模拟真实物理系统的程序，那就是基于被模拟程序的结构去设计程序的结构。那么有关的物理系统里的每一个对象，我们构造起一个与之对象的计算对象；对该系统里的每种活动，我们在自己的计算系统里顶一种符号操作。采用这一策略时的希望是，在需要针对系统中的新对象或者新活动扩充对应的计算模型时候，我们能够不必对程序的组织方面做得很成功，那么在需要添加新特城或者排除旧东西里的错误时候，就只需要在系统里的一些小局部中工作。
+本章研究两种特点鲜明的策略。第一种策略将注意力集中在对象上，将大型系统看成一大批对象，它们的行为可能随着时间的进展而不断的变化。另一种组织策略将注意力集中在流过的系统的信息流上，非常像电子工程师观察一个信号处理系统。
+对于对象途径而言，我们必须关注计算对象可以怎样变化而又同时保持其标识。这将迫使我们抛弃老的计算的代换模型，转向更机械式的，理论上也更不同意把握的计算的环境模型。在处理对象、变化和标识时，各种困难的基本根源在于我们需要在这一计算模型中与时间搏斗。如果允许程序并发指向的可能性，事情会变得更困难许多。流方式特别能用于松解在我们模型中对时间的模拟与计算机求值过程中的各种时间发生的顺序。我们将通过一种称为延时求值的技术做到这一点。
+赋值和局部状态
+一个由许多对象组成的系统里，其中的这些对象极少会是完全独立的。每个对象都可能通过交互作用，影响其他对象的状态，所谓交互就是建立起一个对象的状态变量与其他对象的状态变量之间的联系。确实如果一个系统中的状态变量可以分组，形成一些内部紧密结合的子系统，每个子系统与其他子系统之间只存在松散的练习，此时将这个系统看作是由一些独立对象组成的观点就会特别有用。
+对于一个系统的这种观点，有可能成为组织这一系统的计算模型的有力框架。要使这样的一个模型成为模块化的，就要求它能够分解为一批计算对象，使它们能够模拟系统里的实际对象。每个计算对象必须有它自己的一些局部状态变量，用于描述实际对象的状态。对于被模拟系统里的对象的状态是随着时间的变化的，与它们对象的计算对象的状态也必须变化。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2016-09-10T08:33:32+00:00" />
+<meta property="article:modified_time" content="2016-09-10T08:33:32+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="[读书笔记] sicp 第三章 模块化 对象和状态"/>
+<meta name="twitter:description" content="有效的程序综合还需要一些组织原则，它们能够指导我们系统化地完成系统的整体设计。特别的需要一些能够帮助我们构造起模块化的大型系统策略，也就是说，使这些系统能够“自然地”划分为一些具有内聚力的部分，使这些部分可以分别进行开发和维护。
+有一种非常强有力的设计策略，特别适合用于构造那类模拟真实物理系统的程序，那就是基于被模拟程序的结构去设计程序的结构。那么有关的物理系统里的每一个对象，我们构造起一个与之对象的计算对象；对该系统里的每种活动，我们在自己的计算系统里顶一种符号操作。采用这一策略时的希望是，在需要针对系统中的新对象或者新活动扩充对应的计算模型时候，我们能够不必对程序的组织方面做得很成功，那么在需要添加新特城或者排除旧东西里的错误时候，就只需要在系统里的一些小局部中工作。
+本章研究两种特点鲜明的策略。第一种策略将注意力集中在对象上，将大型系统看成一大批对象，它们的行为可能随着时间的进展而不断的变化。另一种组织策略将注意力集中在流过的系统的信息流上，非常像电子工程师观察一个信号处理系统。
+对于对象途径而言，我们必须关注计算对象可以怎样变化而又同时保持其标识。这将迫使我们抛弃老的计算的代换模型，转向更机械式的，理论上也更不同意把握的计算的环境模型。在处理对象、变化和标识时，各种困难的基本根源在于我们需要在这一计算模型中与时间搏斗。如果允许程序并发指向的可能性，事情会变得更困难许多。流方式特别能用于松解在我们模型中对时间的模拟与计算机求值过程中的各种时间发生的顺序。我们将通过一种称为延时求值的技术做到这一点。
+赋值和局部状态
+一个由许多对象组成的系统里，其中的这些对象极少会是完全独立的。每个对象都可能通过交互作用，影响其他对象的状态，所谓交互就是建立起一个对象的状态变量与其他对象的状态变量之间的联系。确实如果一个系统中的状态变量可以分组，形成一些内部紧密结合的子系统，每个子系统与其他子系统之间只存在松散的练习，此时将这个系统看作是由一些独立对象组成的观点就会特别有用。
+对于一个系统的这种观点，有可能成为组织这一系统的计算模型的有力框架。要使这样的一个模型成为模块化的，就要求它能够分解为一批计算对象，使它们能够模拟系统里的实际对象。每个计算对象必须有它自己的一些局部状态变量，用于描述实际对象的状态。对于被模拟系统里的对象的状态是随着时间的变化的，与它们对象的计算对象的状态也必须变化。"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" /><link rel="prev" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%B8%A6%E6%9C%89%E9%80%9A%E7%94%A8%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%9A%84%E7%B3%BB%E7%BB%9F/" /><link rel="next" href="http://coderyang.com/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "[读书笔记] sicp 第三章 模块化 对象和状态",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "sicp, 计算机程序的构造与解释","wordcount":  693 ,
+        "url": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81\/","datePublished": "2016-09-10T08:33:32+00:00","dateModified": "2016-09-10T08:33:32+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">[读书笔记] sicp 第三章 模块化 对象和状态</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2016-09-10">2016-09-10</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;693 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;4 minutes&nbsp;<span id="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" class="leancloud_visitors" data-flag-title="[读书笔记] sicp 第三章 模块化 对象和状态">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#局部状态变量">局部状态变量</a></li>
+    <li><a href="#引进赋值带来的收益">引进赋值带来的收益</a></li>
+    <li><a href="#引进赋值的代价">引进赋值的代价</a>
+      <ul>
+        <li><a href="#命令式程序设计的缺陷">命令式程序设计的缺陷</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#简单过程的应用">简单过程的应用</a></li>
+    <li><a href="#将框架看做局部状态的展台">将框架看做局部状态的展台</a></li>
+    <li><a href="#内部定义">内部定义</a></li>
+  </ul>
+
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#共享与相等">共享与相等</a></li>
+        <li><a href="#改变也就是赋值">改变也就是赋值</a></li>
+      </ul>
+    </li>
+    <li><a href="#队列的表示">队列的表示</a></li>
+    <li><a href="#表格的表示">表格的表示</a></li>
+    <li><a href="#数字电路的模拟器">数字电路的模拟器</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#串行化的实现">串行化的实现</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>有效的程序综合还需要一些组织原则，它们能够指导我们系统化地完成系统的整体设计。特别的需要一些能够帮助我们构造起模块化的大型系统策略，也就是说，使这些系统能够“自然地”划分为一些具有内聚力的部分，使这些部分可以分别进行开发和维护。
+有一种非常强有力的设计策略，特别适合用于构造那类模拟真实物理系统的程序，那就是基于被模拟程序的结构去设计程序的结构。那么有关的物理系统里的每一个对象，我们构造起一个与之对象的计算对象；对该系统里的每种活动，我们在自己的计算系统里顶一种符号操作。采用这一策略时的希望是，在需要针对系统中的新对象或者新活动扩充对应的计算模型时候，我们能够不必对程序的组织方面做得很成功，那么在需要添加新特城或者排除旧东西里的错误时候，就只需要在系统里的一些小局部中工作。
+本章研究两种特点鲜明的策略。第一种策略将注意力集中在对象上，将大型系统看成一大批对象，它们的行为可能随着时间的进展而不断的变化。另一种组织策略将注意力集中在流过的系统的信息流上，非常像电子工程师观察一个信号处理系统。
+对于对象途径而言，我们必须关注计算对象可以怎样变化而又同时保持其标识。这将迫使我们抛弃老的计算的代换模型，转向更机械式的，理论上也更不同意把握的计算的环境模型。在处理对象、变化和标识时，各种困难的基本根源在于我们需要在这一计算模型中与时间搏斗。如果允许程序并发指向的可能性，事情会变得更困难许多。流方式特别能用于松解在我们模型中对时间的模拟与计算机求值过程中的各种时间发生的顺序。我们将通过一种称为延时求值的技术做到这一点。</p>
+<h1 id="赋值和局部状态">赋值和局部状态</h1>
+<p>一个由许多对象组成的系统里，其中的这些对象极少会是完全独立的。每个对象都可能通过交互作用，影响其他对象的状态，所谓交互就是建立起一个对象的状态变量与其他对象的状态变量之间的联系。确实如果一个系统中的状态变量可以分组，形成一些内部紧密结合的子系统，每个子系统与其他子系统之间只存在松散的练习，此时将这个系统看作是由一些独立对象组成的观点就会特别有用。
+对于一个系统的这种观点，有可能成为组织这一系统的计算模型的有力框架。要使这样的一个模型成为模块化的，就要求它能够分解为一批计算对象，使它们能够模拟系统里的实际对象。每个计算对象必须有它自己的一些局部状态变量，用于描述实际对象的状态。对于被模拟系统里的对象的状态是随着时间的变化的，与它们对象的计算对象的状态也必须变化。</p>
+<h2 id="局部状态变量">局部状态变量</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">set!</span> <span class="nv">&lt;name&gt;</span> <span class="nv">&lt;new-value&gt;</span><span class="p">)</span><span class="c1">;设置值</span>
+<span class="p">(</span><span class="nv">begin</span> <span class="nv">&lt;exp1&gt;</span> <span class="nv">&lt;exp2&gt;</span><span class="p">)</span><span class="c1">;顺序求值</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="nv">balance</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">withdraw</span> <span class="nv">amount</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">&gt;=</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">)</span>
+      <span class="p">(</span><span class="nv">begin</span> <span class="p">(</span><span class="nv">set!</span> <span class="nv">balance</span> <span class="p">(</span><span class="nf">-</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">))</span>
+             <span class="nv">balance</span><span class="p">)</span>
+      <span class="s">&#34;Insufficient funds&#34;</span><span class="p">))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面使用了全局变量
+下面使用局部变量</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="nv">new-withdraw</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">balance</span> <span class="mi">100</span><span class="p">))</span>
+    <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">amount</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">&gt;=</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">)</span>
+          <span class="p">(</span><span class="nv">begin</span> <span class="p">(</span><span class="nv">set!</span> <span class="nv">balance</span> <span class="p">(</span><span class="nf">-</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">))</span>
+                 <span class="nv">balance</span><span class="p">)</span>
+          <span class="s">&#34;Insufficient funds&#34;</span><span class="p">))))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>构建一个提款机</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-withdraw</span> <span class="nv">balance</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">amount</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">&gt;=</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">)</span>
+        <span class="p">(</span><span class="nv">begin</span> <span class="p">(</span><span class="nv">set!</span> <span class="nv">balance</span> <span class="p">(</span><span class="nf">-</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">))</span>
+               <span class="nv">balance</span><span class="p">)</span>
+        <span class="s">&#34;Insufficient funds&#34;</span><span class="p">)))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>创建一个账户</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-withdraw</span> <span class="nv">balance</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">withdraw</span> <span class="nv">amount</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">&gt;=</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">)</span>
+        <span class="p">(</span><span class="nv">begin</span> <span class="p">(</span><span class="nv">set!</span> <span class="nv">balance</span> <span class="p">(</span><span class="nf">-</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">))</span>
+               <span class="nv">balance</span><span class="p">)</span>
+        <span class="s">&#34;Insufficient funds&#34;</span><span class="p">))</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">deposit</span> <span class="nv">amount</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">set!</span> <span class="nv">balance</span> <span class="p">(</span><span class="nf">+</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">))</span>
+    <span class="nv">balance</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">dispatch</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;withdraw</span><span class="p">)</span> <span class="nv">withdraw</span><span class="p">)</span>
+          <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;deposit</span><span class="p">)</span> <span class="nv">deposit</span><span class="p">)</span>
+          <span class="p">(</span><span class="nv">else</span> <span class="p">(</span><span class="kt">error</span> <span class="s">&#34;Unknoew request --MAKE-ACCOUNT&#34;</span>
+                       <span class="nv">m</span><span class="p">))))</span>
+  <span class="nv">dispatch</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="引进赋值带来的收益">引进赋值带来的收益</h2>
+<p>能够简化一部分需要变量状态的过程。</p>
+<h2 id="引进赋值的代价">引进赋值的代价</h2>
+<p>相比函数是编程，输入什么结果就是什么。显然引进赋值让程序变得更复杂。
+需要存在一个位置存储变量。</p>
+<h3 id="命令式程序设计的缺陷">命令式程序设计的缺陷</h3>
+<p>与函数式程序设计相对，广泛采用的赋值程序设计被称为命令是程序设计。
+求值顺序需要保证。</p>
+<h1 id="求值的环境模型">求值的环境模型</h1>
+<p>类似于C++的区域。
+过程也是对象。
+调用过程就会产生新的上下文环境，过程内的是过程内的环境。过程外全局环境等。</p>
+<p>过程应用的环境模型两条规则：</p>
+<ol>
+<li>将一个过程对象应用于一集实际参数，将构造出一个新框架，其中将过程的形式参数约束到调用时的实际参数，而后在构造起的这一新环境的上下文中求</li>
+<li>相对于一个给定的环境求值一个lambda表达式，将创建其一个过程对象，这个过程对象是一个序对，由该lambda表达式的征文和一个指向环境的指针组成，这一指针指向的就是创建这个过程对象时候的环境。</li>
+</ol>
+<h2 id="简单过程的应用">简单过程的应用</h2>
+<h2 id="将框架看做局部状态的展台">将框架看做局部状态的展台</h2>
+<h2 id="内部定义">内部定义</h2>
+<ol>
+<li>局部过程的名字不会与包容它们的过程之外的名字互相干扰，这是因为这些局部过程名 都是该过程运行时创建的框架里约束的，而不是在全局环境里约束的。</li>
+<li>局部过程只需将包含着它们的过程的形参作为自由变量，就可以访问该过程的实际参数，这是因为对于局部过程体的求值所在的环境是外围过程求值所在的环境的下属。</li>
+</ol>
+<h1 id="用变动的数据做模拟">用变动的数据做模拟</h1>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">append!</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">set-cdr!</span> <span class="p">(</span><span class="nv">last-pair</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">)</span>
+  <span class="nv">x</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">last-pair</span> <span class="nv">x</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nv">null?</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">x</span><span class="p">))</span>
+      <span class="nv">x</span>
+      <span class="p">(</span><span class="nv">last-pair</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">x</span><span class="p">))))</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="共享与相等">共享与相等</h3>
+<p>共享会导致多个对象都拥有同一个对象，修改一个会导致另外的也跟着被修改。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">eq?</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span><span class="c1">;检查是不是一个对象</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="改变也就是赋值">改变也就是赋值</h3>
+<p>主要是构建了一前一后两个指针。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nc">cons</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">set-x!</span> <span class="nv">v</span><span class="p">)</span> <span class="p">(</span><span class="nv">set!</span> <span class="nv">x</span> <span class="nv">v</span><span class="p">))</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">set-y!</span> <span class="nv">v</span><span class="p">)</span> <span class="p">(</span><span class="nv">set!</span> <span class="nv">y</span> <span class="nv">v</span><span class="p">))</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">dispatch</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;car</span><span class="p">)</span> <span class="nv">x</span><span class="p">)</span>
+          <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;cdr</span><span class="p">)</span> <span class="nv">y</span><span class="p">)</span>
+          <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;set-car!</span><span class="p">)</span> <span class="nv">set-x!</span><span class="p">)</span>
+          <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;set-cdr!</span><span class="p">)</span> <span class="nv">set-y!</span><span class="p">)</span>
+          <span class="p">(</span><span class="nv">else</span> <span class="p">(</span><span class="kt">error</span> <span class="s">&#34;Undefined operation -- CONS&#34;</span> <span class="nv">m</span><span class="p">))))</span>
+  <span class="nv">dispatch</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">z</span><span class="p">)</span> <span class="p">(</span><span class="nv">z</span> <span class="ss">&#39;car</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">z</span><span class="p">)</span> <span class="p">(</span><span class="nv">z</span> <span class="ss">&#39;cdr</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">set-car!</span> <span class="nv">z</span> <span class="nv">new-value</span><span class="p">)</span>
+  <span class="p">((</span><span class="nv">z</span> <span class="ss">&#39;set-car!</span><span class="p">)</span> <span class="nv">new-value</span><span class="p">)</span>
+  <span class="nv">z</span><span class="p">)</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">set-cdr!</span> <span class="nv">z</span> <span class="nv">new-value</span><span class="p">)</span>
+  <span class="p">((</span><span class="nv">z</span> <span class="ss">&#39;set-cdr!</span><span class="p">)</span> <span class="nv">new-value</span><span class="p">)</span>
+  <span class="nv">z</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="队列的表示">队列的表示</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="c1">;构造函数</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-queue</span><span class="p">)</span> <span class="p">(</span><span class="nc">cons</span> <span class="o">&#39;</span><span class="p">()</span> <span class="o">&#39;</span><span class="p">()))</span>
+<span class="c1">;选择函数</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">front-queue</span> <span class="nv">queue</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nv">empty-queue?</span> <span class="nv">queue</span><span class="p">)</span>
+      <span class="p">(</span><span class="kt">error</span> <span class="s">&#34;FRONT called with an empty queue&#34;</span> <span class="nv">queue</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">car</span> <span class="p">(</span><span class="nv">front-ptr</span> <span class="nv">queue</span><span class="p">))))</span>
+<span class="c1">;检测队列是否为空</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">empty-queue?</span> <span class="nv">queue</span><span class="p">)</span> <span class="p">(</span><span class="nv">null?</span> <span class="p">(</span><span class="nv">front-ptr</span> <span class="nv">queue</span><span class="p">)))</span>
+<span class="c1">;改变函数</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">insert-queue!</span> <span class="nv">queue</span> <span class="nv">item</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">new-pair</span> <span class="p">(</span><span class="nc">cons</span> <span class="nv">item</span> <span class="o">&#39;</span><span class="p">())))</span>
+    <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">empty-queue?</span> <span class="nv">queue</span><span class="p">)</span>
+           <span class="p">(</span><span class="nv">set-front-ptr!</span> <span class="nv">queue</span> <span class="nv">new-pair</span><span class="p">)</span>
+           <span class="p">(</span><span class="nv">set-rear-ptr!</span> <span class="nv">queue</span> <span class="nv">new-pair</span><span class="p">)</span>
+           <span class="nv">queue</span><span class="p">)</span>
+          <span class="p">(</span><span class="nv">else</span>
+           <span class="p">(</span><span class="nv">set-cdr!</span> <span class="p">(</span><span class="nv">rear-ptr</span> <span class="nv">queue</span><span class="p">)</span> <span class="nv">new-pair</span><span class="p">)</span>
+           <span class="p">(</span><span class="nv">set-rear-ptr!</span> <span class="nv">queue</span> <span class="nv">new-pair</span><span class="p">)</span>
+           <span class="nv">queue</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">delete-queue!</span> <span class="nv">queue</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">empty-queue?</span> <span class="nv">queue</span><span class="p">)</span>
+         <span class="p">(</span><span class="kt">error</span> <span class="s">&#34;DELETE! called with an empty queue&#34;</span> <span class="nv">queue</span><span class="p">))</span>
+        <span class="p">(</span><span class="nv">else</span>
+         <span class="p">(</span><span class="nv">set-front-ptr!</span> <span class="nv">queue</span> <span class="p">(</span><span class="nf">cdr</span> <span class="p">(</span><span class="nv">front-ptr</span> <span class="nv">queue</span><span class="p">)))</span>
+         <span class="nv">queue</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">front-ptr</span> <span class="nv">queue</span><span class="p">)</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">queue</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">rear-ptr</span> <span class="nv">queue</span><span class="p">)</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">queue</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">set-front-ptr!</span> <span class="nv">queue</span> <span class="nv">item</span><span class="p">)</span> <span class="p">(</span><span class="nv">set-car!</span> <span class="nv">queue</span> <span class="nv">item</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">set-rear-ptr!</span> <span class="nv">queue</span> <span class="nv">item</span><span class="p">)</span> <span class="p">(</span><span class="nv">set-car!</span> <span class="nv">queue</span> <span class="nv">item</span><span class="p">))</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="表格的表示">表格的表示</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">lookup</span> <span class="nv">key</span> <span class="nv">table</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">record</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nv">key</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">table</span><span class="p">))))</span>
+    <span class="p">(</span><span class="k">if</span> <span class="nv">record</span>
+        <span class="p">(</span><span class="nf">cdr</span> <span class="nv">record</span><span class="p">)</span>
+        <span class="nv">false</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nv">key</span> <span class="nv">records</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">null?</span> <span class="nv">records</span><span class="p">)</span> <span class="nv">false</span><span class="p">)</span>
+        <span class="p">((</span><span class="nv">equal?</span> <span class="nv">key</span> <span class="p">(</span><span class="nf">caar</span> <span class="nv">records</span><span class="p">))</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">records</span><span class="p">))</span>
+        <span class="p">(</span><span class="nv">else</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nv">key</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">records</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">insert!</span> <span class="nv">key</span> <span class="nv">value</span> <span class="nv">table</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">record</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nv">key</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">table</span><span class="p">))))</span>
+    <span class="p">(</span><span class="k">if</span> <span class="nv">record</span>
+        <span class="p">(</span><span class="nv">set-cdr!</span> <span class="nv">record</span> <span class="nv">value</span><span class="p">)</span>
+        <span class="p">(</span><span class="nv">set-cdr!</span> <span class="nv">table</span>
+                  <span class="p">(</span><span class="nc">cons</span> <span class="p">(</span><span class="nc">cons</span> <span class="nv">key</span> <span class="nv">value</span><span class="p">)</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">table</span><span class="p">))))))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-table</span><span class="p">)</span>
+  <span class="p">(</span><span class="nc">list</span> <span class="ss">&#39;*table*</span><span class="p">))</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="数字电路的模拟器">数字电路的模拟器</h2>
+<h1 id="并发时间本质是个问题">并发：时间本质是个问题</h1>
+<p>和普通的并发问题是一致的。
+串行化共享部分。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="nv">s</span> <span class="nv">make-serializer</span><span class="p">)</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-account</span> <span class="nv">balance</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">withdraw</span> <span class="nv">amount</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">&gt;=</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">)</span>
+        <span class="p">(</span><span class="nv">begin</span> <span class="p">(</span><span class="nv">set!</span> <span class="nv">balance</span> <span class="p">(</span><span class="nf">=</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">))</span>
+               <span class="nv">balance</span><span class="p">)</span>
+        <span class="s">&#34;Insufficient funds&#34;</span><span class="p">))</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">deposit</span> <span class="nv">amount</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">set!</span> <span class="nv">balance</span> <span class="p">(</span><span class="nf">+</span> <span class="nv">balance</span> <span class="nv">amount</span><span class="p">))</span>
+    <span class="nv">balance</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">protected</span> <span class="p">(</span><span class="nv">make-serializer</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">dispatch</span> <span class="nv">m</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;withdraw</span><span class="p">)</span> <span class="p">(</span><span class="nv">protected</span> <span class="nv">withdraw</span><span class="p">))</span>
+            <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;deposit</span><span class="p">)</span> <span class="p">(</span><span class="nv">protected</span> <span class="nv">deposit</span><span class="p">))</span>
+            <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;balance</span><span class="p">)</span> <span class="nv">balance</span><span class="p">)</span>
+            <span class="p">(</span><span class="nv">else</span> <span class="p">(</span><span class="kt">error</span> <span class="s">&#34;Unknown request --MAKE-ACCOUNT&#34;</span>
+                         <span class="nv">m</span><span class="p">))))</span>
+    <span class="nv">dispatch</span><span class="p">))</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="串行化的实现">串行化的实现</h2>
+<p>互斥元同步机制。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-serializer</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">mutex</span> <span class="p">(</span><span class="nv">make-mutex</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">p</span><span class="p">)</span>
+      <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">serialized-p</span> <span class="o">.</span> <span class="nv">args</span><span class="p">)</span>
+        <span class="p">(</span><span class="nv">mutex</span> <span class="ss">&#39;acquire</span><span class="p">)</span>
+        <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">val</span> <span class="p">(</span><span class="nf">apply</span> <span class="nv">p</span> <span class="nv">args</span><span class="p">)))</span>
+          <span class="p">(</span><span class="nv">mutex</span> <span class="ss">&#39;release</span><span class="p">)</span>
+          <span class="nv">val</span><span class="p">))</span>
+      <span class="nv">serialized-p</span><span class="p">)))</span>
+
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-mutex</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">cell</span> <span class="p">(</span><span class="nc">list</span> <span class="nv">false</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">the-mutex</span> <span class="nv">m</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;acquire</span><span class="p">)</span>
+             <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nv">test-and-set!</span> <span class="nv">cell</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nv">the-mutex</span> <span class="ss">&#39;acquire</span><span class="p">)))</span>
+            <span class="p">((</span><span class="nv">eq?</span> <span class="nv">m</span> <span class="ss">&#39;release</span><span class="p">)</span> <span class="p">(</span><span class="nv">clea!</span> <span class="nv">cell</span><span class="p">))))</span>
+    <span class="nv">the-mutex</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">test-and-set!</span> <span class="nv">cell</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">cell</span><span class="p">)</span>
+      <span class="nv">true</span>
+      <span class="p">(</span><span class="nv">begin</span> <span class="p">(</span><span class="nv">set-car!</span> <span class="nv">cell</span> <span class="nv">true</span><span class="p">)</span>
+             <span class="nv">false</span><span class="p">)))</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2016-09-10</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" data-title="[读书笔记] sicp 第三章 模块化 对象和状态" data-hashtags="sicp,计算机程序的构造与解释"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" data-hashtag="sicp"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" data-title="[读书笔记] sicp 第三章 模块化 对象和状态"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" data-title="[读书笔记] sicp 第三章 模块化 对象和状态"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/" data-title="[读书笔记] sicp 第三章 模块化 对象和状态"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%B8%A6%E6%9C%89%E9%80%9A%E7%94%A8%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%9A%84%E7%B3%BB%E7%BB%9F/" class="prev" rel="prev" title="[读书笔记] sicp 第二章 带有通用型操作的系统"><i class="fas fa-angle-left fa-fw"></i>[读书笔记] sicp 第二章 带有通用型操作的系统</a>
+            <a href="/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/" class="next" rel="next" title="windows下Pyqt &#43; guiqwt环境的搭建">windows下Pyqt &#43; guiqwt环境的搭建<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

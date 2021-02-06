@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学" />
+<meta property="og:description" content="第二章：构造函数语意学
+由于C&#43;&#43;的编译器在程序员之外做了太多事情，导致会产生很多意料之外的错误。
+例子 Conversion运算符。
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+
+//为了支持
+if(cin);
+//定义了一个perator int()
+//但是导致了以下错误的代码能够正常运行
+int inVal;
+cin &lt;&lt; inVal;
+//此处&lt;&lt;被解释为左移操作符
+int temp = cin.operator int();
+temp &lt;&lt; intVal;
+
+
+Default Constructor的构建操作
+默认构造函数只在编译器认为需要的时候才创建。
+
+
+1
+2
+3
+4
+5
+6
+
+
+class Foo{public: int val; Foo *pnext};
+int main()
+{
+    Foo test;
+    return 0;
+]
+
+
+这种情况实际没有默认构造函数，编译器什么都没做。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2016-08-07T18:36:20+00:00" />
+<meta property="article:modified_time" content="2016-08-07T18:36:20+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学"/>
+<meta name="twitter:description" content="第二章：构造函数语意学
+由于C&#43;&#43;的编译器在程序员之外做了太多事情，导致会产生很多意料之外的错误。
+例子 Conversion运算符。
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+
+//为了支持
+if(cin);
+//定义了一个perator int()
+//但是导致了以下错误的代码能够正常运行
+int inVal;
+cin &lt;&lt; inVal;
+//此处&lt;&lt;被解释为左移操作符
+int temp = cin.operator int();
+temp &lt;&lt; intVal;
+
+
+Default Constructor的构建操作
+默认构造函数只在编译器认为需要的时候才创建。
+
+
+1
+2
+3
+4
+5
+6
+
+
+class Foo{public: int val; Foo *pnext};
+int main()
+{
+    Foo test;
+    return 0;
+]
+
+
+这种情况实际没有默认构造函数，编译器什么都没做。"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" /><link rel="prev" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%85%B3%E4%BA%8E%E5%AF%B9%E8%B1%A1/" /><link rel="next" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%B8%89%E7%AB%A0-data%E8%AF%AD%E6%84%8F%E5%AD%A6/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "[读书笔记]深入理解C++对象模型 第二章 构造函数的语意学",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "C\u002b\u002b, 理论, 读书笔记","wordcount":  524 ,
+        "url": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6\/","datePublished": "2016-08-07T18:36:20+00:00","dateModified": "2016-08-07T18:36:20+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2016-08-07">2016-08-07</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;524 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;3 minutes&nbsp;<span id="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" class="leancloud_visitors" data-flag-title="[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#带有default-constructor的-member-class-object">带有Default Constructor的 Member class Object</a></li>
+    <li><a href="#带有default-constructor的-base-class">带有Default Constructor的 Base Class</a></li>
+    <li><a href="#带有一个virtual-function的-class">带有一个Virtual Function的 Class</a></li>
+    <li><a href="#带有一个virtual-base-class-的class">带有一个Virtual Base Class 的Class</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#default-memberwise-initialization">Default Memberwise Initialization</a></li>
+    <li><a href="#非逐位拷贝">非逐位拷贝</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#明确的初始化操作">明确的初始化操作</a></li>
+    <li><a href="#参数的初始化">参数的初始化</a></li>
+    <li><a href="#返回初始值">返回初始值</a></li>
+    <li><a href="#在使用者层面的优化">在使用者层面的优化</a></li>
+    <li><a href="#在编译器层面优化">在编译器层面优化</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="第二章构造函数语意学">第二章：构造函数语意学</h1>
+<p>由于C++的编译器在程序员之外做了太多事情，导致会产生很多意料之外的错误。
+例子 Conversion运算符。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//为了支持
+</span><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">cin</span><span class="p">);</span>
+<span class="c1">//定义了一个perator int()
+</span><span class="c1">//但是导致了以下错误的代码能够正常运行
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">inVal</span><span class="p">;</span>
+<span class="n">cin</span> <span class="o">&lt;&lt;</span> <span class="n">inVal</span><span class="p">;</span>
+<span class="c1">//此处&lt;&lt;被解释为左移操作符
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">cin</span><span class="p">.</span><span class="k">operator</span> <span class="kt">int</span><span class="p">();</span>
+<span class="n">temp</span> <span class="o">&lt;&lt;</span> <span class="n">intVal</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="default-constructor的构建操作">Default Constructor的构建操作</h1>
+<p>默认构造函数只在编译器认为需要的时候才创建。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Foo</span><span class="p">{</span><span class="k">public</span><span class="o">:</span> <span class="kt">int</span> <span class="n">val</span><span class="p">;</span> <span class="n">Foo</span> <span class="o">*</span><span class="n">pnext</span><span class="p">};</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">Foo</span> <span class="n">test</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这种情况实际没有默认构造函数，编译器什么都没做。</p>
+<h2 id="带有default-constructor的-member-class-object">带有Default Constructor的 Member class Object</h2>
+<p>如果一个Class没有任何构造函数，但是包含一个member object，而后者又有default constructor，那么会在constructor真正被调用时合成出一个默认构造函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">classFoo</span> <span class="p">{</span><span class="k">public</span><span class="o">:</span> <span class="n">Foo</span><span class="p">(),</span><span class="n">Foo</span><span class="p">(</span><span class="kt">int</span><span class="p">);...};</span>
+<span class="n">classBar</span> <span class="p">{</span><span class="k">public</span><span class="o">:</span> <span class="n">Foofoo</span><span class="p">;</span> <span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">;};</span>
+<span class="kt">void</span> <span class="nf">foo_bar</span><span class="p">(){</span>
+   <span class="n">Bar</span> <span class="n">bar</span><span class="p">;</span> <span class="c1">//Bar::foo应在此处被初始化
+</span><span class="c1"></span>   <span class="k">if</span><span class="p">(</span><span class="n">str</span><span class="p">){...}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>此时的Bar合成默认构造函数会调用Foo的默认构造函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">Bar</span><span class="o">::</span><span class="n">Bar</span><span class="p">()</span>
+<span class="p">{</span> 
+    <span class="n">foo</span><span class="p">.</span><span class="n">Foo</span><span class="o">::</span><span class="n">Foo</span><span class="p">();</span> <span class="c1">//合成出的
+</span><span class="c1"></span>    <span class="c1">//但是str等成员是不会管的
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>如果已经写了一个默认构造函数，那么就会扩张该函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">Bar</span><span class="o">::</span><span class="n">Bar</span><span class="p">()</span>
+<span class="p">{</span> 
+    <span class="n">foo</span><span class="p">.</span><span class="n">Foo</span><span class="o">::</span><span class="n">Foo</span><span class="p">();</span> <span class="c1">//扩展的
+</span><span class="c1"></span>    <span class="n">str</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="c1">//程序员代码
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>C++会以member objects在class中声明的次序来调用各个构造函数，由编译器完成。如果成员没有默认构造函数的话，就不会有扩张。</p>
+<h2 id="带有default-constructor的-base-class">带有Default Constructor的 Base Class</h2>
+<p>一个没有任何构造函数的类派生子一个带有默认构造函数的基类，那么会合成出一个一个默认构造函数，调用上一层的默认构造函数（根据声明次序）。
+如果是一个有多个构造函数的类，但是没有默认构造函数，则会扩张每一个构造函数，加入有必要的基类部分的默认构造。
+但是不会合成默认构造函数，因为已经存在了程序员编写的构造函数。
+如果也存在带有构造函数的成员，那么会在基类的部分构造之后，调用这些成员的构造函数。</p>
+<h2 id="带有一个virtual-function的-class">带有一个Virtual Function的 Class</h2>
+<p>另有两种情况，也需要合成出default constructor</p>
+<blockquote>
+<ul>
+<li>class声明（或者继承）一个virtual function</li>
+<li>class派生自一个继承串链，其中有一个或者更多的virtual base classes</li>
+</ul>
+</blockquote>
+<p>如果程序员没有声明自己的构造函数，编译器就会详细记录合成一个default constructor的必要信息。
+编译器需要做以下的几个功能：</p>
+<blockquote>
+<ul>
+<li>一个virtual function table会被编译器产生出来，内放class的virtual function地址。</li>
+<li>在每一个class object中，一个额外的pointer member会被编译器合成，内含相关的classs vtbl的地址。</li>
+</ul>
+</blockquote>
+<p>此外如果必要，虚函数表的部分会被重写，以改变为需要的情况。
+为了支持这种功能，编译器必须为每个w对象设置它的vptr（这是成员变量，此时需要指向合适的vtbl），因此编译器需要在default ctor中安插一些代码来完成这种工作。</p>
+<h2 id="带有一个virtual-base-class-的class">带有一个Virtual Base Class 的Class</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">classX</span> <span class="p">{</span> <span class="k">public</span><span class="o">:</span> <span class="n">inti</span><span class="p">;</span> <span class="p">};</span>
+<span class="nl">classA</span> <span class="p">:</span> <span class="n">publicvirtualX</span>   <span class="p">{</span> <span class="k">public</span><span class="o">:</span> <span class="n">intj</span><span class="p">;</span> <span class="p">};</span>
+<span class="nl">classB</span> <span class="p">:</span> <span class="n">publicvirtualX</span>   <span class="p">{</span> <span class="k">public</span><span class="o">:</span> <span class="n">doubled</span><span class="p">;</span> <span class="p">};</span>
+<span class="nl">classC</span> <span class="p">:</span> <span class="n">publicA</span><span class="p">,</span> <span class="n">publicB</span> <span class="p">{</span> <span class="k">public</span><span class="o">:</span> <span class="n">intk</span><span class="p">;</span> <span class="p">};</span>
+<span class="c1">//无法在编译期间解析出 pa-&gt;i 的位置（给一个pa无法确定i的地址）。
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span> <span class="n">constA</span><span class="o">*</span> <span class="n">pa</span> <span class="p">)</span> <span class="p">{</span> <span class="n">pa</span><span class="o">-&gt;</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span> <span class="p">}</span>
+<span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+   <span class="n">foo</span><span class="p">(</span> <span class="k">new</span> <span class="n">A</span> <span class="p">);</span>
+   <span class="n">foo</span><span class="p">(</span> <span class="k">new</span> <span class="n">C</span> <span class="p">);</span>
+   <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+<span class="c1">//由于pa的真正类型不确定，所以某些编译器会记录一个指针例（如 __vbcX）来记录X，然后通过这个指针来定位pa指向的i。
+</span><span class="c1">//上述
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span> <span class="n">constA</span><span class="o">*</span> <span class="n">pa</span> <span class="p">)</span> <span class="p">{</span> <span class="n">pa</span><span class="o">-&gt;</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span> <span class="p">}</span>
+<span class="c1">//变成了：
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span> <span class="n">constA</span><span class="o">*</span> <span class="n">pa</span> <span class="p">)</span> <span class="p">{</span> <span class="n">pa</span><span class="o">-&gt;</span> <span class="n">__vbcX</span> <span class="o">-&gt;</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span> <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中__vbcX标示编译器产生的指针，指向 virtual base class X。
+__vbcX需要在每一个构造函数按错那么“允许每一个 virtual base class的执行期间存取操作“的码。如果class没有声明任何构造函数，就需要合成一个默认构造函数。</p>
+<h1 id="copy-constructor的构建操作">Copy Constructor的构建操作</h1>
+<p>有三种情况会执行拷贝构造函数：</p>
+<blockquote>
+<ul>
+<li>显式的使用 =</li>
+<li>传参</li>
+<li>返回</li>
+</ul>
+</blockquote>
+<h2 id="default-memberwise-initialization">Default Memberwise Initialization</h2>
+<p>一个class没有提供显式的拷贝构造函数的话，那么利用Memberwise Initialization(对每一个成员将源对象所有的member复制给目标对象)</p>
+<h2 id="非逐位拷贝">非逐位拷贝</h2>
+<blockquote>
+<ul>
+<li>这个类的某个member object有拷贝构造函数。（不管成员的拷贝构造函数是合成的还是显式的定义的，都需要合成一个拷贝构造函数）。</li>
+<li>这个类继承自某个有copy ctor的base class。（同上）。</li>
+<li>这个类声明了若干个virtual function。（如果继承的基类有virtual function那么一定有拷贝构造函数，符合第二条。）</li>
+<li>这个类派生自的继承链中有virtual base class。</li>
+</ul>
+</blockquote>
+<p>第三四种情况需要合成的复制构造函数构建正确的虚表指针给每一个对象。
+因为复制构造函数可以 派生类赋值给基类。那么派生类的虚表指针是没法用逐位拷贝来赋值，需要一个合成的复制构造函数正确的设定虚表指针。</p>
+<h1 id="程序转化语意学">程序转化语意学</h1>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">X</span> <span class="nf">foo</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">X</span> <span class="n">xx</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">xx</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>一个人可能会做出以下假设：</p>
+<blockquote>
+<ul>
+<li>每次foo()调用，就会传回xx的值.</li>
+<li>如果class X定义了一个拷贝构造函数，那么每次调用foo()，保证该拷贝构造函数也会被调用。</li>
+</ul>
+</blockquote>
+<p>均不一定。move语意和外面没有接收的可能导致以上假设不一定。</p>
+<h2 id="明确的初始化操作">明确的初始化操作</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">X</span> <span class="n">x0</span><span class="p">;</span>
+<span class="kt">void</span> <span class="nf">foo_bar</span><span class="p">(){</span>
+   <span class="n">X</span> <span class="n">x1</span><span class="p">(</span><span class="n">x0</span><span class="p">);</span>             <span class="c1">//定义了x1
+</span><span class="c1"></span>   <span class="n">X</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">x0</span><span class="p">;</span>           <span class="c1">//定义了x2
+</span><span class="c1"></span>   <span class="n">X</span> <span class="n">x3</span> <span class="o">=</span> <span class="n">X</span><span class="p">(</span><span class="n">x0</span><span class="p">);</span>       <span class="c1">//定义了x3
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>//转化的两个动作
+//即变成了</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">foo_bar</span><span class="p">(){</span>
+   <span class="n">X</span> <span class="n">x1</span><span class="p">;</span>    <span class="c1">//定义被重写，初始化操作被剥除
+</span><span class="c1"></span>   <span class="n">X</span> <span class="n">x2</span><span class="p">;</span>    <span class="c1">//定义被重写，初始化操作被剥除
+</span><span class="c1"></span>   <span class="n">X</span> <span class="n">x3</span><span class="p">;</span>    <span class="c1">//定义被重写，初始化操作被剥除
+</span><span class="c1"></span>
+   <span class="c1">//编译器安插X copy ctor。
+</span><span class="c1"></span>   <span class="n">x1</span><span class="p">.</span><span class="n">X</span><span class="o">::</span><span class="n">X</span><span class="p">(</span> <span class="n">x0</span> <span class="p">);</span>
+   <span class="n">x2</span><span class="p">.</span><span class="n">X</span><span class="o">::</span><span class="n">X</span><span class="p">(</span> <span class="n">x0</span> <span class="p">);</span>
+   <span class="n">x3</span><span class="p">.</span><span class="n">X</span><span class="o">::</span><span class="n">X</span><span class="p">(</span> <span class="n">x0</span> <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中:
+x1.X::X( x0 );
+会表现为对拷贝构造函数的调用：
+X::X( constX&amp; xx);）</p>
+<h2 id="参数的初始化">参数的初始化</h2>
+<p>如下代码的变化</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span><span class="n">X</span> <span class="n">x0</span><span class="p">);</span>
+<span class="c1">//...
+</span><span class="c1"></span><span class="n">X</span> <span class="n">xx</span><span class="p">;</span>
+<span class="n">foo</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这种方式把函数的参数变成了引用，然后将拷贝构造函数构造的参数传入。
+变成了</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span><span class="n">X</span><span class="o">&amp;</span> <span class="n">x0</span><span class="p">);</span>
+<span class="c1">//...
+</span><span class="c1"></span><span class="n">X</span> <span class="n">__tmp</span><span class="p">;</span>
+<span class="n">__tmp</span><span class="p">.</span><span class="n">X</span><span class="o">::</span><span class="n">X</span><span class="p">(</span> <span class="n">XX</span> <span class="p">);</span>
+<span class="n">foo</span><span class="p">(</span><span class="n">__tmp</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中X声明了destructor，它在foo调用完成后销毁暂时性的对象。</p>
+<h2 id="返回初始值">返回初始值</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">X</span> <span class="nf">bar</span><span class="p">(){</span>
+  <span class="n">X</span> <span class="n">xx</span><span class="p">;</span>
+  <span class="c1">//...
+</span><span class="c1"></span>  <span class="k">return</span> <span class="n">xx</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>先添加一个额外的引用参数，然后在返回之前调用一个复制构造函数构造这个返回对象。
+于是变成了</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">bar</span><span class="p">(</span><span class="n">X</span><span class="o">&amp;</span> <span class="n">_result</span><span class="p">){</span>
+   <span class="n">X</span> <span class="n">xx</span><span class="p">;</span>
+   <span class="c1">//...
+</span><span class="c1"></span>   <span class="n">_result</span><span class="p">.</span><span class="n">X</span><span class="o">::</span><span class="n">X</span><span class="p">(</span><span class="n">xx</span><span class="p">);</span>
+   <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">X</span> <span class="n">xx</span> <span class="o">=</span> <span class="n">bar</span><span class="p">();</span>
+<span class="c1">//转换为
+</span><span class="c1"></span><span class="n">X</span> <span class="n">xx</span><span class="p">;</span>
+<span class="n">bar</span><span class="p">(</span><span class="n">xx</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">bar</span><span class="p">().</span><span class="n">memfunc</span><span class="p">();</span>
+<span class="c1">//可能转换为
+</span><span class="c1"></span><span class="n">X</span> <span class="n">_temp0</span><span class="p">;</span>
+<span class="p">(</span><span class="n">bar</span><span class="p">(</span><span class="n">_temp0</span><span class="p">),</span> <span class="n">_temp0</span><span class="p">).</span><span class="n">memfunc</span><span class="p">();</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="在使用者层面的优化">在使用者层面的优化</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">X</span> <span class="nf">bar</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">,</span>  <span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">z</span><span class="p">)</span>
+<span class="p">{</span>
+   <span class="n">X</span> <span class="n">xx</span><span class="p">;</span>
+   <span class="c1">//...
+</span><span class="c1"></span>   <span class="k">return</span> <span class="n">xx</span><span class="p">;</span>
+<span class="p">}</span> 
+</code></pre></td></tr></table>
+</div>
+</div><p>而是定义一个新的构造函数，这样在转换之后效率更高</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">X</span> <span class="nf">bar</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">,</span>  <span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">z</span><span class="p">)</span>
+<span class="p">{</span>
+   <span class="k">return</span> <span class="n">X</span><span class="p">(</span><span class="n">y</span> <span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+<span class="p">}</span> 
+</code></pre></td></tr></table>
+</div>
+</div><p>转换后</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">bar</span><span class="p">(</span><span class="n">X</span> <span class="o">&amp;</span><span class="n">_result</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">,</span>  <span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">z</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">_result</span> <span class="n">X</span><span class="o">::</span><span class="n">X</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+  <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span> 
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="在编译器层面优化">在编译器层面优化</h2>
+<p>就是上面那个转换代码</p>
+<p>理论上合成的拷贝构造函数就能够正常的工作了。某些情况不会有合成的拷贝构造函数，而是直接逐位拷贝。这样的情况下，就没法实施，上面的编译器层面的优化。
+那么我们应该预见这个类是不是有很多传值的操作，比如上面的函数的参数，返回值。如果有，那么提供一个，编译器才能够实施优化。</p>
+<p><strong>成员们的初始化队伍</strong>
+构造函数初始化列表</p>
+<blockquote>
+<ul>
+<li>初始化一个引用成员（不这样做出错）</li>
+<li>初始化一个const成员（不这样做出错）</li>
+<li>调用一个base class的构造函数，而它拥有一组参数时（不这样做出错）</li>
+<li>调用一个member class的构造函数，而它拥有一组参数时（比赋值更有效率）</li>
+</ul>
+</blockquote>
+<p>编译器会一一操作初始化列表，以适当次序（成员的声明次序）在构造函数之内安插初始化操作，并且在任何显式写的代码之前完成操作。
+初始化列表能够使用成员函数来初始化一个成员。（这里如果比较复杂的初始化能够使用这种方式提高初始化的效率，但是要注意该函数使用的变量是不是在调用前都被初始化了。合法的原因是此时this指针已经创建好了。）</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2016-08-07</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" data-title="[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学" data-hashtags="C&#43;&#43;,理论,读书笔记"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" data-hashtag="C&#43;&#43;"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" data-title="[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" data-title="[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/" data-title="[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%85%B3%E4%BA%8E%E5%AF%B9%E8%B1%A1/" class="prev" rel="prev" title="[读书笔记]深入探索C&#43;&#43; 对象模型 第一章 关于对象"><i class="fas fa-angle-left fa-fw"></i>[读书笔记]深入探索C&#43;&#43; 对象模型 第一章 关于对象</a>
+            <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%B8%89%E7%AB%A0-data%E8%AF%AD%E6%84%8F%E5%AD%A6/" class="next" rel="next" title="[读书笔记] 深入探索C&#43;&#43;对象模型 第三章 Data语意学">[读书笔记] 深入探索C&#43;&#43;对象模型 第三章 Data语意学<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器" />
+<meta property="og:description" content="概论
+第一章基本都是C&#43;&#43;基础的知识，读了《C&#43;&#43; Primer》的话都懂。关于各种C&#43;&#43;的特性、STL特性都有。
+STL六大组件 功能与运用
+STL提供六大组件，彼此可以组合套用
+
+容器：各种数据结构。Vector,list,deque,set,map
+算法：各种常用算法如sort,search,copy,erase
+迭代器：扮演容器与算法之间的粘合剂，所谓的泛型指针。五种类型
+仿函数：行为类似函数，可以作为算法的某种策略。仿函数是重载了()的class或者class template，一般函数指针可视为狭义的仿函数
+配接器：一种用来修饰容器或者仿函数或迭代器接口的东西。
+配置器：负责控件的配置与管理。
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2016-11-16T08:32:26+00:00" />
+<meta property="article:modified_time" content="2016-11-16T08:32:26+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器"/>
+<meta name="twitter:description" content="概论
+第一章基本都是C&#43;&#43;基础的知识，读了《C&#43;&#43; Primer》的话都懂。关于各种C&#43;&#43;的特性、STL特性都有。
+STL六大组件 功能与运用
+STL提供六大组件，彼此可以组合套用
+
+容器：各种数据结构。Vector,list,deque,set,map
+算法：各种常用算法如sort,search,copy,erase
+迭代器：扮演容器与算法之间的粘合剂，所谓的泛型指针。五种类型
+仿函数：行为类似函数，可以作为算法的某种策略。仿函数是重载了()的class或者class template，一般函数指针可视为狭义的仿函数
+配接器：一种用来修饰容器或者仿函数或迭代器接口的东西。
+配置器：负责控件的配置与管理。
+"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" /><link rel="prev" href="http://coderyang.com/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/" /><link rel="next" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "stl源码剖析","wordcount":  1050 ,
+        "url": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8\/","datePublished": "2016-11-16T08:32:26+00:00","dateModified": "2016-11-16T08:32:26+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2016-11-16">2016-11-16</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1050 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;5 minutes&nbsp;<span id="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" class="leancloud_visitors" data-flag-title="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#stl六大组件-功能与运用">STL六大组件 功能与运用</a>
+      <ul>
+        <li><a href="#第二级配置器">第二级配置器</a>
+          <ul>
+            <li><a href="#空间配置函数allocate">空间配置函数allocate()</a></li>
+            <li><a href="#空间释放函数-deallocate">空间释放函数 deallocate()</a></li>
+            <li><a href="#重新填充free-lists">重新填充free lists</a></li>
+            <li><a href="#内存池">内存池</a></li>
+          </ul>
+        </li>
+        <li><a href="#内存基本处理工具">内存基本处理工具</a>
+          <ul>
+            <li><a href="#uninitialized_fill_n实现">uninitialized_fill_n实现</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="概论">概论</h1>
+<p>第一章基本都是C++基础的知识，读了《C++ Primer》的话都懂。关于各种C++的特性、STL特性都有。</p>
+<h2 id="stl六大组件-功能与运用">STL六大组件 功能与运用</h2>
+<p>STL提供六大组件，彼此可以组合套用</p>
+<ol>
+<li>容器：各种数据结构。Vector,list,deque,set,map</li>
+<li>算法：各种常用算法如sort,search,copy,erase</li>
+<li>迭代器：扮演容器与算法之间的粘合剂，所谓的泛型指针。五种类型</li>
+<li>仿函数：行为类似函数，可以作为算法的某种策略。仿函数是重载了()的class或者class template，一般函数指针可视为狭义的仿函数</li>
+<li>配接器：一种用来修饰容器或者仿函数或迭代器接口的东西。</li>
+<li>配置器：负责控件的配置与管理。</li>
+</ol>
+<img src="/img/20161108212017.png" alt=""/>
+# 空间配置器
+SGI STL时间了一个专属的，拥有次层配置能力的、效率优越的特殊配置器。
+SGI STL的缺省分配器都是其自己的分配器。
+## SGI特殊的空间配置器 std::alloc
+使用::construct() ::destroy()构造和析构
+使用alloc::allocate() alloc::deallocate()分配 释放
+```cpp
+//直接利用这个类能够用指定类型指针，转换为其他引用等
+template <class _Tp>
+struct iterator_traits<const _Tp*> {
+  typedef random_access_iterator_tag iterator_category;
+  typedef _Tp                         value_type;
+  typedef ptrdiff_t                   difference_type;
+  typedef const _Tp*                  pointer;
+  typedef const _Tp&                  reference;
+};
+```
+```cpp
+//如果有non-trivial 析构函数
+template <class _ForwardIterator>
+void
+__destroy_aux(_ForwardIterator __first, _ForwardIterator __last, __false_type)
+{
+  for ( ; __first != __last; ++__first)
+    destroy(&*__first);
+}
+//如果没有non-trivial 析构函数
+template <class _ForwardIterator> 
+inline void __destroy_aux(_ForwardIterator, _ForwardIterator, __true_type) {}
+<p>template &lt;class _ForwardIterator, class _Tp&gt;
+inline void
+__destroy(_ForwardIterator __first, _ForwardIterator __last, _Tp*)
+{
+typedef typename __type_traits&lt;_Tp&gt;::has_trivial_destructor
+_Trivial_destructor;
+__destroy_aux(__first, __last, _Trivial_destructor());//_Trivial_destructor()将会是_true_type 或者_false_type
+//利用模板和特化
+}</p>
+<p>template <class _ForwardIterator>
+inline void _Destroy(_ForwardIterator __first, _ForwardIterator __last) {
+__destroy(__first, __last, __VALUE_TYPE(__first));//__VALUE_TYPE(__first)获取到了类型的指针，然后调用上面函数
+//利用模板和特化
+}</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">## 空间的配置与释放 std::alloc
+sgi设计了双层级配置器，第一级配置器直接使用malloc()和free()，第二级配置器则视情况采用不同的策略。
+当分配大于128bytes时候调用第一级，小于128时候，为了降低额外负担，使用负责的memory pool整理方式。
+### 第一级配置器 __malloc_alloc_template剖析
+以malloc free realloc实现。
+然后自己实现了一个new handler机制。
+```cpp
+template &lt;int __inst&gt;
+void*
+__malloc_alloc_template&lt;__inst&gt;::_S_oom_malloc(size_t __n)
+{
+    void (* __my_malloc_handler)();
+    void* __result;
+
+    for (;;) {
+        __my_malloc_handler = __malloc_alloc_oom_handler;
+        if (0 == __my_malloc_handler) { __THROW_BAD_ALLOC; }
+        (*__my_malloc_handler)();
+        __result = malloc(__n);
+        if (__result) return(__result);
+    }
+}
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="第二级配置器">第二级配置器</h3>
+<p>SIG第二级配置器的做法，如果区块够大，超过128bytes时候，就移交第一级配置器处理。当区块小鱼128bytes时候，则以内存池管理。每次配置一大块内存，并维护对应之自由链表，下次若再有相同大小的内存需求从free-lists中拨出。如果客端释放小额区块，就由配置器回收到fres-lists中。
+分配区块时候，自动上调到8的倍数，并维护16个fres-lists,分别管理大小为8/16/24/32/40/48/56/64/72/80/88/96/104/112/120/128的小额区块。</p>
+<blockquote>
+<p>其实这里和公司用的NG_malloc是一样的策略。ng_malloc之前对于大小的区分是256k的样子，更大。后来又改写了，支持更大的内存块了。</p>
+</blockquote>
+<p>节点如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="nl">__PRIVATE</span><span class="p">:</span>
+  <span class="k">union</span> <span class="nc">_Obj</span> <span class="p">{</span>
+        <span class="k">union</span> <span class="nc">_Obj</span><span class="o">*</span> <span class="n">_M_free_list_link</span><span class="p">;</span>
+        <span class="kt">char</span> <span class="n">_M_client_data</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>    <span class="cm">/* The client sees this.        */</span>
+  <span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>使用union的话，可以不用每次都去转换。char _M_client_data的存在是，方便去取首地址。实际上下面用到的就是_M_free_list_link，用来作为链表。这样的话，就可以用一个4字节的空间(32位机器指针大小)，实现两个功能。而不是使用struct，因为那样就会浪费空间。</p>
+<h4 id="空间配置函数allocate">空间配置函数allocate()</h4>
+<p>功能：判断大小，大于128用第一级分配，小于128就查找free list。如果free list中有可用的区块，就直接拿来用，如果没有就将区块大小上调至8的倍数边界，然后调用refill()，准备为free list重新填充空间。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp">  <span class="k">static</span> <span class="kt">void</span><span class="o">*</span> <span class="nf">allocate</span><span class="p">(</span><span class="n">size_t</span> <span class="n">__n</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">void</span><span class="o">*</span> <span class="n">__ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="c1">//超过设定的最大值就调用第一级配置器，STL设置为128
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">__n</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_MAX_BYTES</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">__ret</span> <span class="o">=</span> <span class="n">malloc_alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">//寻找合适的free lists中适当的一个
+</span><span class="c1"></span>      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span>
+          <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+      <span class="c1">// Acquire the lock here with a constructor call.
+</span><span class="c1"></span>      <span class="c1">// This ensures that it is released in exit or during stack
+</span><span class="c1"></span>      <span class="c1">// unwinding.
+</span><span class="c1"></span><span class="cp">#     ifndef _NOTHREADS
+</span><span class="cp"></span>      <span class="cm">/*REFERENCED*/</span>
+      <span class="c1">//多线程锁
+</span><span class="c1"></span>      <span class="n">_Lock</span> <span class="n">__lock_instance</span><span class="p">;</span>
+<span class="cp">#     endif
+</span><span class="cp"></span>      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__RESTRICT</span> <span class="n">__result</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">__result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1">//没找到的话，就重新填充free list
+</span><span class="c1"></span>        <span class="n">__ret</span> <span class="o">=</span> <span class="n">_S_refill</span><span class="p">(</span><span class="n">_S_round_up</span><span class="p">(</span><span class="n">__n</span><span class="p">));</span>
+      <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">//指向后一个成员
+</span><span class="c1"></span>        <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__result</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span><span class="p">;</span>
+        <span class="n">__ret</span> <span class="o">=</span> <span class="n">__result</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">__ret</span><span class="p">;</span>
+  <span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="空间释放函数-deallocate">空间释放函数 deallocate()</h4>
+<p>先判断大小，大于128调用第一级，小于128找出对应的free list，将区块回收。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cm">/* __p may not be 0 */</span>
+  <span class="k">static</span> <span class="kt">void</span> <span class="nf">deallocate</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">__p</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">__n</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">__n</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_MAX_BYTES</span><span class="p">)</span>
+      <span class="n">malloc_alloc</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span> <span class="n">__n</span><span class="p">);</span>
+    <span class="k">else</span> <span class="p">{</span>
+      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span>  <span class="n">__my_free_list</span>
+          <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__q</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">__p</span><span class="p">;</span>
+
+      <span class="c1">// acquire lock
+</span><span class="c1"></span><span class="cp">#       ifndef _NOTHREADS
+</span><span class="cp"></span>      <span class="cm">/*REFERENCED*/</span>
+      <span class="n">_Lock</span> <span class="n">__lock_instance</span><span class="p">;</span>
+<span class="cp">#       endif </span><span class="cm">/* _NOTHREADS */</span><span class="cp">
+</span><span class="cp"></span>      <span class="n">__q</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+      <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__q</span><span class="p">;</span>
+      <span class="c1">// lock is released here
+</span><span class="c1"></span>    <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="重新填充free-lists">重新填充free lists</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span> <span class="n">__threads</span><span class="p">,</span> <span class="kt">int</span> <span class="n">__inst</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="o">*</span>
+<span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span> <span class="n">__inst</span><span class="o">&gt;::</span><span class="n">_S_refill</span><span class="p">(</span><span class="n">size_t</span> <span class="n">__n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">__nobjs</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+    <span class="c1">//尝试分配空间 __nobjs是引用传递，作为返回值
+</span><span class="c1"></span>    <span class="kt">char</span><span class="o">*</span> <span class="n">__chunk</span> <span class="o">=</span> <span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__n</span><span class="p">,</span> <span class="n">__nobjs</span><span class="p">);</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span><span class="p">;</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__result</span><span class="p">;</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__current_obj</span><span class="p">;</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__next_obj</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">__i</span><span class="p">;</span>
+    
+    <span class="c1">//对只分配出一个的时候的优化
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="mi">1</span> <span class="o">==</span> <span class="n">__nobjs</span><span class="p">)</span> <span class="k">return</span><span class="p">(</span><span class="n">__chunk</span><span class="p">);</span>
+    <span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+
+    <span class="c1">//形成链表
+</span><span class="c1"></span>    <span class="cm">/* Build free list in chunk */</span>
+      <span class="n">__result</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">__chunk</span><span class="p">;</span>
+      <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__next_obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)(</span><span class="n">__chunk</span> <span class="o">+</span> <span class="n">__n</span><span class="p">);</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">__i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="p">;</span> <span class="n">__i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">__current_obj</span> <span class="o">=</span> <span class="n">__next_obj</span><span class="p">;</span>
+        <span class="n">__next_obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">__next_obj</span> <span class="o">+</span> <span class="n">__n</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">__nobjs</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">__i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">__current_obj</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">__current_obj</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="n">__next_obj</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="内存池">内存池</h4>
+<p>从内存池中取空间给free list 使用，是chunk_alloc的工作</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span> <span class="n">__threads</span><span class="p">,</span> <span class="kt">int</span> <span class="n">__inst</span><span class="o">&gt;</span>
+<span class="kt">char</span><span class="o">*</span>
+<span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span> <span class="n">__inst</span><span class="o">&gt;::</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">size_t</span> <span class="n">__size</span><span class="p">,</span> 
+                                                            <span class="kt">int</span><span class="o">&amp;</span> <span class="n">__nobjs</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">char</span><span class="o">*</span> <span class="n">__result</span><span class="p">;</span><span class="c1">//返回值
+</span><span class="c1"></span>    <span class="n">size_t</span> <span class="n">__total_bytes</span> <span class="o">=</span> <span class="n">__size</span> <span class="o">*</span> <span class="n">__nobjs</span><span class="p">;</span><span class="c1">//需要分配的空间大小
+</span><span class="c1"></span>    <span class="n">size_t</span> <span class="n">__bytes_left</span> <span class="o">=</span> <span class="n">_S_end_free</span> <span class="o">-</span> <span class="n">_S_start_free</span><span class="p">;</span><span class="c1">//内存池剩余空间
+</span><span class="c1"></span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">__bytes_left</span> <span class="o">&gt;=</span> <span class="n">__total_bytes</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">__result</span> <span class="o">=</span> <span class="n">_S_start_free</span><span class="p">;</span><span class="c1">//返回
+</span><span class="c1"></span>        <span class="n">_S_start_free</span> <span class="o">+=</span> <span class="n">__total_bytes</span><span class="p">;</span><span class="c1">//内存池可用空间起始处后移
+</span><span class="c1"></span>        <span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">__bytes_left</span> <span class="o">&gt;=</span> <span class="n">__size</span><span class="p">)</span> <span class="p">{</span><span class="c1">//能够分配一部分空间
+</span><span class="c1"></span>        <span class="n">__nobjs</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">__bytes_left</span><span class="o">/</span><span class="n">__size</span><span class="p">);</span><span class="c1">//判断能够分配的块数
+</span><span class="c1"></span>        <span class="n">__total_bytes</span> <span class="o">=</span> <span class="n">__size</span> <span class="o">*</span> <span class="n">__nobjs</span><span class="p">;</span>
+        <span class="n">__result</span> <span class="o">=</span> <span class="n">_S_start_free</span><span class="p">;</span>
+        <span class="n">_S_start_free</span> <span class="o">+=</span> <span class="n">__total_bytes</span><span class="p">;</span><span class="c1">//与上同
+</span><span class="c1"></span>        <span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span><span class="c1">//不能够分配一块的大小
+</span><span class="c1"></span>        <span class="n">size_t</span> <span class="n">__bytes_to_get</span> <span class="o">=</span> 
+	  <span class="mi">2</span> <span class="o">*</span> <span class="n">__total_bytes</span> <span class="o">+</span> <span class="n">_S_round_up</span><span class="p">(</span><span class="n">_S_heap_size</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">);</span>
+        <span class="c1">// Try to make use of the left-over piece.
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">__bytes_left</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span><span class="c1">//把剩余空间，分配到合适的free list
+</span><span class="c1"></span>            <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span> <span class="o">=</span>
+                        <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__bytes_left</span><span class="p">);</span>
+
+            <span class="p">((</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">_S_start_free</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+            <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">_S_start_free</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+        <span class="c1">//从堆上重新分配出部分空间
+</span><span class="c1"></span>        <span class="n">_S_start_free</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">__bytes_to_get</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">==</span> <span class="n">_S_start_free</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">size_t</span> <span class="n">__i</span><span class="p">;</span>
+            <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span><span class="p">;</span>
+	    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__p</span><span class="p">;</span>
+            <span class="c1">// Try to make do with what we have.  That can&#39;t
+</span><span class="c1"></span>            <span class="c1">// hurt.  We do not try smaller requests, since that tends
+</span><span class="c1"></span>            <span class="c1">// to result in disaster on multi-process machines.
+</span><span class="c1"></span>            <span class="k">for</span> <span class="p">(</span><span class="n">__i</span> <span class="o">=</span> <span class="n">__size</span><span class="p">;</span>
+                 <span class="n">__i</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_MAX_BYTES</span><span class="p">;</span>
+                 <span class="n">__i</span> <span class="o">+=</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_ALIGN</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__i</span><span class="p">);</span>
+                <span class="n">__p</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+                <span class="c1">//malloc失败的话，在现有的free list中找未用的、足够大的fee list分配
+</span><span class="c1"></span>                <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">!=</span> <span class="n">__p</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__p</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span><span class="p">;</span>
+                    <span class="n">_S_start_free</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">__p</span><span class="p">;</span>
+                    <span class="n">_S_end_free</span> <span class="o">=</span> <span class="n">_S_start_free</span> <span class="o">+</span> <span class="n">__i</span><span class="p">;</span>
+                    <span class="k">return</span><span class="p">(</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__size</span><span class="p">,</span> <span class="n">__nobjs</span><span class="p">));</span>
+                    <span class="c1">// Any leftover piece will eventually make it to the
+</span><span class="c1"></span>                    <span class="c1">// right free list.
+</span><span class="c1"></span>                <span class="p">}</span>
+            <span class="p">}</span>
+	    <span class="n">_S_end_free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>	<span class="c1">// In case of exception.
+</span><span class="c1"></span>            <span class="n">_S_start_free</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc_alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__bytes_to_get</span><span class="p">);</span>
+            <span class="c1">// This should either throw an
+</span><span class="c1"></span>            <span class="c1">// exception or remedy the situation.  Thus we assume it
+</span><span class="c1"></span>            <span class="c1">// succeeded.
+</span><span class="c1"></span>        <span class="p">}</span>
+        <span class="c1">//拿到新空间
+</span><span class="c1"></span>        <span class="n">_S_heap_size</span> <span class="o">+=</span> <span class="n">__bytes_to_get</span><span class="p">;</span>
+        <span class="n">_S_end_free</span> <span class="o">=</span> <span class="n">_S_start_free</span> <span class="o">+</span> <span class="n">__bytes_to_get</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__size</span><span class="p">,</span> <span class="n">__nobjs</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="内存基本处理工具">内存基本处理工具</h3>
+<p>uninitialized_copy、uninitialized_fill、uninitialized_fill_n用来处理一些特殊的复制构造的情况。</p>
+<h4 id="uninitialized_fill_n实现">uninitialized_fill_n实现</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp">
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="n">_ForwardIter</span> 
+<span class="n">uninitialized_fill_n</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">__uninitialized_fill_n</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__n</span><span class="p">,</span> <span class="n">__x</span><span class="p">,</span> <span class="n">__VALUE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp1</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="n">_ForwardIter</span> 
+<span class="n">__uninitialized_fill_n</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="n">_Tp1</span><span class="o">*</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">__type_traits</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="o">&gt;::</span><span class="n">is_POD_type</span> <span class="n">_Is_POD</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nf">__uninitialized_fill_n_aux</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__n</span><span class="p">,</span> <span class="n">__x</span><span class="p">,</span> <span class="n">_Is_POD</span><span class="p">());</span><span class="c1">//判断有没有复制构造函数，调用不同的函数处理
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//没有复制构造函数的版本
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="n">_ForwardIter</span>
+<span class="n">__uninitialized_fill_n_aux</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="n">__true_type</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">fill_n</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__n</span><span class="p">,</span> <span class="n">__x</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="c1">//有复制构造函数的版本
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="n">_ForwardIter</span>
+<span class="n">__uninitialized_fill_n_aux</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="n">__false_type</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">_ForwardIter</span> <span class="n">__cur</span> <span class="o">=</span> <span class="n">__first</span><span class="p">;</span>
+  <span class="n">__STL_TRY</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="p">;</span> <span class="n">__n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="o">--</span><span class="n">__n</span><span class="p">,</span> <span class="o">++</span><span class="n">__cur</span><span class="p">)</span>
+      <span class="n">_Construct</span><span class="p">(</span><span class="o">&amp;*</span><span class="n">__cur</span><span class="p">,</span> <span class="n">__x</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">__cur</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">__STL_UNWIND</span><span class="p">(</span><span class="n">_Destroy</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__cur</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>uninitialized_copy、uninitialized_fill的实现类似</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2016-11-16</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器" data-hashtags="stl源码剖析"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" data-hashtag="stl源码剖析"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">stl源码剖析</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/" class="prev" rel="prev" title="阅读谷歌编程规范"><i class="fas fa-angle-left fa-fw"></i>阅读谷歌编程规范</a>
+            <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" class="next" rel="next" title="[读书笔记] stl源码剖析 第三章 迭代器">[读书笔记] stl源码剖析 第三章 迭代器<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

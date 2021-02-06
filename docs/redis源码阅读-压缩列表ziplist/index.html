@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>redis源码阅读-压缩列表ziplist - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="redis源码阅读-压缩列表ziplist" />
+<meta property="og:description" content="压缩列表时列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每个列表项要么是小整数，要么是长度比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。
+压缩列表的构成
+压缩列表是redis为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。一个压缩列表可以包含任意多个节点，每个节点可以保存一个字节数组或者一个整数组。
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+
+
+《redis设计与实现》
+空白 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;-- end --&gt;|
+
+size          4 bytes   4 bytes 2 bytes  1 byte
+            &#43;---------&#43;--------&#43;-------&#43;-----------&#43;
+component   | zlbytes | zltail | zllen | zlend     |
+            |         |        |       |           |
+value       |  1011   |  1010  |   0   | 1111 1111 |
+            &#43;---------&#43;--------&#43;-------&#43;-----------&#43;
+                                       ^
+                                       |
+                               ZIPLIST_ENTRY_HEAD
+                                       &amp;
+address                        ZIPLIST_ENTRY_TAIL
+                                       &amp;
+                               ZIPLIST_ENTRY_END
+
+非空 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
+
+size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
+            &#43;---------&#43;--------&#43;-------&#43;--------&#43;--------&#43;--------&#43;--------&#43;-------&#43;
+component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
+            &#43;---------&#43;--------&#43;-------&#43;--------&#43;--------&#43;--------&#43;--------&#43;-------&#43;
+                                       ^                          ^        ^
+address                                |                          |        |
+                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
+                                                                  |
+                                                        ZIPLIST_ENTRY_TAIL
+
+
+zlbytes记录整个压缩列表占用的字节数。
+zltail记录压缩列表尾节点距离压缩列表的起始地址有多少字节。
+zzlen记录压缩列表包含的节点数量。
+entryX列表节点，数量不定。
+zlend特殊值0xff，标记压缩列表末端。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2017-07-08T21:49:02+00:00" />
+<meta property="article:modified_time" content="2017-07-08T21:49:02+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="redis源码阅读-压缩列表ziplist"/>
+<meta name="twitter:description" content="压缩列表时列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每个列表项要么是小整数，要么是长度比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。
+压缩列表的构成
+压缩列表是redis为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。一个压缩列表可以包含任意多个节点，每个节点可以保存一个字节数组或者一个整数组。
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+
+
+《redis设计与实现》
+空白 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;-- end --&gt;|
+
+size          4 bytes   4 bytes 2 bytes  1 byte
+            &#43;---------&#43;--------&#43;-------&#43;-----------&#43;
+component   | zlbytes | zltail | zllen | zlend     |
+            |         |        |       |           |
+value       |  1011   |  1010  |   0   | 1111 1111 |
+            &#43;---------&#43;--------&#43;-------&#43;-----------&#43;
+                                       ^
+                                       |
+                               ZIPLIST_ENTRY_HEAD
+                                       &amp;
+address                        ZIPLIST_ENTRY_TAIL
+                                       &amp;
+                               ZIPLIST_ENTRY_END
+
+非空 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
+
+size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
+            &#43;---------&#43;--------&#43;-------&#43;--------&#43;--------&#43;--------&#43;--------&#43;-------&#43;
+component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
+            &#43;---------&#43;--------&#43;-------&#43;--------&#43;--------&#43;--------&#43;--------&#43;-------&#43;
+                                       ^                          ^        ^
+address                                |                          |        |
+                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
+                                                                  |
+                                                        ZIPLIST_ENTRY_TAIL
+
+
+zlbytes记录整个压缩列表占用的字节数。
+zltail记录压缩列表尾节点距离压缩列表的起始地址有多少字节。
+zzlen记录压缩列表包含的节点数量。
+entryX列表节点，数量不定。
+zlend特殊值0xff，标记压缩列表末端。"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" /><link rel="prev" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/" /><link rel="next" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "redis源码阅读-压缩列表ziplist",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "redis, 源码阅读","wordcount":  1252 ,
+        "url": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist\/","datePublished": "2017-07-08T21:49:02+00:00","dateModified": "2017-07-08T21:49:02+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">redis源码阅读-压缩列表ziplist</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2017-07-08">2017-07-08</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1252 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;6 minutes&nbsp;<span id="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" class="leancloud_visitors" data-flag-title="redis源码阅读-压缩列表ziplist">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#压缩列表的构成">压缩列表的构成</a></li>
+    <li><a href="#压缩列表节点的构成">压缩列表节点的构成</a>
+      <ul>
+        <li><a href="#previous_entry_length">previous_entry_length</a></li>
+        <li><a href="#encoding">encoding</a></li>
+        <li><a href="#content">content</a></li>
+      </ul>
+    </li>
+    <li><a href="#连锁更新">连锁更新</a></li>
+    <li><a href="#压缩列表api">压缩列表API</a>
+      <ul>
+        <li><a href="#创建空ziplist">创建空ziplist</a></li>
+        <li><a href="#插入节点">插入节点</a></li>
+        <li><a href="#根据给定索引遍历列表并返回索引指定节点的指针">根据给定索引，遍历列表，并返回索引指定节点的指针。</a></li>
+        <li><a href="#删除给定节点">删除给定节点</a></li>
+      </ul>
+    </li>
+    <li><a href="#小结">小结</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>压缩列表时列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每个列表项要么是小整数，要么是长度比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。</p>
+<h2 id="压缩列表的构成">压缩列表的构成</h2>
+<p>压缩列表是redis为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。一个压缩列表可以包含任意多个节点，每个节点可以保存一个字节数组或者一个整数组。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">《redis设计与实现》
+空白 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;-- end --&gt;|
+
+size          4 bytes   4 bytes 2 bytes  1 byte
+            +---------+--------+-------+-----------+
+component   | zlbytes | zltail | zllen | zlend     |
+            |         |        |       |           |
+value       |  1011   |  1010  |   0   | 1111 1111 |
+            +---------+--------+-------+-----------+
+                                       ^
+                                       |
+                               ZIPLIST_ENTRY_HEAD
+                                       &amp;
+address                        ZIPLIST_ENTRY_TAIL
+                                       &amp;
+                               ZIPLIST_ENTRY_END
+
+非空 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
+
+size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+                                       ^                          ^        ^
+address                                |                          |        |
+                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
+                                                                  |
+                                                        ZIPLIST_ENTRY_TAIL
+</code></pre></td></tr></table>
+</div>
+</div><p>zlbytes记录整个压缩列表占用的字节数。</p>
+<p>zltail记录压缩列表尾节点距离压缩列表的起始地址有多少字节。</p>
+<p>zzlen记录压缩列表包含的节点数量。</p>
+<p>entryX列表节点，数量不定。</p>
+<p>zlend特殊值0xff，标记压缩列表末端。</p>
+<h2 id="压缩列表节点的构成">压缩列表节点的构成</h2>
+<p>每个压缩列表可以保存一个字节数组或者一个整数值，字节数组可以有三种长度：</p>
+<ol>
+<li>长度小于等于63字节的字节数组</li>
+<li>长度小于等于16383字节的字节数组</li>
+<li>长度小于等于4294967295字节的字节数组</li>
+</ol>
+<p>每个压缩列表节点由previous_entry_length、encoding、content三个部分组成。</p>
+<h3 id="previous_entry_length">previous_entry_length</h3>
+<p>节点previous_entry_length属性以字节为单位，记录一个压缩列表节点的长度。previous_entry_length属性的长度可以是1字节或者5字节：</p>
+<ul>
+<li>如果前一节点的长度小于254字节，长度为1,前一节点长度保存在这个字节里面。</li>
+<li>如果前一节点的长度大于 等于254字节，长度为5：属性的第一个字节被设置为0xfe，而之后的四个字节用于保存前一 节点的长度。</li>
+</ul>
+<h3 id="encoding">encoding</h3>
+<p>记录节点的content属性所保存数据类型以及长度：</p>
+<ul>
+<li>一字节、两字节或者五字节长，值的最高位为00、01或者10的是 字节数组编码：这种编码表示节点的content属性保存着字节数组，数组的长度由编码除去最高两位之后的其他位记录</li>
+<li>一字节长，值的最高位以11开头的是整数编码：这种编码表示节点的content属性保存着整数数值，整数值的类型和长度由编码除去最高两位之后的其他位记录。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">编码</th>
+<th>编码长度</th>
+<th>content属性保存的值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">00bbbbbb</td>
+<td>1 bytes</td>
+<td>&lt;= 63 bytes的字节数组</td>
+</tr>
+<tr>
+<td style="text-align:left">01bbbbbb xxxxxxxx</td>
+<td>2 bytes</td>
+<td>&lt;= 16383 bytes字节数组</td>
+</tr>
+<tr>
+<td style="text-align:left">10**__** aaaaaaaa bbbbbbbb cccccccc dddddddd</td>
+<td>5 bytes</td>
+<td>&lt;= 4294967295 bytes字节数组</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>编码</th>
+<th>编码长度</th>
+<th>content属性保存的值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11000000</td>
+<td>1</td>
+<td>int16_t（2 bytes）类型整数</td>
+</tr>
+<tr>
+<td>11010000</td>
+<td>1</td>
+<td>int32_t（4 bytes）类型整数</td>
+</tr>
+<tr>
+<td>11100000</td>
+<td>1</td>
+<td>int64_t（8 bytes）类型整数</td>
+</tr>
+<tr>
+<td>11110000</td>
+<td>1</td>
+<td>24位有符整数</td>
+</tr>
+<tr>
+<td>11111110</td>
+<td>1</td>
+<td>8位有符整数</td>
+</tr>
+<tr>
+<td>1111xxxx</td>
+<td>1</td>
+<td>0~12</td>
+</tr>
+</tbody>
+</table>
+<h3 id="content">content</h3>
+<p>节点的content属性负责保存节点的值，节点值可以是一个字节数组或者整数，值的类型和长度由节点的encoding属性决定。</p>
+<h2 id="连锁更新">连锁更新</h2>
+<p>previous_entry_length属性的长度可以是1字节或者5字节：</p>
+<ul>
+<li>如果前一节点的长度小于254字节，长度为1,前一节点长度保存在这个字节里面。</li>
+<li>如果前一节点的长度大于 等于254字节，长度为5：属性的第一个字节被设置为0xfe，而之后的四个字节用于保存前一 节点的长度。</li>
+</ul>
+<p>那么一种情况：在压缩列表中，有多个连续的长度介于250字节到253字节之间的节点e1至eN。</p>
+<p>在e1前插入一个大于254字节的节点，此时要更新e1的previous_entry_length属性，由于前一个节点大于254，那么要扩容，重新设置好压缩列表。之后又发现e2需要更新previous_entry_length属性，依旧大于254。产生了连锁反应。</p>
+<p>同理删除节点也可能发生这种情况。</p>
+<h2 id="压缩列表api">压缩列表API</h2>
+<h3 id="创建空ziplist">创建空ziplist</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 创建一个空的ziplist
+</span><span class="c1"></span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">ziplistNew</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// ZIPLIST_HEADER_SIZE 是 ziplist 表头的大小
+</span><span class="c1"></span>    <span class="c1">// 1 字节是表末端 ZIP_END 的大小
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">bytes</span> <span class="o">=</span> <span class="n">ZIPLIST_HEADER_SIZE</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">zl</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="n">bytes</span><span class="p">);</span>
+    <span class="n">ZIPLIST_BYTES</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span> <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">bytes</span><span class="p">);</span> <span class="c1">// 设置ziplist所占字节数，如有必要进行大小端转换
+</span><span class="c1"></span>    <span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span> <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_HEADER_SIZE</span><span class="p">);</span> <span class="c1">// 设定尾节点相对头部的偏移量
+</span><span class="c1"></span>    <span class="n">ZIPLIST_LENGTH</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 设定ziplist的节点数
+</span><span class="c1"></span>    <span class="n">zl</span><span class="p">[</span><span class="n">bytes</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ZIP_END</span><span class="p">;</span> <span class="c1">// 设定尾部字节位0xff
+</span><span class="c1"></span>    <span class="k">return</span> <span class="n">zl</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="插入节点">插入节点</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">ziplistInsert</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">zl</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">slen</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__ziplistInsert</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">slen</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 将长度为slen的字符串s插入到z1中，位置为p前
+</span><span class="c1"></span><span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">__ziplistInsert</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">zl</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">slen</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">size_t</span> <span class="n">curlen</span> <span class="o">=</span> <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_BYTES</span><span class="p">(</span><span class="n">zl</span><span class="p">)),</span> <span class="n">reqlen</span><span class="p">;</span> <span class="c1">// 当前ziplist长度，插入后的长度
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">prevlensize</span><span class="p">,</span> <span class="n">prevlen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 前置节点长度和编码该长度所需要的长度
+</span><span class="c1"></span>    <span class="n">size_t</span> <span class="n">offset</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">nextdiff</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">encoding</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">123456789</span><span class="p">;</span> <span class="cm">/* initialized to avoid warning. Using a value
+</span><span class="cm">                                    that is easy to see if for some reason
+</span><span class="cm">                                    we use it uninitialized. */</span>
+    <span class="n">zlentry</span> <span class="n">tail</span><span class="p">;</span>
+
+    <span class="cm">/* Find out prevlen for the entry that is inserted. */</span>
+    <span class="c1">// 找到待插入节点的前置节点长度
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 不为末尾解码长度
+</span><span class="c1"></span>        <span class="n">ZIP_DECODE_PREVLEN</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">prevlensize</span><span class="p">,</span> <span class="n">prevlen</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// 指向末尾则表示ziplist为空
+</span><span class="c1"></span>        <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ptail</span> <span class="o">=</span> <span class="n">ZIPLIST_ENTRY_TAIL</span><span class="p">(</span><span class="n">zl</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ptail</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// 计算尾节点长度
+</span><span class="c1"></span>            <span class="n">prevlen</span> <span class="o">=</span> <span class="n">zipRawEntryLength</span><span class="p">(</span><span class="n">ptail</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 判断编码是否为整数
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">zipTryEncoding</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">slen</span><span class="p">,</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span><span class="o">&amp;</span><span class="n">encoding</span><span class="p">))</span> <span class="p">{</span>
+        <span class="c1">// 该节点编码为整数，通过encoding来获取编码长度
+</span><span class="c1"></span>        <span class="n">reqlen</span> <span class="o">=</span> <span class="n">zipIntSize</span><span class="p">(</span><span class="n">encoding</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// 使用字符串来编码节点
+</span><span class="c1"></span>        <span class="n">reqlen</span> <span class="o">=</span> <span class="n">slen</span><span class="p">;</span>
+    <span class="p">}</span>
+     <span class="c1">// 计算前置节点长度所需的大小
+</span><span class="c1"></span>    <span class="n">reqlen</span> <span class="o">+=</span> <span class="n">zipPrevEncodeLength</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="n">prevlen</span><span class="p">);</span>
+    <span class="c1">// 计算编码当前节点值所需要的大小
+</span><span class="c1"></span>    <span class="n">reqlen</span> <span class="o">+=</span> <span class="n">zipEncodeLength</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="n">encoding</span><span class="p">,</span><span class="n">slen</span><span class="p">);</span>
+
+    <span class="c1">// 保存新旧编码之间的字节差
+</span><span class="c1"></span>    <span class="n">nextdiff</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="o">?</span> <span class="n">zipPrevLenByteDiff</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">reqlen</span><span class="p">)</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">p</span><span class="o">-</span><span class="n">zl</span><span class="p">;</span> <span class="c1">// 保存偏移
+</span><span class="c1"></span>    <span class="c1">// 重分配长度
+</span><span class="c1"></span>    <span class="n">zl</span> <span class="o">=</span> <span class="n">ziplistResize</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span><span class="n">curlen</span><span class="o">+</span><span class="n">reqlen</span><span class="o">+</span><span class="n">nextdiff</span><span class="p">);</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">zl</span><span class="o">+</span><span class="n">offset</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="p">{</span>
+        
+        <span class="c1">// 移动元素，为新元素腾出位置
+</span><span class="c1"></span>        <span class="n">memmove</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="n">reqlen</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="n">nextdiff</span><span class="p">,</span><span class="n">curlen</span><span class="o">-</span><span class="n">offset</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">nextdiff</span><span class="p">);</span>
+
+        <span class="c1">// 将新节点的长度编码到后置节点
+</span><span class="c1"></span>        <span class="n">zipPrevEncodeLength</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="n">reqlen</span><span class="p">,</span><span class="n">reqlen</span><span class="p">);</span>
+
+        <span class="c1">// 更新尾部的偏移量
+</span><span class="c1"></span>        <span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span>
+            <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">))</span><span class="o">+</span><span class="n">reqlen</span><span class="p">);</span>
+
+        <span class="cm">/* When the tail contains more than one entry, we need to take
+</span><span class="cm">         * &#34;nextdiff&#34; in account as well. Otherwise, a change in the
+</span><span class="cm">         * size of prevlen doesn&#39;t have an effect on the *tail* offset. */</span>
+        <span class="n">tail</span> <span class="o">=</span> <span class="n">zipEntry</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="n">reqlen</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">reqlen</span><span class="o">+</span><span class="n">tail</span><span class="p">.</span><span class="n">headersize</span><span class="o">+</span><span class="n">tail</span><span class="p">.</span><span class="n">len</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span>
+                <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">))</span><span class="o">+</span><span class="n">nextdiff</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="cm">/* This element will be the new tail. */</span>
+        <span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span> <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">zl</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* When nextdiff != 0, the raw length of the next entry has changed, so
+</span><span class="cm">     * we need to cascade the update throughout the ziplist */</span>
+    <span class="c1">// 判断是不是需要连锁更新
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">nextdiff</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">p</span><span class="o">-</span><span class="n">zl</span><span class="p">;</span>
+        <span class="n">zl</span> <span class="o">=</span> <span class="n">__ziplistCascadeUpdate</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span><span class="n">p</span><span class="o">+</span><span class="n">reqlen</span><span class="p">);</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">zl</span><span class="o">+</span><span class="n">offset</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Write the entry */</span>
+    <span class="c1">// 写入节点前置节点长度
+</span><span class="c1"></span>    <span class="n">p</span> <span class="o">+=</span> <span class="n">zipPrevEncodeLength</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">prevlen</span><span class="p">);</span>
+    <span class="c1">// 节点值的长度写入节点
+</span><span class="c1"></span>    <span class="n">p</span> <span class="o">+=</span> <span class="n">zipEncodeLength</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">encoding</span><span class="p">,</span><span class="n">slen</span><span class="p">);</span>
+    <span class="c1">// 写入节点值
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">ZIP_IS_STR</span><span class="p">(</span><span class="n">encoding</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">memcpy</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">slen</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">zipSaveInteger</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">encoding</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="c1">// 更新节点计数器
+</span><span class="c1"></span>    <span class="n">ZIPLIST_INCR_LENGTH</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">zl</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="根据给定索引遍历列表并返回索引指定节点的指针">根据给定索引，遍历列表，并返回索引指定节点的指针。</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">ziplistIndex</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">zl</span><span class="p">,</span> <span class="kt">int</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">prevlensize</span><span class="p">,</span> <span class="n">prevlen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="c1">// index为负从尾部，正从头部
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">index</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="c1">// 获取尾部指针
+</span><span class="c1"></span>        <span class="n">p</span> <span class="o">=</span> <span class="n">ZIPLIST_ENTRY_TAIL</span><span class="p">(</span><span class="n">zl</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// 解码前置节点长度
+</span><span class="c1"></span>            <span class="n">ZIP_DECODE_PREVLEN</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">prevlensize</span><span class="p">,</span> <span class="n">prevlen</span><span class="p">);</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">prevlen</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">index</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">p</span> <span class="o">-=</span> <span class="n">prevlen</span><span class="p">;</span> <span class="c1">// 偏移
+</span><span class="c1"></span>                <span class="c1">// 解码前置节点长度
+</span><span class="c1"></span>                <span class="n">ZIP_DECODE_PREVLEN</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">prevlensize</span><span class="p">,</span> <span class="n">prevlen</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ZIPLIST_ENTRY_HEAD</span><span class="p">(</span><span class="n">zl</span><span class="p">);</span> <span class="c1">// 头部
+</span><span class="c1"></span>        <span class="k">while</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span> <span class="o">&amp;&amp;</span> <span class="n">index</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">p</span> <span class="o">+=</span> <span class="n">zipRawEntryLength</span><span class="p">(</span><span class="n">p</span><span class="p">);</span> <span class="c1">// 移动
+</span><span class="c1"></span>        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 返回
+</span><span class="c1"></span>    <span class="k">return</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ZIP_END</span> <span class="o">||</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">?</span> <span class="nb">NULL</span> <span class="o">:</span> <span class="n">p</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="删除给定节点">删除给定节点</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">ziplistDelete</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">zl</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">**</span><span class="n">p</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">size_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="o">*</span><span class="n">p</span><span class="o">-</span><span class="n">zl</span><span class="p">;</span>
+    <span class="n">zl</span> <span class="o">=</span> <span class="n">__ziplistDelete</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="cm">/* Store pointer to current element in p, because ziplistDelete will
+</span><span class="cm">     * do a realloc which might result in a different &#34;zl&#34;-pointer.
+</span><span class="cm">     * When the delete direction is back to front, we might delete the last
+</span><span class="cm">     * entry and end up with &#34;p&#34; pointing to ZIP_END, so check this. */</span>
+    <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">zl</span><span class="o">+</span><span class="n">offset</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">zl</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">__ziplistDelete</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">zl</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">num</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">totlen</span><span class="p">,</span> <span class="n">deleted</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">size_t</span> <span class="n">offset</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">nextdiff</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">zlentry</span> <span class="n">first</span><span class="p">,</span> <span class="n">tail</span><span class="p">;</span>
+
+    <span class="c1">// 计算被删除节点总共占用的内存字节数
+</span><span class="c1"></span>    <span class="c1">// 删除的节点总数
+</span><span class="c1"></span>    <span class="n">first</span> <span class="o">=</span> <span class="n">zipEntry</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span> <span class="o">&amp;&amp;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">p</span> <span class="o">+=</span> <span class="n">zipRawEntryLength</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+        <span class="n">deleted</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">totlen</span> <span class="o">=</span> <span class="n">p</span><span class="o">-</span><span class="n">first</span><span class="p">.</span><span class="n">p</span><span class="p">;</span> <span class="c1">// 被删除节点总共占用内存字节数
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">totlen</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="p">{</span>
+            
+            <span class="c1">// 计算新旧前置节点字节数差
+</span><span class="c1"></span>            <span class="n">nextdiff</span> <span class="o">=</span> <span class="n">zipPrevLenByteDiff</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">first</span><span class="p">.</span><span class="n">prevrawlen</span><span class="p">);</span>
+            <span class="n">p</span> <span class="o">-=</span> <span class="n">nextdiff</span><span class="p">;</span> <span class="c1">// 有需要将p后退nextdiff字节，为新header空出空间
+</span><span class="c1"></span>            <span class="n">zipPrevEncodeLength</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">first</span><span class="p">.</span><span class="n">prevrawlen</span><span class="p">);</span> <span class="c1">// 将first的前置节点长度编码至p中
+</span><span class="c1"></span>
+            <span class="cm">/* Update offset for tail */</span>
+            <span class="c1">// 更新尾部偏移
+</span><span class="c1"></span>            <span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span>
+                <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">))</span><span class="o">-</span><span class="n">totlen</span><span class="p">);</span>
+
+            <span class="cm">/* When the tail contains more than one entry, we need to take
+</span><span class="cm">             * &#34;nextdiff&#34; in account as well. Otherwise, a change in the
+</span><span class="cm">             * size of prevlen doesn&#39;t have an effect on the *tail* offset. */</span>
+            <span class="c1">// 被删除节点之后还存在节点，就需要将nextdiff计算在内
+</span><span class="c1"></span>            <span class="n">tail</span> <span class="o">=</span> <span class="n">zipEntry</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">tail</span><span class="p">.</span><span class="n">headersize</span><span class="o">+</span><span class="n">tail</span><span class="p">.</span><span class="n">len</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZIP_END</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span>
+                   <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">))</span><span class="o">+</span><span class="n">nextdiff</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="cm">/* Move tail to the front of the ziplist */</span>
+            <span class="c1">// 将删除节点后面内存空间移动到删除节点之后
+</span><span class="c1"></span>            <span class="n">memmove</span><span class="p">(</span><span class="n">first</span><span class="p">.</span><span class="n">p</span><span class="p">,</span><span class="n">p</span><span class="p">,</span>
+                <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_BYTES</span><span class="p">(</span><span class="n">zl</span><span class="p">))</span><span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">zl</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="cm">/* The entire tail was deleted. No need to move memory. */</span>
+            <span class="c1">// 被删除节点后无节点，不需要移动
+</span><span class="c1"></span>            <span class="n">ZIPLIST_TAIL_OFFSET</span><span class="p">(</span><span class="n">zl</span><span class="p">)</span> <span class="o">=</span>
+                <span class="n">intrev32ifbe</span><span class="p">((</span><span class="n">first</span><span class="p">.</span><span class="n">p</span><span class="o">-</span><span class="n">zl</span><span class="p">)</span><span class="o">-</span><span class="n">first</span><span class="p">.</span><span class="n">prevrawlen</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="cm">/* Resize and update length */</span>
+        <span class="c1">// 更新ziplist长度
+</span><span class="c1"></span>        <span class="n">offset</span> <span class="o">=</span> <span class="n">first</span><span class="p">.</span><span class="n">p</span><span class="o">-</span><span class="n">zl</span><span class="p">;</span>
+        <span class="n">zl</span> <span class="o">=</span> <span class="n">ziplistResize</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span> <span class="n">intrev32ifbe</span><span class="p">(</span><span class="n">ZIPLIST_BYTES</span><span class="p">(</span><span class="n">zl</span><span class="p">))</span><span class="o">-</span><span class="n">totlen</span><span class="o">+</span><span class="n">nextdiff</span><span class="p">);</span>
+        <span class="n">ZIPLIST_INCR_LENGTH</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span><span class="o">-</span><span class="n">deleted</span><span class="p">);</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">zl</span><span class="o">+</span><span class="n">offset</span><span class="p">;</span>
+
+        <span class="cm">/* When nextdiff != 0, the raw length of the next entry has changed, so
+</span><span class="cm">         * we need to cascade the update throughout the ziplist */</span>
+         <span class="c1">// 看看是否需要连锁更新
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">nextdiff</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">zl</span> <span class="o">=</span> <span class="n">__ziplistCascadeUpdate</span><span class="p">(</span><span class="n">zl</span><span class="p">,</span><span class="n">p</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">zl</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="小结">小结</h2>
+<p>整体上ziplist设计出来的目的是为了节省内存，采用了在连续内存空间上建立一个双向列表来实现。</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2017-07-08</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" data-title="redis源码阅读-压缩列表ziplist" data-hashtags="redis,源码阅读"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" data-hashtag="redis"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" data-title="redis源码阅读-压缩列表ziplist"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" data-title="redis源码阅读-压缩列表ziplist"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" data-title="redis源码阅读-压缩列表ziplist"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/" class="prev" rel="prev" title="redis源码阅读-整数集合"><i class="fas fa-angle-left fa-fw"></i>redis源码阅读-整数集合</a>
+            <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" class="next" rel="next" title="redis源码阅读-对象">redis源码阅读-对象<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

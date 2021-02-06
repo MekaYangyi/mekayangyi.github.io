@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>redis源码阅读-一个命令的旅程 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="redis源码阅读-一个命令的旅程" />
+<meta property="og:description" content="redis服务器会与多个客户端建立网络连接，处理客户端发送的命令请求，在数据库中保存客户端执行的命令，并通过资源管理来维持整个服务器自身的运转。
+本文目的是为了理清楚服务器对于命令请求的整个处理过程，说明这个过程中服务器与客户端如何互相交互，服务器内部如何调用内部组件达到对命令的执行。
+命令的处理流程
+之前在事务代码部分的阅读，已经对于服务器接收客户端的连接并创建命令请求处理器等待命令请求的过程。
+现在以一个简单的set命令为例子，看服务器在接收请求之后如何处理。
+
+
+1
+2
+
+
+redis&gt; SET KEY VALUE
+ok
+
+
+从客户端发送set key value命令到接收回复ok，都做了如下操作：
+
+客户端发送命令。
+服务器命令请求处理器接收，引发命令的执行，并产生命令回复处理器。
+命令回复处理器发送ok给客户端。
+客户端接收ok，并打印。
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2017-07-18T15:28:23+00:00" />
+<meta property="article:modified_time" content="2017-07-18T15:28:23+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="redis源码阅读-一个命令的旅程"/>
+<meta name="twitter:description" content="redis服务器会与多个客户端建立网络连接，处理客户端发送的命令请求，在数据库中保存客户端执行的命令，并通过资源管理来维持整个服务器自身的运转。
+本文目的是为了理清楚服务器对于命令请求的整个处理过程，说明这个过程中服务器与客户端如何互相交互，服务器内部如何调用内部组件达到对命令的执行。
+命令的处理流程
+之前在事务代码部分的阅读，已经对于服务器接收客户端的连接并创建命令请求处理器等待命令请求的过程。
+现在以一个简单的set命令为例子，看服务器在接收请求之后如何处理。
+
+
+1
+2
+
+
+redis&gt; SET KEY VALUE
+ok
+
+
+从客户端发送set key value命令到接收回复ok，都做了如下操作：
+
+客户端发送命令。
+服务器命令请求处理器接收，引发命令的执行，并产生命令回复处理器。
+命令回复处理器发送ok给客户端。
+客户端接收ok，并打印。
+"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" /><link rel="prev" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%BA%8B%E4%BB%B6/" /><link rel="next" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%80%BB%E7%BB%93/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "redis源码阅读-一个命令的旅程",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "redis, 源码阅读","wordcount":  2927 ,
+        "url": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B\/","datePublished": "2017-07-18T15:28:23+00:00","dateModified": "2017-07-18T15:28:23+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">redis源码阅读-一个命令的旅程</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2017-07-18">2017-07-18</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;2927 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;14 minutes&nbsp;<span id="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" class="leancloud_visitors" data-flag-title="redis源码阅读-一个命令的旅程">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#命令的处理流程">命令的处理流程</a></li>
+    <li><a href="#发送命令">发送命令</a></li>
+    <li><a href="#读取命令">读取命令</a>
+      <ul>
+        <li><a href="#读取命令到缓冲区并处理">读取命令到缓冲区并处理</a></li>
+        <li><a href="#从缓冲区中读取命令并处理">从缓冲区中读取命令并处理</a></li>
+      </ul>
+    </li>
+    <li><a href="#命令的执行">命令的执行</a>
+      <ul>
+        <li><a href="#命令的查找">命令的查找</a></li>
+        <li><a href="#命令的执行-1">命令的执行</a></li>
+      </ul>
+    </li>
+    <li><a href="#回复客户端">回复客户端</a></li>
+    <li><a href="#结束">结束</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>redis服务器会与多个客户端建立网络连接，处理客户端发送的命令请求，在数据库中保存客户端执行的命令，并通过资源管理来维持整个服务器自身的运转。</p>
+<p>本文目的是为了理清楚服务器对于命令请求的整个处理过程，说明这个过程中服务器与客户端如何互相交互，服务器内部如何调用内部组件达到对命令的执行。</p>
+<h2 id="命令的处理流程">命令的处理流程</h2>
+<p>之前在事务代码部分的阅读，已经对于服务器接收客户端的连接并创建命令请求处理器等待命令请求的过程。</p>
+<p>现在以一个简单的set命令为例子，看服务器在接收请求之后如何处理。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">redis</span><span class="o">&gt;</span> <span class="n">SET</span> <span class="n">KEY</span> <span class="n">VALUE</span>
+<span class="n">ok</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>从客户端发送set key value命令到接收回复ok，都做了如下操作：</p>
+<ul>
+<li>客户端发送命令。</li>
+<li>服务器命令请求处理器接收，引发命令的执行，并产生命令回复处理器。</li>
+<li>命令回复处理器发送ok给客户端。</li>
+<li>客户端接收ok，并打印。</li>
+</ul>
+<h2 id="发送命令">发送命令</h2>
+<p>客户端将键入的命令转换为协议格式并套接字发送到服务器</p>
+<h2 id="读取命令">读取命令</h2>
+<p>服务器发现客户端连接套接字变为可读时，通过命令请求处理器readQueryFromClient()函数来进行处理。</p>
+<h3 id="读取命令到缓冲区并处理">读取命令到缓冲区并处理</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 读取客户端的查询缓冲区内容
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">readQueryFromClient</span><span class="p">(</span><span class="n">aeEventLoop</span> <span class="o">*</span><span class="n">el</span><span class="p">,</span> <span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">redisClient</span><span class="o">*</span><span class="p">)</span> <span class="n">privdata</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">nread</span><span class="p">,</span> <span class="n">readlen</span><span class="p">;</span>
+    <span class="n">size_t</span> <span class="n">qblen</span><span class="p">;</span>
+    <span class="n">REDIS_NOTUSED</span><span class="p">(</span><span class="n">el</span><span class="p">);</span>
+    <span class="n">REDIS_NOTUSED</span><span class="p">(</span><span class="n">mask</span><span class="p">);</span>
+
+    <span class="n">server</span><span class="p">.</span><span class="n">current_client</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span> <span class="c1">// 设置服务器的当前客户端
+</span><span class="c1"></span>    <span class="n">readlen</span> <span class="o">=</span> <span class="n">REDIS_IOBUF_LEN</span><span class="p">;</span> <span class="c1">// 读取的默认长度
+</span><span class="c1"></span>    <span class="cm">/* If this is a multi bulk request, and we are processing a bulk reply
+</span><span class="cm">     * that is large enough, try to maximize the probability that the query
+</span><span class="cm">     * buffer contains exactly the SDS string representing the object, even
+</span><span class="cm">     * at the risk of requiring more read(2) calls. This way the function
+</span><span class="cm">     * processMultiBulkBuffer() can avoid copying buffers to create the
+</span><span class="cm">     * Redis Object representing the argument. */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reqtype</span> <span class="o">==</span> <span class="n">REDIS_REQ_MULTIBULK</span> <span class="o">&amp;&amp;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span> <span class="o">&amp;&amp;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="o">&amp;&amp;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span> <span class="o">&gt;=</span> <span class="n">REDIS_MBULK_BIG_ARG</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">remaining</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span><span class="p">)(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">remaining</span> <span class="o">&lt;</span> <span class="n">readlen</span><span class="p">)</span> <span class="n">readlen</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 获取缓存区遗留数据长度
+</span><span class="c1"></span>    <span class="n">qblen</span> <span class="o">=</span> <span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf_peak</span> <span class="o">&lt;</span> <span class="n">qblen</span><span class="p">)</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf_peak</span> <span class="o">=</span> <span class="n">qblen</span><span class="p">;</span> <span class="c1">// 查询缓冲区长度峰值更新
+</span><span class="c1"></span>    <span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span> <span class="o">=</span> <span class="n">sdsMakeRoomFor</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span> <span class="n">readlen</span><span class="p">);</span> <span class="c1">// 重新分配查询缓冲区空间
+</span><span class="c1"></span>    <span class="n">nread</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="n">qblen</span><span class="p">,</span> <span class="n">readlen</span><span class="p">);</span> <span class="c1">// 读取fd中数据，在遗留数据之后
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">nread</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 读取错误处理
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">errno</span> <span class="o">==</span> <span class="n">EAGAIN</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">nread</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_VERBOSE</span><span class="p">,</span> <span class="s">&#34;Reading from client: %s&#34;</span><span class="p">,</span><span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+            <span class="n">freeClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">nread</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 遇到EOF,关闭客户端
+</span><span class="c1"></span>        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_VERBOSE</span><span class="p">,</span> <span class="s">&#34;Client closed connection&#34;</span><span class="p">);</span>
+        <span class="n">freeClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">nread</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 读取成功
+</span><span class="c1"></span>        <span class="n">sdsIncrLen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="n">nread</span><span class="p">);</span> <span class="c1">// 正确更新 free 和 len 属性的。
+</span><span class="c1"></span>        <span class="n">c</span><span class="o">-&gt;</span><span class="n">lastinteraction</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">unixtime</span><span class="p">;</span> <span class="c1">// 记录最后一次互动时间
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_MASTER</span><span class="p">)</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">reploff</span> <span class="o">+=</span> <span class="n">nread</span><span class="p">;</span> <span class="c1">// 客户端为master,更新复制偏移量
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">stat_net_input_bytes</span> <span class="o">+=</span> <span class="n">nread</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// 在 nread == -1 且 errno == EAGAIN 时运行
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">current_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 缓冲区长度超过服务器最大缓冲区长度
+</span><span class="c1"></span>    <span class="c1">// 清空缓冲区并释放客户端
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">server</span><span class="p">.</span><span class="n">client_max_querybuf_len</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">sds</span> <span class="n">ci</span> <span class="o">=</span> <span class="n">catClientInfoString</span><span class="p">(</span><span class="n">sdsempty</span><span class="p">(),</span><span class="n">c</span><span class="p">),</span> <span class="n">bytes</span> <span class="o">=</span> <span class="n">sdsempty</span><span class="p">();</span>
+
+        <span class="n">bytes</span> <span class="o">=</span> <span class="n">sdscatrepr</span><span class="p">(</span><span class="n">bytes</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="mi">64</span><span class="p">);</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Closing client that reached max query buffer length: %s (qbuf initial bytes: %s)&#34;</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">bytes</span><span class="p">);</span>
+        <span class="n">sdsfree</span><span class="p">(</span><span class="n">ci</span><span class="p">);</span>
+        <span class="n">sdsfree</span><span class="p">(</span><span class="n">bytes</span><span class="p">);</span>
+        <span class="n">freeClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 从缓冲区中读取内容，创建参数，并执行命令
+</span><span class="c1"></span>    <span class="c1">// 直到缓冲区所有的内容被处理完为止
+</span><span class="c1"></span>    <span class="n">processInputBuffer</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">current_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="从缓冲区中读取命令并处理">从缓冲区中读取命令并处理</h3>
+<p>redis的readQueryFromClient()函数在将命令读取到缓冲区之后，调用processInputBuffer()对缓冲区内的命令进行处理，直到所有命令处理完毕。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 处理客户端输入的内容
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">processInputBuffer</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* Keep processing while there is something in the input buffer */</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">))</span> <span class="p">{</span>
+        <span class="c1">// 客户端处于暂停状态，直接返回
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_SLAVE</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">clientsArePaused</span><span class="p">())</span> <span class="k">return</span><span class="p">;</span>
+
+        <span class="c1">// 客户端被阻塞直接返回
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_BLOCKED</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+
+        <span class="c1">// 客户端被设置为关闭，返回
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_CLOSE_AFTER_REPLY</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+
+        <span class="c1">// 判断请求类型
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reqtype</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;*&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">reqtype</span> <span class="o">=</span> <span class="n">REDIS_REQ_MULTIBULK</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">reqtype</span> <span class="o">=</span> <span class="n">REDIS_REQ_INLINE</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 将缓冲区中的内容转换为命令，以及命令参数
+</span><span class="c1"></span>        <span class="c1">// processMultibulkBuffer()处理一般客户端发送的信息
+</span><span class="c1"></span>      	<span class="c1">// processInlineBuffer()处理TELNET发送的信息
+</span><span class="c1"></span>        <span class="c1">// 命令转换失败跳出循环，也就是可能在没有处理完缓冲区所有数据的情况下跳出。
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reqtype</span> <span class="o">==</span> <span class="n">REDIS_REQ_INLINE</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">processInlineBuffer</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reqtype</span> <span class="o">==</span> <span class="n">REDIS_REQ_MULTIBULK</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">processMultibulkBuffer</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">redisPanic</span><span class="p">(</span><span class="s">&#34;Unknown request type&#34;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// 命令参数为0，不需要执行
+</span><span class="c1"></span>            <span class="n">resetClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// 执行命令，在成功执行之后重置客户端
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">processCommand</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span>
+                <span class="n">resetClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 命令的转换介绍下processMultibulkBuffer()，此为处理客户端发送来命令，相对协议更复杂。
+</span><span class="c1">// processInlineBuffer()相对协议简单就不介绍了。
+</span><span class="c1"></span><span class="cm">/*
+</span><span class="cm"> * 将 c-&gt;querybuf 中的协议内容转换成 c-&gt;argv 中的参数对象
+</span><span class="cm"> * 
+</span><span class="cm"> * 比如 *3\r\n$3\r\nSET\r\n$3\r\nMSG\r\n$5\r\nHELLO\r\n
+</span><span class="cm"> * 将被转换为：
+</span><span class="cm"> * argv[0] = SET
+</span><span class="cm"> * argv[1] = MSG
+</span><span class="cm"> * argv[2] = HELLO
+</span><span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">processMultibulkBuffer</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">newline</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ok</span><span class="p">;</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+
+    <span class="c1">// 读取命令参数个数
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">redisAssertWithInfo</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+
+        <span class="c1">// 校验命令参数中&#34;\r\n&#34;的存在
+</span><span class="c1"></span>        <span class="n">newline</span> <span class="o">=</span> <span class="n">strchr</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="sc">&#39;\r&#39;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">newline</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">REDIS_INLINE_MAX_SIZE</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Protocol error: too big mbulk count string&#34;</span><span class="p">);</span>
+                <span class="n">setProtocolError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// 异步关闭客户端
+</span><span class="c1"></span>            <span class="p">}</span>
+            <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">newline</span><span class="o">-</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">((</span><span class="kt">signed</span><span class="p">)</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+
+        <span class="c1">// 第一个字符必须时*
+</span><span class="c1"></span>        <span class="n">redisAssertWithInfo</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;*&#39;</span><span class="p">);</span>
+
+        <span class="c1">// 转换出参数的个数
+</span><span class="c1"></span>        <span class="n">ok</span> <span class="o">=</span> <span class="n">string2ll</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">newline</span><span class="o">-</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="o">&amp;</span><span class="n">ll</span><span class="p">);</span>
+
+        <span class="c1">// 检测参数个数是否超限
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ok</span> <span class="o">||</span> <span class="n">ll</span> <span class="o">&gt;</span> <span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Protocol error: invalid multibulk length&#34;</span><span class="p">);</span>
+            <span class="n">setProtocolError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">pos</span><span class="p">);</span> <span class="c1">// 异步关闭客户端
+</span><span class="c1"></span>            <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">newline</span><span class="o">-</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ll</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// 参数小于等于0，删除c-&gt;querybuf中从pos到-1的内容
+</span><span class="c1"></span>            <span class="c1">// 返回读取成功
+</span><span class="c1"></span>            <span class="n">sdsrange</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="n">pos</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 设置参数个数
+</span><span class="c1"></span>        <span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span> <span class="o">=</span> <span class="n">ll</span><span class="p">;</span>
+
+        <span class="c1">// 分配参数空间
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">)</span> <span class="n">zfree</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">);</span>
+        <span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">robj</span><span class="o">*</span><span class="p">)</span><span class="o">*</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">redisAssertWithInfo</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 读取参数长度
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// 校验命令参数中&#34;\r\n&#34;的存在
+</span><span class="c1"></span>            <span class="n">newline</span> <span class="o">=</span> <span class="n">strchr</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="n">pos</span><span class="p">,</span><span class="sc">&#39;\r&#39;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">newline</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">REDIS_INLINE_MAX_SIZE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span>
+                        <span class="s">&#34;Protocol error: too big bulk count string&#34;</span><span class="p">);</span>
+                    <span class="n">setProtocolError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+                    <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">newline</span><span class="o">-</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">((</span><span class="kt">signed</span><span class="p">)</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+                <span class="k">break</span><span class="p">;</span>
+
+            <span class="c1">// 确认格式
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">!=</span> <span class="sc">&#39;$&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">addReplyErrorFormat</span><span class="p">(</span><span class="n">c</span><span class="p">,</span>
+                    <span class="s">&#34;Protocol error: expected &#39;$&#39;, got &#39;%c&#39;&#34;</span><span class="p">,</span>
+                    <span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">[</span><span class="n">pos</span><span class="p">]);</span>
+                <span class="n">setProtocolError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">pos</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="c1">// 读取长度
+</span><span class="c1"></span>            <span class="n">ok</span> <span class="o">=</span> <span class="n">string2ll</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="n">pos</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">newline</span><span class="o">-</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="n">pos</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="o">&amp;</span><span class="n">ll</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ok</span> <span class="o">||</span> <span class="n">ll</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">ll</span> <span class="o">&gt;</span> <span class="mi">512</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Protocol error: invalid bulk length&#34;</span><span class="p">);</span>
+                <span class="n">setProtocolError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">pos</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">pos</span> <span class="o">+=</span> <span class="n">newline</span><span class="o">-</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="n">pos</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">;</span>
+            
+            <span class="c1">// 参数太长的特殊处理
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">ll</span> <span class="o">&gt;=</span> <span class="n">REDIS_MBULK_BIG_ARG</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">size_t</span> <span class="n">qblen</span><span class="p">;</span>
+
+                <span class="cm">/* If we are going to read a large object from network
+</span><span class="cm">                 * try to make it likely that it will start at c-&gt;querybuf
+</span><span class="cm">                 * boundary so that we can optimize object creation
+</span><span class="cm">                 * avoiding a large copy of data. */</span>
+                <span class="n">sdsrange</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="n">pos</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="n">qblen</span> <span class="o">=</span> <span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">);</span>
+                <span class="cm">/* Hint the sds library about the amount of bytes this string is
+</span><span class="cm">                 * going to contain. */</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">qblen</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span><span class="n">ll</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span> <span class="o">=</span> <span class="n">sdsMakeRoomFor</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="n">ll</span><span class="o">+</span><span class="mi">2</span><span class="o">-</span><span class="n">qblen</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span> <span class="o">=</span> <span class="n">ll</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 读取参数
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span><span class="o">-</span><span class="n">pos</span> <span class="o">&lt;</span> <span class="p">(</span><span class="kt">unsigned</span><span class="p">)(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span><span class="o">+</span><span class="mi">2</span><span class="p">))</span> <span class="p">{</span>
+            <span class="c1">// 确认协议内容
+</span><span class="c1"></span>            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">//复制参数
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">pos</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span> <span class="o">&gt;=</span> <span class="n">REDIS_MBULK_BIG_ARG</span> <span class="o">&amp;&amp;</span>
+                <span class="p">(</span><span class="kt">signed</span><span class="p">)</span> <span class="n">sdslen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">)</span> <span class="o">==</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">createObject</span><span class="p">(</span><span class="n">REDIS_STRING</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">);</span>
+                <span class="n">sdsIncrLen</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span> <span class="cm">/* remove CRLF */</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span> <span class="o">=</span> <span class="n">sdsempty</span><span class="p">();</span>
+                <span class="cm">/* Assume that if we saw a fat argument we&#39;ll see another one
+</span><span class="cm">                 * likely... */</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span> <span class="o">=</span> <span class="n">sdsMakeRoomFor</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span><span class="o">+</span><span class="mi">2</span><span class="p">);</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span>
+                    <span class="n">createStringObject</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="o">+</span><span class="n">pos</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span><span class="p">);</span>
+                <span class="n">pos</span> <span class="o">+=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span><span class="o">+</span><span class="mi">2</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">c</span><span class="o">-&gt;</span><span class="n">bulklen</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+            <span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span><span class="o">--</span><span class="p">;</span> <span class="c1">// 继续读取
+</span><span class="c1"></span>        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 清除已经读取的内容
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="n">sdsrange</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">querybuf</span><span class="p">,</span><span class="n">pos</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="c1">// 读取完毕返回
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">multibulklen</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+
+    <span class="c1">// 可能内容不符合协议返回失败
+</span><span class="c1"></span>    <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="命令的执行">命令的执行</h2>
+<p>processInputBuffer()在解析成功命令之后，调用processCommand()对命令进行执行。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">processInputBuffer</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+  		<span class="c1">// ....
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// 命令参数为0，不需要执行
+</span><span class="c1"></span>            <span class="n">resetClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// 执行命令，在成功执行之后重置客户端
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">processCommand</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span>
+                <span class="n">resetClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="p">}</span>
+  		<span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="命令的查找">命令的查找</h3>
+<p>在processCommand()执行的第一步就是查询命令表，找到对于的命令实现信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"> <span class="c1">// 命令的执行
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">processCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// quit命令特殊处理，异步关闭服务器
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcasecmp</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">,</span><span class="s">&#34;quit&#34;</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">ok</span><span class="p">);</span>
+        <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CLOSE_AFTER_REPLY</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 查找命令
+</span><span class="c1"></span>    <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">lastcmd</span> <span class="o">=</span> <span class="n">lookupCommand</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 没有查找倒
+</span><span class="c1"></span>        <span class="n">flagTransaction</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="n">addReplyErrorFormat</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;unknown command &#39;%s&#39;&#34;</span><span class="p">,</span>
+            <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">arity</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">arity</span> <span class="o">!=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span><span class="p">)</span> <span class="o">||</span>
+               <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">arity</span><span class="p">))</span> <span class="p">{</span>
+        <span class="c1">// 命令实现与输入的参数数量不匹配
+</span><span class="c1"></span>        <span class="n">flagTransaction</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="n">addReplyErrorFormat</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;wrong number of arguments for &#39;%s&#39; command&#34;</span><span class="p">,</span>
+            <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>redis维护了一个命令表，该命令表为一个字典，键为命令名字，值是一个redisCommand结构，该结构记录了一个Redis的命令实现。</p>
+<p>服务器启动时，调用初始化服务器配置函数initServerConfig()，该函数会进行命令表的初始化，保存在两个字典中commands、orig_commands。原始的命令表初始参数保存在redis.c文件中的redisCommandTable定义。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">redisServer</span> <span class="p">{</span>
+ 	<span class="c1">// ...
+</span><span class="c1"></span>    <span class="c1">// 命令表（受到 rename 配置选项的作用）
+</span><span class="c1"></span>    <span class="n">dict</span> <span class="o">*</span><span class="n">commands</span><span class="p">;</span>
+    <span class="c1">// 命令表（无 rename 配置选项的作用）
+</span><span class="c1"></span>    <span class="n">dict</span> <span class="o">*</span><span class="n">orig_commands</span><span class="p">;</span>
+  	<span class="c1">// ...
+</span><span class="c1"></span><span class="p">};</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+  	<span class="c1">// ...
+</span><span class="c1"></span>    <span class="n">initServerConfig</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">initServerConfig</span><span class="p">()</span> <span class="p">{</span>
+  	<span class="c1">// ...
+</span><span class="c1"></span>  	
+    <span class="c1">// 初始化命令表
+</span><span class="c1"></span>  	<span class="c1">// 创建命令字典
+</span><span class="c1"></span>    <span class="n">server</span><span class="p">.</span><span class="n">commands</span> <span class="o">=</span> <span class="n">dictCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">commandTableDictType</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">orig_commands</span> <span class="o">=</span> <span class="n">dictCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">commandTableDictType</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">populateCommandTable</span><span class="p">();</span> <span class="c1">// 初始化命令表
+</span><span class="c1"></span>  
+  	<span class="c1">// 初始化常用命令快捷
+</span><span class="c1"></span>    <span class="n">server</span><span class="p">.</span><span class="n">delCommand</span> <span class="o">=</span> <span class="n">lookupCommandByCString</span><span class="p">(</span><span class="s">&#34;del&#34;</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">multiCommand</span> <span class="o">=</span> <span class="n">lookupCommandByCString</span><span class="p">(</span><span class="s">&#34;multi&#34;</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">lpushCommand</span> <span class="o">=</span> <span class="n">lookupCommandByCString</span><span class="p">(</span><span class="s">&#34;lpush&#34;</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">lpopCommand</span> <span class="o">=</span> <span class="n">lookupCommandByCString</span><span class="p">(</span><span class="s">&#34;lpop&#34;</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">rpopCommand</span> <span class="o">=</span> <span class="n">lookupCommandByCString</span><span class="p">(</span><span class="s">&#34;rpop&#34;</span><span class="p">);</span>
+  	<span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">populateCommandTable</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">j</span><span class="p">;</span>
+
+    <span class="c1">// 命令数量
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">numcommands</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">redisCommandTable</span><span class="p">)</span><span class="o">/</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">redisCommand</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numcommands</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">redisCommand</span> <span class="o">*</span><span class="n">c</span> <span class="o">=</span> <span class="n">redisCommandTable</span><span class="o">+</span><span class="n">j</span><span class="p">;</span> <span class="c1">// 命令
+</span><span class="c1"></span>        <span class="kt">char</span> <span class="o">*</span><span class="n">f</span> <span class="o">=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">sflags</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">retval1</span><span class="p">,</span> <span class="n">retval2</span><span class="p">;</span>
+
+        <span class="k">while</span><span class="p">(</span><span class="o">*</span><span class="n">f</span> <span class="o">!=</span> <span class="sc">&#39;\0&#39;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">switch</span><span class="p">(</span><span class="o">*</span><span class="n">f</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="sc">&#39;w&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_WRITE</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;r&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_READONLY</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;m&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_DENYOOM</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;a&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_ADMIN</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;p&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_PUBSUB</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;s&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_NOSCRIPT</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;R&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_RANDOM</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;S&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_SORT_FOR_SCRIPT</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;l&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_LOADING</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;t&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_STALE</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;M&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_SKIP_MONITOR</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;k&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_ASKING</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="sc">&#39;F&#39;</span><span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_CMD_FAST</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+            <span class="k">default</span><span class="o">:</span> <span class="n">redisPanic</span><span class="p">(</span><span class="s">&#34;Unsupported command flag&#34;</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">f</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 添加
+</span><span class="c1"></span>        <span class="n">retval1</span> <span class="o">=</span> <span class="n">dictAdd</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">commands</span><span class="p">,</span> <span class="n">sdsnew</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">),</span> <span class="n">c</span><span class="p">);</span>
+        <span class="cm">/* Populate an additional dictionary that will be unaffected
+</span><span class="cm">         * by rename-command statements in redis.conf. */</span>
+        <span class="n">retval2</span> <span class="o">=</span> <span class="n">dictAdd</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">orig_commands</span><span class="p">,</span> <span class="n">sdsnew</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">),</span> <span class="n">c</span><span class="p">);</span>
+        <span class="n">redisAssert</span><span class="p">(</span><span class="n">retval1</span> <span class="o">==</span> <span class="n">DICT_OK</span> <span class="o">&amp;&amp;</span> <span class="n">retval2</span> <span class="o">==</span> <span class="n">DICT_OK</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>redisCommandTable定义</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// Redis 命令
+</span><span class="c1"></span><span class="k">struct</span> <span class="n">redisCommand</span> <span class="p">{</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">;</span> <span class="c1">// 命令名
+</span><span class="c1"></span>    <span class="n">redisCommandProc</span> <span class="o">*</span><span class="n">proc</span><span class="p">;</span> <span class="c1">// 实现函数
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">arity</span><span class="p">;</span> <span class="c1">// 参数个数
+</span><span class="c1"></span>    <span class="kt">char</span> <span class="o">*</span><span class="n">sflags</span><span class="p">;</span> <span class="c1">// 字符串表示FLAG
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">flags</span><span class="p">;</span>   <span class="c1">// 实际FLAG
+</span><span class="c1"></span>    <span class="cm">/* Use a function to determine keys arguments in a command line.
+</span><span class="cm">     * Used for Redis Cluster redirect. */</span>
+    <span class="n">redisGetKeysProc</span> <span class="o">*</span><span class="n">getkeys_proc</span><span class="p">;</span>
+    <span class="c1">// 指定哪个参数为key
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">firstkey</span><span class="p">;</span> <span class="cm">/* The first argument that&#39;s a key (0 = no keys) */</span>
+    <span class="kt">int</span> <span class="n">lastkey</span><span class="p">;</span>  <span class="cm">/* The last argument that&#39;s a key */</span>
+    <span class="kt">int</span> <span class="n">keystep</span><span class="p">;</span>  <span class="cm">/* The step between first and last key */</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">microseconds</span><span class="p">,</span> <span class="n">calls</span><span class="p">;</span> <span class="c1">// 统计信息
+</span><span class="c1"></span><span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">redisCommand</span> <span class="n">redisCommandTable</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="s">&#34;get&#34;</span><span class="p">,</span><span class="n">getCommand</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="s">&#34;r&#34;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">&#34;set&#34;</span><span class="p">,</span><span class="n">setCommand</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="s">&#34;wm&#34;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span>
+  	<span class="c1">// ...
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这样通过一个命令表，能够快捷的找到命令实现及相关参数。</p>
+<h3 id="命令的执行-1">命令的执行</h3>
+<p>找到命令之后即可执行命令。继续看processCommand()函数。在经过一系列特殊情况处理之后，开始执行命令。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 命令的执行
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">processCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+  	<span class="c1">// ...查找命令
+</span><span class="c1"></span>  
+    <span class="c1">// 一系列特殊情况处理
+</span><span class="c1"></span>
+    <span class="cm">/* Exec the command */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_MULTI</span> <span class="o">&amp;&amp;</span>
+        <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">!=</span> <span class="n">execCommand</span> <span class="o">&amp;&amp;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">!=</span> <span class="n">discardCommand</span> <span class="o">&amp;&amp;</span>
+        <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">!=</span> <span class="n">multiCommand</span> <span class="o">&amp;&amp;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">!=</span> <span class="n">watchCommand</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// 事务状态下的特殊处理
+</span><span class="c1"></span>        <span class="n">queueMultiCommand</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">queued</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+        <span class="c1">// 执行命令
+</span><span class="c1"></span>        <span class="n">call</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">REDIS_CALL_FULL</span><span class="p">);</span>
+        <span class="n">c</span><span class="o">-&gt;</span><span class="n">woff</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">master_repl_offset</span><span class="p">;</span>
+
+        <span class="c1">// 处理那些解除阻塞的键
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">listLength</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">ready_keys</span><span class="p">))</span>
+            <span class="n">handleClientsBlockedOnLists</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 执行命令
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">call</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">dirty</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">duration</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">client_old_flags</span> <span class="o">=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span><span class="p">;</span>
+
+    <span class="c1">// 命令发送倒MONITOR
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">listLength</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">monitors</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+        <span class="o">!</span><span class="n">server</span><span class="p">.</span><span class="n">loading</span> <span class="o">&amp;&amp;</span>
+        <span class="o">!</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">REDIS_CMD_SKIP_MONITOR</span><span class="o">|</span><span class="n">REDIS_CMD_ADMIN</span><span class="p">)))</span>
+    <span class="p">{</span>
+        <span class="n">replicationFeedMonitors</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">server</span><span class="p">.</span><span class="n">monitors</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 执行命令
+</span><span class="c1"></span>    <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="n">REDIS_FORCE_AOF</span><span class="o">|</span><span class="n">REDIS_FORCE_REPL</span><span class="p">);</span>
+    <span class="n">redisOpArrayInit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">server</span><span class="p">.</span><span class="n">also_propagate</span><span class="p">);</span>
+    <span class="n">dirty</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">dirty</span><span class="p">;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">ustime</span><span class="p">();</span>
+    <span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="c1">// 命令实现函数
+</span><span class="c1"></span>    <span class="n">duration</span> <span class="o">=</span> <span class="n">ustime</span><span class="p">()</span><span class="o">-</span><span class="n">start</span><span class="p">;</span> <span class="c1">// 执行时间
+</span><span class="c1"></span>    <span class="n">dirty</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">dirty</span><span class="o">-</span><span class="n">dirty</span><span class="p">;</span> <span class="c1">// 命令执行dirty的数量
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">dirty</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="n">dirty</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="c1">// ... 一系列附加操作
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>最终调用到setCommand(redisClient *c)函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="cm">/* SET key value [NX] [XX] [EX &lt;seconds&gt;] [PX &lt;milliseconds&gt;] */</span>
+<span class="kt">void</span> <span class="nf">setCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">j</span><span class="p">;</span>
+    <span class="n">robj</span> <span class="o">*</span><span class="n">expire</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">UNIT_SECONDS</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">flags</span> <span class="o">=</span> <span class="n">REDIS_SET_NO_FLAGS</span><span class="p">;</span>
+
+    <span class="c1">// 设置选项参数
+</span><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">char</span> <span class="o">*</span><span class="n">a</span> <span class="o">=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">;</span>
+        <span class="n">robj</span> <span class="o">*</span><span class="n">next</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">==</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">?</span> <span class="nb">NULL</span> <span class="o">:</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span>
+
+        <span class="k">if</span> <span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;n&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;N&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+            <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;x&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;X&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;\0&#39;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_SET_NX</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;x&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;X&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                   <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;x&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;X&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;\0&#39;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_SET_XX</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;e&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;E&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                   <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;x&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;X&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;\0&#39;</span> <span class="o">&amp;&amp;</span> <span class="n">next</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">UNIT_SECONDS</span><span class="p">;</span>
+            <span class="n">expire</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span>
+            <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;p&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;P&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                   <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;x&#39;</span> <span class="o">||</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;X&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;\0&#39;</span> <span class="o">&amp;&amp;</span> <span class="n">next</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">UNIT_MILLISECONDS</span><span class="p">;</span>
+            <span class="n">expire</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span>
+            <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">syntaxerr</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 尝试编码转换
+</span><span class="c1"></span>    <span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">tryObjectEncoding</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+
+    <span class="c1">// set命令通用的实现
+</span><span class="c1"></span>    <span class="n">setGenericCommand</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">flags</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">expire</span><span class="p">,</span><span class="n">unit</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setGenericCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">val</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">expire</span><span class="p">,</span> <span class="kt">int</span> <span class="n">unit</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">ok_reply</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">abort_reply</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">milliseconds</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="cm">/* initialized to avoid any harmness warning */</span>
+
+    <span class="c1">// 取出过期时间 expire为过期时间参数
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">expire</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">getLongLongFromObjectOrReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">expire</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">milliseconds</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">)</span> <span class="o">!=</span> <span class="n">REDIS_OK</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">milliseconds</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">addReplyErrorFormat</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;invalid expire time in %s&#34;</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">unit</span> <span class="o">==</span> <span class="n">UNIT_SECONDS</span><span class="p">)</span> <span class="n">milliseconds</span> <span class="o">*=</span> <span class="mi">1000</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 如果REDIS_SET_NX REDIS_SET_XX 判断是否符合规范
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">((</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_SET_NX</span> <span class="o">&amp;&amp;</span> <span class="n">lookupKeyWrite</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span><span class="p">,</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="o">||</span>
+        <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_SET_XX</span> <span class="o">&amp;&amp;</span> <span class="n">lookupKeyWrite</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span><span class="p">,</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">abort_reply</span> <span class="o">?</span> <span class="nl">abort_reply</span> <span class="p">:</span> <span class="n">shared</span><span class="p">.</span><span class="n">nullbulk</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 设置键
+</span><span class="c1"></span>    <span class="n">setKey</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">val</span><span class="p">);</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">dirty</span><span class="o">++</span><span class="p">;</span> <span class="c1">// 脏计数增加
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">expire</span><span class="p">)</span> <span class="n">setExpire</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">mstime</span><span class="p">()</span><span class="o">+</span><span class="n">milliseconds</span><span class="p">);</span> <span class="c1">// 设置过期时间
+</span><span class="c1"></span>    <span class="n">notifyKeyspaceEvent</span><span class="p">(</span><span class="n">REDIS_NOTIFY_STRING</span><span class="p">,</span><span class="s">&#34;set&#34;</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">);</span> <span class="c1">// 发送事件通知
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">expire</span><span class="p">)</span> <span class="n">notifyKeyspaceEvent</span><span class="p">(</span><span class="n">REDIS_NOTIFY_GENERIC</span><span class="p">,</span>
+        <span class="s">&#34;expire&#34;</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">);</span><span class="c1">// 发送事件通知
+</span><span class="c1"></span>    <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">ok_reply</span> <span class="o">?</span> <span class="nl">ok_reply</span> <span class="p">:</span> <span class="n">shared</span><span class="p">.</span><span class="n">ok</span><span class="p">);</span> <span class="c1">// 回复
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="回复客户端">回复客户端</h2>
+<p>在执行命令出错或者成功后使用addReply()生成回复信息，该函数将通过prepareClientToWrite()产生回复客户端的文件事件，同时将回复内容复制到回复缓存区。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">addReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">prepareClientToWrite</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span> <span class="c1">// 生成回复客户端的文件事件
+</span><span class="c1"></span>
+    <span class="c1">// 根据不同情况，生成回复内容,写入不同的缓冲区
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">sdsEncodedObject</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">_addReplyToBuffer</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">,</span><span class="n">sdslen</span><span class="p">(</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">))</span> <span class="o">!=</span> <span class="n">REDIS_OK</span><span class="p">)</span>
+            <span class="n">_addReplyObjectToList</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">obj</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">encoding</span> <span class="o">==</span> <span class="n">REDIS_ENCODING_INT</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* Optimization: if there is room in the static buffer for 32 bytes
+</span><span class="cm">         * (more than the max chars a 64 bit integer can take as string) we
+</span><span class="cm">         * avoid decoding the object and go for the lower level approach. */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">listLength</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">buf</span><span class="p">)</span> <span class="o">-</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">32</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+            <span class="kt">int</span> <span class="n">len</span><span class="p">;</span>
+
+            <span class="n">len</span> <span class="o">=</span> <span class="n">ll2string</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),(</span><span class="kt">long</span><span class="p">)</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">_addReplyToBuffer</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">buf</span><span class="p">,</span><span class="n">len</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="cm">/* else... continue with the normal code path, but should never
+</span><span class="cm">             * happen actually since we verified there is room. */</span>
+        <span class="p">}</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">getDecodedObject</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">_addReplyToBuffer</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">,</span><span class="n">sdslen</span><span class="p">(</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">))</span> <span class="o">!=</span> <span class="n">REDIS_OK</span><span class="p">)</span>
+            <span class="n">_addReplyObjectToList</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">obj</span><span class="p">);</span>
+        <span class="n">decrRefCount</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">redisPanic</span><span class="p">(</span><span class="s">&#34;Wrong obj-&gt;encoding in addReply()&#34;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">prepareClientToWrite</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// lua 脚本伪客户端
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_LUA_CLIENT</span><span class="p">)</span> <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+
+    <span class="c1">// 客户端为REDIS_MASTER REDIS_MASTER_FORCE_REPLY
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">((</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_MASTER</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+        <span class="o">!</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_MASTER_FORCE_REPLY</span><span class="p">))</span> <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">fd</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span> <span class="cm">/* Fake client for AOF loading. */</span>
+
+    <span class="c1">// 一般的客户端生成写事件
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">listLength</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
+        <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">replstate</span> <span class="o">==</span> <span class="n">REDIS_REPL_NONE</span> <span class="o">||</span>
+         <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">replstate</span> <span class="o">==</span> <span class="n">REDIS_REPL_ONLINE</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">repl_put_online_on_ack</span><span class="p">)))</span>
+    <span class="p">{</span>
+        <span class="cm">/* Try to install the write handler. */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">aeCreateFileEvent</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">el</span><span class="p">,</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">fd</span><span class="p">,</span> <span class="n">AE_WRITABLE</span><span class="p">,</span>
+                <span class="n">sendReplyToClient</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">AE_ERR</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">freeClientAsync</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Authorize the caller to queue in the output buffer of this client. */</span>
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>最终文件事件调用sendReplyToClient()回复客户端。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">sendReplyToClient</span><span class="p">(</span><span class="n">aeEventLoop</span> <span class="o">*</span><span class="n">el</span><span class="p">,</span> <span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span> <span class="o">=</span> <span class="n">privdata</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">nwritten</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">totwritten</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">objlen</span><span class="p">;</span>
+    <span class="n">size_t</span> <span class="n">objmem</span><span class="p">;</span>
+    <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">;</span>
+    <span class="n">REDIS_NOTUSED</span><span class="p">(</span><span class="n">el</span><span class="p">);</span>
+    <span class="n">REDIS_NOTUSED</span><span class="p">(</span><span class="n">mask</span><span class="p">);</span>
+
+    <span class="c1">// 从缓存区获取数据，写入，直到写完
+</span><span class="c1"></span>    <span class="k">while</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">listLength</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// 先写入回复缓冲区数据
+</span><span class="c1"></span>            <span class="n">nwritten</span> <span class="o">=</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">buf</span><span class="o">+</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span><span class="o">-</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">nwritten</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span> <span class="c1">// 出错跳出
+</span><span class="c1"></span>
+            <span class="c1">// 成功计数
+</span><span class="c1"></span>            <span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span> <span class="o">+=</span> <span class="n">nwritten</span><span class="p">;</span>
+            <span class="n">totwritten</span> <span class="o">+=</span> <span class="n">nwritten</span><span class="p">;</span>
+
+            <span class="c1">// 如果内容写完则清空两个计数器
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span> <span class="o">==</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+            <span class="c1">// 回复缓冲区为空的话，在回复链表查找
+</span><span class="c1"></span>            <span class="n">o</span> <span class="o">=</span> <span class="n">listNodeValue</span><span class="p">(</span><span class="n">listFirst</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">));</span>
+            <span class="n">objlen</span> <span class="o">=</span> <span class="n">sdslen</span><span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">);</span>
+            <span class="n">objmem</span> <span class="o">=</span> <span class="n">getStringObjectSdsUsedMemory</span><span class="p">(</span><span class="n">o</span><span class="p">);</span>
+
+            <span class="c1">// 跳过空对象
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">objlen</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">listDelNode</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">,</span><span class="n">listFirst</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">));</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">reply_bytes</span> <span class="o">-=</span> <span class="n">objmem</span><span class="p">;</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="c1">// 写入
+</span><span class="c1"></span>            <span class="n">nwritten</span> <span class="o">=</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">)</span><span class="o">+</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span><span class="p">,</span><span class="n">objlen</span><span class="o">-</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">nwritten</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span> <span class="c1">// 出错跳出
+</span><span class="c1"></span>
+            <span class="c1">// 计数
+</span><span class="c1"></span>            <span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span> <span class="o">+=</span> <span class="n">nwritten</span><span class="p">;</span>
+            <span class="n">totwritten</span> <span class="o">+=</span> <span class="n">nwritten</span><span class="p">;</span>
+
+            <span class="c1">// 如果汉冲去内容写入完毕，删除已经写入的节点
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span> <span class="o">==</span> <span class="n">objlen</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">listDelNode</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">,</span><span class="n">listFirst</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">));</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">reply_bytes</span> <span class="o">-=</span> <span class="n">objmem</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">// 写入量超过限制 在最大内存没设或者最大内存没使用完的情况下跳出
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">stat_net_output_bytes</span> <span class="o">+=</span> <span class="n">totwritten</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">totwritten</span> <span class="o">&gt;</span> <span class="n">REDIS_MAX_WRITE_PER_EVENT</span> <span class="o">&amp;&amp;</span>
+            <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">maxmemory</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span>
+             <span class="n">zmalloc_used_memory</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">server</span><span class="p">.</span><span class="n">maxmemory</span><span class="p">))</span> <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 写入出错
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">nwritten</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">errno</span> <span class="o">==</span> <span class="n">EAGAIN</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">nwritten</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_VERBOSE</span><span class="p">,</span>
+                <span class="s">&#34;Error writing to client: %s&#34;</span><span class="p">,</span> <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+            <span class="n">freeClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">totwritten</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* For clients representing masters we don&#39;t count sending data
+</span><span class="cm">         * as an interaction, since we always send REPLCONF ACK commands
+</span><span class="cm">         * that take some time to just fill the socket output buffer.
+</span><span class="cm">         * We just rely on data / pings received for timeout detection. */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_MASTER</span><span class="p">))</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">lastinteraction</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">unixtime</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">bufpos</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">listLength</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">reply</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span><span class="o">-&gt;</span><span class="n">sentlen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+        <span class="c1">// 写完了删除write handler
+</span><span class="c1"></span>        <span class="n">aeDeleteFileEvent</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">el</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">fd</span><span class="p">,</span><span class="n">AE_WRITABLE</span><span class="p">);</span>
+
+        <span class="c1">// 必要的话关闭客户端
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_CLOSE_AFTER_REPLY</span><span class="p">)</span> <span class="n">freeClient</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="结束">结束</h2>
+<p>至此一个命令的旅程就结束了。</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2017-07-18</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" data-title="redis源码阅读-一个命令的旅程" data-hashtags="redis,源码阅读"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" data-hashtag="redis"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" data-title="redis源码阅读-一个命令的旅程"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" data-title="redis源码阅读-一个命令的旅程"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%B8%80%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B/" data-title="redis源码阅读-一个命令的旅程"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%BA%8B%E4%BB%B6/" class="prev" rel="prev" title="redis源码阅读-事件"><i class="fas fa-angle-left fa-fw"></i>redis源码阅读-事件</a>
+            <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%80%BB%E7%BB%93/" class="next" rel="next" title="Redis源码阅读-总结">Redis源码阅读-总结<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

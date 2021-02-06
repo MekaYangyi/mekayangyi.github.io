@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>redis源码阅读-对象 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="redis源码阅读-对象" />
+<meta property="og:description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。
+redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。
+对象的类型与编码
+redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一个对象用作键值对的键，一个对象用作键值对的值。
+对象的结构体
+
+
+1
+2
+3
+4
+5
+6
+7
+
+
+typedef struct redisObject {
+    unsigned type:4; // 类型
+    unsigned encoding:4; // 编码
+    unsigned lru:REDIS_LRU_BITS; /* lru time (relative to server.lruclock) */
+    int refcount; // 引用计数
+    void *ptr; // 值
+} robj;
+
+
+redis结构体使用位段结构节省空间
+类型type
+记录redis对象类型，五种类型
+
+
+1
+2
+3
+4
+5
+
+
+#define REDIS_STRING 0 // 字符串对象
+#define REDIS_LIST 1 // 列表对象
+#define REDIS_SET 2 // 哈希对象
+#define REDIS_ZSET 3 // 集合对象
+#define REDIS_HASH 4 // 有序集合对象
+
+
+编码encoding
+记录redis对象的编码
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+
+
+// 对象编码
+#define REDIS_ENCODING_RAW 0     /* 简单动态字符串 */
+#define REDIS_ENCODING_INT 1     /* long类型的整数 */
+#define REDIS_ENCODING_HT 2      /* 字典 */
+#define REDIS_ENCODING_ZIPMAP 3  /* zipmap 3.2.5不再使用 */
+#define REDIS_ENCODING_LINKEDLIST 4 /* 双端队列 */
+#define REDIS_ENCODING_ZIPLIST 5 /* 压缩列表 */
+#define REDIS_ENCODING_INTSET 6  /* 整数集合 */
+#define REDIS_ENCODING_SKIPLIST 7  /* 跳跃表 */
+#define REDIS_ENCODING_EMBSTR 8  /* EMBSTR编码的简单字符串 */
+
+
+每种类型对应至少两种不同的编码。
+
+
+
+对象类型
+编码方式
+
+
+
+
+REDIS_STRING
+REDIS_ENCODING_RAW ,REDIS_ENCODING_INT ,REDIS_ENCODING_EMBSTR
+
+
+REDIS_LIST
+REDIS_ENCODING_LINKEDLIST ,REDIS_ENCODING_ZIPLIST
+
+
+REDIS_SET
+REDIS_ENCODING_INTSET ,REDIS_ENCODING_HT
+
+
+REDIS_ZSET
+REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_SKIPLIST
+
+
+REDIS_HASH
+REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_HT
+
+
+
+访问时间
+表示对象的最后一次访问时间。
+引用计数
+常见的管理方式，引用计数为0时回收。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2017-07-09T22:55:14+00:00" />
+<meta property="article:modified_time" content="2017-07-09T22:55:14+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="redis源码阅读-对象"/>
+<meta name="twitter:description" content="之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。
+redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。
+对象的类型与编码
+redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一个对象用作键值对的键，一个对象用作键值对的值。
+对象的结构体
+
+
+1
+2
+3
+4
+5
+6
+7
+
+
+typedef struct redisObject {
+    unsigned type:4; // 类型
+    unsigned encoding:4; // 编码
+    unsigned lru:REDIS_LRU_BITS; /* lru time (relative to server.lruclock) */
+    int refcount; // 引用计数
+    void *ptr; // 值
+} robj;
+
+
+redis结构体使用位段结构节省空间
+类型type
+记录redis对象类型，五种类型
+
+
+1
+2
+3
+4
+5
+
+
+#define REDIS_STRING 0 // 字符串对象
+#define REDIS_LIST 1 // 列表对象
+#define REDIS_SET 2 // 哈希对象
+#define REDIS_ZSET 3 // 集合对象
+#define REDIS_HASH 4 // 有序集合对象
+
+
+编码encoding
+记录redis对象的编码
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+
+
+// 对象编码
+#define REDIS_ENCODING_RAW 0     /* 简单动态字符串 */
+#define REDIS_ENCODING_INT 1     /* long类型的整数 */
+#define REDIS_ENCODING_HT 2      /* 字典 */
+#define REDIS_ENCODING_ZIPMAP 3  /* zipmap 3.2.5不再使用 */
+#define REDIS_ENCODING_LINKEDLIST 4 /* 双端队列 */
+#define REDIS_ENCODING_ZIPLIST 5 /* 压缩列表 */
+#define REDIS_ENCODING_INTSET 6  /* 整数集合 */
+#define REDIS_ENCODING_SKIPLIST 7  /* 跳跃表 */
+#define REDIS_ENCODING_EMBSTR 8  /* EMBSTR编码的简单字符串 */
+
+
+每种类型对应至少两种不同的编码。
+
+
+
+对象类型
+编码方式
+
+
+
+
+REDIS_STRING
+REDIS_ENCODING_RAW ,REDIS_ENCODING_INT ,REDIS_ENCODING_EMBSTR
+
+
+REDIS_LIST
+REDIS_ENCODING_LINKEDLIST ,REDIS_ENCODING_ZIPLIST
+
+
+REDIS_SET
+REDIS_ENCODING_INTSET ,REDIS_ENCODING_HT
+
+
+REDIS_ZSET
+REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_SKIPLIST
+
+
+REDIS_HASH
+REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_HT
+
+
+
+访问时间
+表示对象的最后一次访问时间。
+引用计数
+常见的管理方式，引用计数为0时回收。"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" /><link rel="prev" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" /><link rel="next" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B0%E6%8D%AE%E5%BA%93/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "redis源码阅读-对象",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "redis, 源码阅读","wordcount":  1415 ,
+        "url": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1\/","datePublished": "2017-07-09T22:55:14+00:00","dateModified": "2017-07-09T22:55:14+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">redis源码阅读-对象</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2017-07-09">2017-07-09</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1415 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;7 minutes&nbsp;<span id="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" class="leancloud_visitors" data-flag-title="redis源码阅读-对象">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#对象的类型与编码">对象的类型与编码</a>
+      <ul>
+        <li><a href="#对象的结构体">对象的结构体</a>
+          <ul>
+            <li><a href="#类型type">类型type</a></li>
+            <li><a href="#编码encoding">编码encoding</a></li>
+            <li><a href="#访问时间">访问时间</a></li>
+            <li><a href="#引用计数">引用计数</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#对象的api">对象的API</a>
+      <ul>
+        <li><a href="#对象的创建">对象的创建</a></li>
+        <li><a href="#对象的释放">对象的释放</a></li>
+      </ul>
+    </li>
+    <li><a href="#字符串对象">字符串对象</a></li>
+    <li><a href="#列表对象">列表对象</a></li>
+    <li><a href="#哈希对象">哈希对象</a></li>
+    <li><a href="#集合对象">集合对象</a></li>
+    <li><a href="#有序集合对象">有序集合对象</a></li>
+    <li><a href="#命令">命令</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。</p>
+<p>redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。</p>
+<h2 id="对象的类型与编码">对象的类型与编码</h2>
+<p>redis使用对象来表示数据库中的键值，创建一个键值对时，会创建至少两个对象，一个对象用作键值对的键，一个对象用作键值对的值。</p>
+<h3 id="对象的结构体">对象的结构体</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">redisObject</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="nl">type</span><span class="p">:</span><span class="mi">4</span><span class="p">;</span> <span class="c1">// 类型
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="nl">encoding</span><span class="p">:</span><span class="mi">4</span><span class="p">;</span> <span class="c1">// 编码
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="nl">lru</span><span class="p">:</span><span class="n">REDIS_LRU_BITS</span><span class="p">;</span> <span class="cm">/* lru time (relative to server.lruclock) */</span>
+    <span class="kt">int</span> <span class="n">refcount</span><span class="p">;</span> <span class="c1">// 引用计数
+</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span> <span class="c1">// 值
+</span><span class="c1"></span><span class="p">}</span> <span class="n">robj</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>redis结构体使用位段结构节省空间</p>
+<h4 id="类型type">类型type</h4>
+<p>记录redis对象类型，五种类型</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="cp">#define REDIS_STRING 0 </span><span class="c1">// 字符串对象
+</span><span class="c1"></span><span class="cp">#define REDIS_LIST 1 </span><span class="c1">// 列表对象
+</span><span class="c1"></span><span class="cp">#define REDIS_SET 2 </span><span class="c1">// 哈希对象
+</span><span class="c1"></span><span class="cp">#define REDIS_ZSET 3 </span><span class="c1">// 集合对象
+</span><span class="c1"></span><span class="cp">#define REDIS_HASH 4 </span><span class="c1">// 有序集合对象
+</span></code></pre></td></tr></table>
+</div>
+</div><h4 id="编码encoding">编码encoding</h4>
+<p>记录redis对象的编码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 对象编码
+</span><span class="c1"></span><span class="cp">#define REDIS_ENCODING_RAW 0     </span><span class="cm">/* 简单动态字符串 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_INT 1     </span><span class="cm">/* long类型的整数 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_HT 2      </span><span class="cm">/* 字典 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_ZIPMAP 3  </span><span class="cm">/* zipmap 3.2.5不再使用 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_LINKEDLIST 4 </span><span class="cm">/* 双端队列 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_ZIPLIST 5 </span><span class="cm">/* 压缩列表 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_INTSET 6  </span><span class="cm">/* 整数集合 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_SKIPLIST 7  </span><span class="cm">/* 跳跃表 */</span><span class="cp">
+</span><span class="cp">#define REDIS_ENCODING_EMBSTR 8  </span><span class="cm">/* EMBSTR编码的简单字符串 */</span><span class="cp">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>每种类型对应至少两种不同的编码。</p>
+<table>
+<thead>
+<tr>
+<th>对象类型</th>
+<th>编码方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REDIS_STRING</td>
+<td>REDIS_ENCODING_RAW ,REDIS_ENCODING_INT ,REDIS_ENCODING_EMBSTR</td>
+</tr>
+<tr>
+<td>REDIS_LIST</td>
+<td>REDIS_ENCODING_LINKEDLIST ,REDIS_ENCODING_ZIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_SET</td>
+<td>REDIS_ENCODING_INTSET ,REDIS_ENCODING_HT</td>
+</tr>
+<tr>
+<td>REDIS_ZSET</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_SKIPLIST</td>
+</tr>
+<tr>
+<td>REDIS_HASH</td>
+<td>REDIS_ENCODING_ZIPLIST ,REDIS_ENCODING_HT</td>
+</tr>
+</tbody>
+</table>
+<h4 id="访问时间">访问时间</h4>
+<p>表示对象的最后一次访问时间。</p>
+<h4 id="引用计数">引用计数</h4>
+<p>常见的管理方式，引用计数为0时回收。</p>
+<h2 id="对象的api">对象的API</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">decrRefCount</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 引用计数-1，降为0时释放对象
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">decrRefCountVoid</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 用于特定数据结构的释放
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">incrRefCount</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 引用计数+1
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">resetRefCount</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span> <span class="c1">// 设置引用计数为0
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">freeStringObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 释放字符串对象
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">freeListObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 释放列表对象
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">freeSetObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span>  <span class="c1">// 释放集合对象
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">freeZsetObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 释放有序集合对象
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">freeHashObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 释放hash对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createObject</span><span class="p">(</span><span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span> <span class="c1">// 创建一个新robj对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createStringObject</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">len</span><span class="p">);</span> <span class="c1">// 创建一个字符串对象，根据大小选择编码
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createRawStringObject</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">len</span><span class="p">);</span><span class="c1">// 创建一个 REDIS_ENCODING_RAW 编码的字符对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createEmbeddedStringObject</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">len</span><span class="p">);</span><span class="c1">// 创建一个 REDIS_ENCODING_EMBSTR 编码的字符对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">dupStringObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 复制一个字符串对象
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">isObjectRepresentableAsLongLong</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">llongval</span><span class="p">);</span> <span class="c1">// 检查对象的值是否为Long long
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">tryObjectEncoding</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 尝试对字符串对象编码，以节约内存
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">getDecodedObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 返回一个对象的编码版本
+</span><span class="c1"></span><span class="n">size_t</span> <span class="nf">stringObjectLen</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 返回字符串对象的字符串值的长度
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createStringObjectFromLongLong</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">value</span><span class="p">);</span> <span class="c1">// 根据传入的值，创建一个字符串对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createStringObjectFromLongDouble</span><span class="p">(</span><span class="kt">long</span> <span class="kt">double</span> <span class="n">value</span><span class="p">,</span> <span class="kt">int</span> <span class="n">humanfriendly</span><span class="p">);</span> <span class="c1">// 根据传入的值，创建一个字符串对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createListObject</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="c1">// 创建一个linkedlist编码的列表对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createZiplistObject</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="c1">// 创建一个ziplist编码的列表对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createSetObject</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="c1">// 创建一个ht编码的集合对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createIntsetObject</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="c1">// 创建一个intset编码的集合对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createHashObject</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="c1">// 创建一个ziplist编码的哈希对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createZsetObject</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="c1">// 创建一个skiplist编码的有序集合
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createZsetZiplistObject</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="c1">// 创建一个ziplist编码的有序集合
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">getLongFromObjectOrReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">long</span> <span class="o">*</span><span class="n">target</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">);</span> <span class="c1">// 尝试从对象中获取Long类型值
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">checkType</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">);</span> <span class="c1">// 检查对象0的类型是否和type相同
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">getLongLongFromObjectOrReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">target</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">);</span> <span class="c1">// 尝试从对象中取出整数值
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">getDoubleFromObjectOrReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">double</span> <span class="o">*</span><span class="n">target</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">);</span> <span class="c1">// 尝试从对象中取出double值
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">getLongLongFromObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">target</span><span class="p">);</span> <span class="c1">// 尝试从对象中获取整数值
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">getLongDoubleFromObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">double</span> <span class="o">*</span><span class="n">target</span><span class="p">);</span> <span class="c1">// 尝试从对象获取long double值
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">getLongDoubleFromObjectOrReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">double</span> <span class="o">*</span><span class="n">target</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">);</span> <span class="c1">// 尝试从对象获取long double值
+</span><span class="c1"></span><span class="kt">char</span> <span class="o">*</span><span class="nf">strEncoding</span><span class="p">(</span><span class="kt">int</span> <span class="n">encoding</span><span class="p">);</span> <span class="c1">// 返回编码的字符串表示
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">compareStringObjects</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">b</span><span class="p">);</span> <span class="c1">// 二进制方式比较两个字符串对象
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">collateStringObjects</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">b</span><span class="p">);</span> <span class="c1">// 以collation方式比较两个字符串对象
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">equalStringObjects</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">b</span><span class="p">);</span> <span class="c1">// 判断是否相同两个字符串对象
+</span><span class="c1"></span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="nf">estimateObjectIdleTime</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 计算对象的闲置时间
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="对象的创建">对象的创建</h3>
+<p>对象的创建都比较类似，一般创建底层数据结构，然后创建对象。然后初始化。</p>
+<p>以string对象为例</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 创建字符串对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createStringObject</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 长度小于39时使用EMBSTR
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="n">REDIS_ENCODING_EMBSTR_SIZE_LIMIT</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">createEmbeddedStringObject</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="n">len</span><span class="p">);</span>
+    <span class="k">else</span>
+        <span class="k">return</span> <span class="n">createRawStringObject</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="n">len</span><span class="p">);</span>
+<span class="p">}</span>
+
+ <span class="c1">// 创建一个embstr编码的字符串对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createEmbeddedStringObject</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 直接分配一个连续空间长度为redis和字符串结构+字符串保存内存
+</span><span class="c1"></span>    <span class="n">robj</span> <span class="o">*</span><span class="n">o</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">robj</span><span class="p">)</span><span class="o">+</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">sdshdr</span><span class="p">)</span><span class="o">+</span><span class="n">len</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">struct</span> <span class="n">sdshdr</span> <span class="o">*</span><span class="n">sh</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)(</span><span class="n">o</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// 找到字符串的起始位置
+</span><span class="c1"></span>
+    <span class="c1">// 初始化字符串
+</span><span class="c1"></span>    <span class="n">o</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">=</span> <span class="n">REDIS_STRING</span><span class="p">;</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">REDIS_ENCODING_EMBSTR</span><span class="p">;</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">sh</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">lru</span> <span class="o">=</span> <span class="n">LRU_CLOCK</span><span class="p">();</span>
+
+    <span class="n">sh</span><span class="o">-&gt;</span><span class="n">len</span> <span class="o">=</span> <span class="n">len</span><span class="p">;</span>
+    <span class="n">sh</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">memcpy</span><span class="p">(</span><span class="n">sh</span><span class="o">-&gt;</span><span class="n">buf</span><span class="p">,</span><span class="n">ptr</span><span class="p">,</span><span class="n">len</span><span class="p">);</span>
+        <span class="n">sh</span><span class="o">-&gt;</span><span class="n">buf</span><span class="p">[</span><span class="n">len</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">sh</span><span class="o">-&gt;</span><span class="n">buf</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">len</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">o</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 创建一个 REDIS_ENCODING_RAW 编码的字符对象
+</span><span class="c1">// 对象的指针指向一个 sds 结构
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createRawStringObject</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+  	<span class="c1">// sdsnewlen新建字符串
+</span><span class="c1"></span>    <span class="k">return</span> <span class="n">createObject</span><span class="p">(</span><span class="n">REDIS_STRING</span><span class="p">,</span><span class="n">sdsnewlen</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="n">len</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="c1">// 创建一个新对象
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">createObject</span><span class="p">(</span><span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">robj</span> <span class="o">*</span><span class="n">o</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">o</span><span class="p">));</span>
+
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">=</span> <span class="n">type</span><span class="p">;</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">REDIS_ENCODING_RAW</span><span class="p">;</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">;</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="cm">/* Set the LRU to the current lruclock (minutes resolution). */</span>
+    <span class="n">o</span><span class="o">-&gt;</span><span class="n">lru</span> <span class="o">=</span> <span class="n">LRU_CLOCK</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">o</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="对象的释放">对象的释放</h3>
+<p>以字符串对象为例子，redis采用引用计数进行对象的释放，当对象不再使用时调用decrRefCount减少引用计数，在引用计数减到0后，释放对象。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">decrRefCount</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">redisPanic</span><span class="p">(</span><span class="s">&#34;decrRefCount against refcount &lt;= 0&#34;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">switch</span><span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 根据类型释放 各个函数会调用各自的释放函数释放
+</span><span class="c1"></span>        <span class="k">case</span> <span class="nl">REDIS_STRING</span><span class="p">:</span> <span class="n">freeStringObject</span><span class="p">(</span><span class="n">o</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="nl">REDIS_LIST</span><span class="p">:</span> <span class="n">freeListObject</span><span class="p">(</span><span class="n">o</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="nl">REDIS_SET</span><span class="p">:</span> <span class="n">freeSetObject</span><span class="p">(</span><span class="n">o</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="nl">REDIS_ZSET</span><span class="p">:</span> <span class="n">freeZsetObject</span><span class="p">(</span><span class="n">o</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="nl">REDIS_HASH</span><span class="p">:</span> <span class="n">freeHashObject</span><span class="p">(</span><span class="n">o</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+        <span class="k">default</span><span class="o">:</span> <span class="n">redisPanic</span><span class="p">(</span><span class="s">&#34;Unknown object type&#34;</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">zfree</span><span class="p">(</span><span class="n">o</span><span class="p">);</span> <span class="c1">// 释放对象内存
+</span><span class="c1"></span>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">o</span><span class="o">-&gt;</span><span class="n">refcount</span><span class="o">--</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 如果时RAW编码调用sdsfree释放，否则在释放robj时就释放了，因为采用了embstr编码
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">freeStringObject</span><span class="p">(</span><span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">encoding</span> <span class="o">==</span> <span class="n">REDIS_ENCODING_RAW</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">sdsfree</span><span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="字符串对象">字符串对象</h2>
+<p>字符串编码可以是Int、raw或者embstr。</p>
+<p>字符串对象为整数值，可以用long long类型表示，则为int编码。</p>
+<p>字符串对象为浮点数，能够用long double类型表示，使用embstr还是raw根据长度来定。</p>
+<p>如果一个字符串对象小于等于REDIS_ENCODING_EMBSTR_SIZE_LIMIT则用embstr编码。</p>
+<p>大于REDIS_ENCODING_EMBSTR_SIZE_LIMIT采用raw编码。</p>
+<p>int编码在执行一个会将int转变为字符串值时，编码变为raw。</p>
+<p>embstr为只读的，当尝试修改时会转换为raw。</p>
+<h2 id="列表对象">列表对象</h2>
+<p>列表对象编码是ziplist或者linkedlist。</p>
+<p>满足以下两个条件使用ziplist：</p>
+<ul>
+<li>保存的字符串长度都小于64</li>
+<li>元素数量小于512</li>
+</ul>
+<h2 id="哈希对象">哈希对象</h2>
+<p>哈希对象编码是ziplist或者hashtable。</p>
+<p>如果采用的是ziplist那么添加键值时，先将键推入压缩列表表尾部，再将值推入压缩列表表尾。</p>
+<p>如果采用hashtable编码，那么字典的键就是键值对的键的字符串对象，字典的值时键值对的值。</p>
+<p>满足以下两个条件使用ziplist：</p>
+<ul>
+<li>保存的字符串长度都小于64</li>
+<li>元素数量小于512</li>
+</ul>
+<h2 id="集合对象">集合对象</h2>
+<p>集合的编码是inset或者hashtable</p>
+<p>满足以下条件使用intset编码：</p>
+<ul>
+<li>集合对象保存的值都为整数</li>
+<li>集合对象保存的元素不超过512个</li>
+</ul>
+<h2 id="有序集合对象">有序集合对象</h2>
+<p>有序集合编码是ziplist或者skiplist。</p>
+<p>skiplist编码使用一个zskiplist和dict作为底层实现。zskiplist按照分值从大到小保存集合元素。dict保存从成员到分值的映射。</p>
+<p>满足以下条件使用ziplist编码：</p>
+<ul>
+<li>有序集合保存的元素小于128个。</li>
+<li>有序集合保存的所有元素成员的长度都小于64字节。</li>
+</ul>
+<h2 id="命令">命令</h2>
+<p>对象的命令处理在redis.h中。
+执行命令之前会检查对象的类型，是否能够执行该命令。
+如果能就调用对象的命令处理函数,否则返回错误。</p>
+<p>在调用了对象的命令处理函数之后，则根据命令具体的编码，去选择使用什么底层数据结构的接口来实现。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c">
+<span class="cm">/* Commands prototypes */</span>
+<span class="kt">void</span> <span class="nf">authCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pingCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">echoCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">setCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">setnxCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">setexCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">psetexCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">getCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">delCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">existsCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">setbitCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">getbitCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">setrangeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">getrangeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">incrCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">decrCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">incrbyCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">decrbyCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">incrbyfloatCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">selectCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">randomkeyCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">keysCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">scanCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">dbsizeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lastsaveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">saveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">bgsaveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">bgrewriteaofCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">shutdownCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">moveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">renameCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">renamenxCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lpushCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">rpushCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lpushxCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">rpushxCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">linsertCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lpopCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">rpopCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">llenCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lindexCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lrangeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">ltrimCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">typeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lsetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">saddCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sremCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">smoveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sismemberCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">scardCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">spopCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">srandmemberCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sinterCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sinterstoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sunionCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sunionstoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sdiffCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sdiffstoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sscanCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">syncCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">flushdbCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">flushallCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">sortCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">lremCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">rpoplpushCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">infoCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">mgetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">monitorCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">expireCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">expireatCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pexpireCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pexpireatCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">getsetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">ttlCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pttlCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">persistCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">slaveofCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">debugCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">msetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">msetnxCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zaddCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zincrbyCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrangeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrangebyscoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrevrangebyscoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrangebylexCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrevrangebylexCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zcountCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zlexcountCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrevrangeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zcardCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zremCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zscoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zremrangebyscoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zremrangebylexCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">multiCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">execCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">discardCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">blpopCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">brpopCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">brpoplpushCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">appendCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">strlenCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrankCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zrevrankCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hsetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hsetnxCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hgetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hmsetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hmgetCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hdelCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hlenCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zremrangebyrankCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zunionstoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zinterstoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">zscanCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hkeysCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hvalsCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hgetallCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hexistsCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hscanCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">configCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hincrbyCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hincrbyfloatCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">subscribeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">unsubscribeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">psubscribeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">punsubscribeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">publishCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pubsubCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">watchCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">unwatchCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">clusterCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">restoreCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">migrateCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">askingCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">readonlyCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">readwriteCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">dumpCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">objectCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">clientCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">evalCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">evalShaCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">scriptCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">timeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">bitopCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">bitcountCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">bitposCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">replconfCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">waitCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pfselftestCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pfaddCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pfcountCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pfmergeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pfdebugCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2017-07-09</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" data-title="redis源码阅读-对象" data-hashtags="redis,源码阅读"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" data-hashtag="redis"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" data-title="redis源码阅读-对象"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" data-title="redis源码阅读-对象"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/" data-title="redis源码阅读-对象"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/" class="prev" rel="prev" title="redis源码阅读-压缩列表ziplist"><i class="fas fa-angle-left fa-fw"></i>redis源码阅读-压缩列表ziplist</a>
+            <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B0%E6%8D%AE%E5%BA%93/" class="next" rel="next" title="redis源码阅读-服务器">redis源码阅读-服务器<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

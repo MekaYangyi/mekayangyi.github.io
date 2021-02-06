@@ -1,0 +1,1854 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>stl源码剖析 - Tag - 鉴心</title>
+        <link>http://coderyang.com/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/</link>
+        <description>stl源码剖析 - Tag - 鉴心</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 21 Nov 2016 20:32:26 &#43;0000</lastBuildDate><atom:link href="http://coderyang.com/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/" rel="self" type="application/rss+xml" /><item>
+    <title>[读书笔记] stl源码剖析 总结</title>
+    <link>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/</link>
+    <pubDate>Mon, 21 Nov 2016 20:32:26 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/</guid>
+    <description><![CDATA[<p>大致上是将STL源码剖析看过了一篇。
+前三章看到比较认真，后面几章就看到比较粗略了。
+我想STL的精髓正是在内存配置、迭代器、容器中。
+至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。
+我的计划是在未来的一小段日子里实现一个小型的stl，所谓实现，可能也不过是重新将sgi的代码打一遍罢了。不过对于整个stl的理解，我相信会更好一些。
+之后我应该会更新一些写小型stl遇到的问题和解决方案。
+项目的地址：
+<a href="https://github.com/MekaYangyi/STL/">https://github.com/MekaYangyi/STL/</a></p>
+]]></description>
+</item><item>
+    <title>[读书笔记] stl源码剖析 第四章 序列式容器</title>
+    <link>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E5%BA%8F%E5%88%97%E5%BC%8F%E5%AE%B9%E5%99%A8/</link>
+    <pubDate>Sun, 20 Nov 2016 20:32:26 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E5%BA%8F%E5%88%97%E5%BC%8F%E5%AE%B9%E5%99%A8/</guid>
+    <description><![CDATA[<p>容器分类
+</p>
+<h1 id="vector">vector</h1>
+<p>vector还是比较简单，也就是一个动态数组，提供了些操作，带三个指针，start/finish/end
+核心就是动态调整内存的方法，也就是满了开大一倍空间，拷贝过去。
+push_back等操作都是值语义的，拷贝传进来的内容放入到vector中。
+因为是连续的空间，所有元素连续存储在一整块内存上，迭代器直接用的原始指针。</p>
+<h1 id="list">list</h1>
+<p>list复杂些.
+模型和常见的list是一致的，动态创建节点，插入。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">struct</span> <span class="nc">_List_node_base</span> <span class="p">{</span>
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_next</span><span class="p">;</span>
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_prev</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">_List_node</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_node_base</span> <span class="p">{</span>
+  <span class="n">_Tp</span> <span class="n">_M_data</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">//迭代器base
+</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_iterator_base</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">size_t</span>                     <span class="n">size_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                  <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">bidirectional_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_node</span><span class="p">;</span><span class="c1">//节点指针
+</span><span class="c1"></span>
+  <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">_List_node_base</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_M_node</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="n">_List_iterator_base</span><span class="p">()</span> <span class="p">{}</span>
+
+  <span class="kt">void</span> <span class="nf">_M_incr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">_M_decr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_prev</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">==</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">!=</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>  
+
+<span class="c1">//迭代器,重载了++ -- == * -&gt;等操作
+</span><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ref</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ptr</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">_List_iterator</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_iterator_base</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="n">_Tp</span><span class="o">*&gt;</span>             <span class="n">iterator</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">*&gt;</span> <span class="n">const_iterator</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Ref</span><span class="p">,</span><span class="n">_Ptr</span><span class="o">&gt;</span>             <span class="n">_Self</span><span class="p">;</span>
+
+  <span class="k">typedef</span> <span class="n">_Tp</span> <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Ptr</span> <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Ref</span> <span class="n">reference</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span> <span class="n">_Node</span><span class="p">;</span>
+
+  <span class="n">_List_iterator</span><span class="p">(</span><span class="n">_Node</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="n">_List_iterator</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="n">_List_iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">iterator</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="n">reference</span> <span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="p">((</span><span class="n">_Node</span><span class="o">*</span><span class="p">)</span> <span class="n">_M_node</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_M_data</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="cp">#ifndef __SGI_STL_NO_ARROW_OPERATOR
+</span><span class="cp"></span>  <span class="n">pointer</span> <span class="k">operator</span><span class="o">-&gt;</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="o">&amp;</span><span class="p">(</span><span class="k">operator</span><span class="o">*</span><span class="p">());</span> <span class="p">}</span>
+<span class="cp">#endif </span><span class="cm">/* __SGI_STL_NO_ARROW_OPERATOR */</span><span class="cp">
+</span><span class="cp"></span>
+  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">++</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">_Self</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">--</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">_Self</span> <span class="k">operator</span><span class="o">--</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="deque">deque</h1>
+<p>双向开头的连续空间</p>
+
+比较特别的地方是用一个双指针维护了一个多个连续的空间
+
+迭代器保持连续的方式
+```cpp
+inline size_t __deque_buf_size(size_t __size) {
+  return __size < 512 ? size_t(512 / __size) : size_t(1);
+}
+<p>template &lt;class _Tp, class _Ref, class _Ptr&gt;
+struct _Deque_iterator {
+typedef _Deque_iterator&lt;_Tp, _Tp&amp;, _Tp*&gt;             iterator;
+typedef _Deque_iterator&lt;_Tp, const _Tp&amp;, const _Tp*&gt; const_iterator;
+static size_t _S_buffer_size() { return __deque_buf_size(sizeof(_Tp)); }</p>
+<p>&hellip;..</p>
+<p>_Tp* _M_cur;
+_Tp* _M_first;
+_Tp* _M_last;
+_Map_pointer _M_node;</p>
+<p>_Deque_iterator(_Tp* __x, _Map_pointer __y)
+: _M_cur(__x), _M_first(*__y),
+_M_last(*__y + _S_buffer_size()), _M_node(__y) {}
+_Deque_iterator() : _M_cur(0), _M_first(0), _M_last(0), _M_node(0) {}
+_Deque_iterator(const iterator&amp; __x)
+: _M_cur(__x._M_cur), _M_first(__x._M_first),
+_M_last(__x._M_last), _M_node(__x._M_node) {}</p>
+<p>reference operator*() const { return *_M_cur; }
+#ifndef __SGI_STL_NO_ARROW_OPERATOR
+pointer operator-&gt;() const { return _M_cur; }
+#endif /* __SGI_STL_NO_ARROW_OPERATOR */</p>
+<p>difference_type operator-(const _Self&amp; __x) const {
+return difference_type(_S_buffer_size()) * (_M_node - __x._M_node - 1) +
+(_M_cur - _M_first) + (__x._M_last - __x._M_cur);
+}</p>
+<p>//++
+_Self&amp; operator++() {
+++_M_cur;
+if (_M_cur == _M_last) {
+//到尾部了就进入下一个区域
+_M_set_node(_M_node + 1);//_M_node + 1就是下一个区域
+_M_cur = _M_first;
+}
+return *this;
+}
+&hellip;&hellip;
+//重置first等指针
+void _M_set_node(_Map_pointer __new_node) {
+_M_node = __new_node;
+_M_first = *__new_node;
+_M_last = _M_first + difference_type(_S_buffer_size());
+}
+};</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">如果map不足，分配空间
+```cpp
+template &lt;class _Tp, class _Alloc&gt;
+class _Deque_base {
+....
+protected:
+  _Tp** _M_map;
+  size_t _M_map_size;  //记录的map的大小
+  iterator _M_start;
+  iterator _M_finish;
+  ....
+};
+</code></pre></td></tr></table>
+</div>
+</div><p>空间不足分配空间</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp">  <span class="kt">void</span> <span class="nf">push_back</span><span class="p">(</span><span class="k">const</span> <span class="n">value_type</span><span class="o">&amp;</span> <span class="n">__t</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span> <span class="o">!=</span> <span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_last</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">construct</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">,</span> <span class="n">__t</span><span class="p">);</span>
+      <span class="o">++</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+      <span class="n">_M_push_back_aux</span><span class="p">(</span><span class="n">__t</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="p">...</span>
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Alloc</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">_M_push_back_aux</span><span class="p">(</span><span class="k">const</span> <span class="n">value_type</span><span class="o">&amp;</span> <span class="n">__t</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">value_type</span> <span class="n">__t_copy</span> <span class="o">=</span> <span class="n">__t</span><span class="p">;</span>
+  <span class="n">_M_reserve_map_at_back</span><span class="p">();</span>
+  <span class="o">*</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">_M_allocate_node</span><span class="p">();</span>
+  <span class="n">__STL_TRY</span> <span class="p">{</span>
+    <span class="n">construct</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span><span class="p">,</span> <span class="n">__t_copy</span><span class="p">);</span>
+    <span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_set_node</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_cur</span> <span class="o">=</span> <span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_first</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">__STL_UNWIND</span><span class="p">(</span><span class="n">_M_deallocate_node</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">_M_finish</span><span class="p">.</span><span class="n">_M_node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)));</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="stack">stack</h1>
+<p>以deuqe为底部结构，封闭头端开口，就是stack。
+没有迭代器。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//这里设定了了 以deque为基础
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> 
+          <span class="k">class</span> <span class="nc">_Sequence</span> <span class="n">__STL_DEPENDENT_DEFAULT_TMPL</span><span class="p">(</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">stack</span><span class="p">;</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq</span><span class="o">&gt;</span>
+<span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Seq</span><span class="o">&gt;&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Seq</span><span class="o">&gt;&amp;</span> <span class="n">__y</span><span class="p">);</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq</span><span class="o">&gt;</span>
+<span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span><span class="p">(</span><span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Seq</span><span class="o">&gt;&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Seq</span><span class="o">&gt;&amp;</span> <span class="n">__y</span><span class="p">);</span>
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Sequence</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">stack</span> <span class="p">{</span>
+<span class="p">.....</span>
+
+
+<span class="cp">#ifdef __STL_MEMBER_TEMPLATES
+</span><span class="cp"></span>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq1</span><span class="o">&gt;</span>
+  <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span> <span class="p">(</span><span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq1</span><span class="o">&gt;</span>
+  <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span> <span class="p">(</span><span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">stack</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+<span class="cp">#else </span><span class="cm">/* __STL_MEMBER_TEMPLATES */</span><span class="cp">
+</span><span class="cp"></span>  <span class="k">friend</span> <span class="kt">bool</span> <span class="n">__STD_QUALIFIER</span>
+  <span class="k">operator</span><span class="o">==</span> <span class="n">__STL_NULL_TMPL_ARGS</span> <span class="p">(</span><span class="k">const</span> <span class="n">stack</span><span class="o">&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">stack</span><span class="o">&amp;</span><span class="p">);</span>
+  <span class="k">friend</span> <span class="kt">bool</span> <span class="n">__STD_QUALIFIER</span>
+  <span class="k">operator</span><span class="o">&lt;</span> <span class="n">__STL_NULL_TMPL_ARGS</span> <span class="p">(</span><span class="k">const</span> <span class="n">stack</span><span class="o">&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">stack</span><span class="o">&amp;</span><span class="p">);</span>
+<span class="cp">#endif </span><span class="cm">/* __STL_MEMBER_TEMPLATES */</span><span class="cp">
+</span><span class="cp"></span>
+<span class="p">.....</span>
+
+<span class="k">protected</span><span class="o">:</span>
+  <span class="n">_Sequence</span> <span class="n">c</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">stack</span><span class="p">()</span> <span class="o">:</span> <span class="n">c</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="k">explicit</span> <span class="nf">stack</span><span class="p">(</span><span class="k">const</span> <span class="n">_Sequence</span><span class="o">&amp;</span> <span class="n">__s</span><span class="p">)</span> <span class="o">:</span> <span class="n">c</span><span class="p">(</span><span class="n">__s</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="kt">bool</span> <span class="nf">empty</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">size_type</span> <span class="nf">size</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">reference</span> <span class="nf">top</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">back</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">const_reference</span> <span class="nf">top</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">back</span><span class="p">();</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="k">const</span> <span class="n">value_type</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="p">{</span> <span class="n">c</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">__x</span><span class="p">);</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">pop</span><span class="p">()</span> <span class="p">{</span> <span class="n">c</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span> <span class="p">}</span>
+<span class="p">};</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="queue">queue</h1>
+<p>同样以deque为基础</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> 
+          <span class="k">class</span> <span class="nc">_Sequence</span> <span class="n">__STL_DEPENDENT_DEFAULT_TMPL</span><span class="p">(</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">queue</span><span class="p">;</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span> <span class="n">_Seq</span><span class="o">&gt;&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span> <span class="n">_Seq</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span><span class="p">(</span><span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span> <span class="n">_Seq</span><span class="o">&gt;&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span> <span class="n">_Seq</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Sequence</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">queue</span> <span class="p">{</span>
+
+<span class="p">.....</span>
+
+<span class="cp">#ifdef __STL_MEMBER_TEMPLATES 
+</span><span class="cp"></span>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq1</span><span class="o">&gt;</span>
+  <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span> <span class="p">(</span><span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Seq1</span><span class="o">&gt;</span>
+  <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span> <span class="p">(</span><span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">queue</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="p">,</span> <span class="n">_Seq1</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+<span class="cp">#else </span><span class="cm">/* __STL_MEMBER_TEMPLATES */</span><span class="cp">
+</span><span class="cp"></span>  <span class="k">friend</span> <span class="kt">bool</span> <span class="n">__STD_QUALIFIER</span>
+  <span class="k">operator</span><span class="o">==</span> <span class="n">__STL_NULL_TMPL_ARGS</span> <span class="p">(</span><span class="k">const</span> <span class="n">queue</span><span class="o">&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">queue</span><span class="o">&amp;</span><span class="p">);</span>
+  <span class="k">friend</span> <span class="kt">bool</span> <span class="n">__STD_QUALIFIER</span>
+  <span class="k">operator</span><span class="o">&lt;</span>  <span class="n">__STL_NULL_TMPL_ARGS</span> <span class="p">(</span><span class="k">const</span> <span class="n">queue</span><span class="o">&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">queue</span><span class="o">&amp;</span><span class="p">);</span>
+<span class="cp">#endif </span><span class="cm">/* __STL_MEMBER_TEMPLATES */</span><span class="cp">
+</span><span class="cp"></span>
+<span class="p">.....</span>
+
+<span class="k">protected</span><span class="o">:</span>
+  <span class="n">_Sequence</span> <span class="n">c</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">queue</span><span class="p">()</span> <span class="o">:</span> <span class="n">c</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="k">explicit</span> <span class="nf">queue</span><span class="p">(</span><span class="k">const</span> <span class="n">_Sequence</span><span class="o">&amp;</span> <span class="n">__c</span><span class="p">)</span> <span class="o">:</span> <span class="n">c</span><span class="p">(</span><span class="n">__c</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="kt">bool</span> <span class="nf">empty</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">size_type</span> <span class="nf">size</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">reference</span> <span class="nf">front</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">front</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">const_reference</span> <span class="nf">front</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">front</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">reference</span> <span class="nf">back</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">back</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">const_reference</span> <span class="nf">back</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">back</span><span class="p">();</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="k">const</span> <span class="n">value_type</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="p">{</span> <span class="n">c</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">__x</span><span class="p">);</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">pop</span><span class="p">()</span> <span class="p">{</span> <span class="n">c</span><span class="p">.</span><span class="n">pop_front</span><span class="p">();</span> <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="heap">heap</h1>
+<p>堆也就是个完全二叉树。用个数组或者vector就能实现
+stl中的heap是保证每个父节点大于等于子节点，每次插入删除节点需要重新调整树</p>
+<h2 id="push_heap">push_heap</h2>
+<p>push操作,后调整树，查看父节点是不是符合要求</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">__push_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span>
+            <span class="n">_Distance</span> <span class="n">__holeIndex</span><span class="p">,</span> <span class="n">_Distance</span> <span class="n">__topIndex</span><span class="p">,</span> <span class="n">_Tp</span> <span class="n">__value</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">_Distance</span> <span class="n">__parent</span> <span class="o">=</span> <span class="p">(</span><span class="n">__holeIndex</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span><span class="c1">//父节点
+</span><span class="c1"></span>  <span class="k">while</span> <span class="p">(</span><span class="n">__holeIndex</span> <span class="o">&gt;</span> <span class="n">__topIndex</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__parent</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">__value</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">//调整节点
+</span><span class="c1"></span>    <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__holeIndex</span><span class="p">)</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__parent</span><span class="p">);</span>
+    <span class="n">__holeIndex</span> <span class="o">=</span> <span class="n">__parent</span><span class="p">;</span>
+    <span class="n">__parent</span> <span class="o">=</span> <span class="p">(</span><span class="n">__holeIndex</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span><span class="c1">//再判断父节点
+</span><span class="c1"></span>  <span class="p">}</span>    
+  <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__holeIndex</span><span class="p">)</span> <span class="o">=</span> <span class="n">__value</span><span class="p">;</span><span class="c1">//把新值移动到新位置
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Distance</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">void</span> 
+<span class="n">__push_heap_aux</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span>
+                <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">,</span> <span class="n">_Distance</span><span class="o">*</span><span class="p">,</span> <span class="n">_Tp</span><span class="o">*</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">__push_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">_Distance</span><span class="p">((</span><span class="n">__last</span> <span class="o">-</span> <span class="n">__first</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">_Distance</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> 
+              <span class="n">_Tp</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">__last</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)));</span>
+<span class="p">}</span>
+
+<span class="c1">//push_heap算法，这个时候值已经插入heap的最尾端，调用此函数调整heap
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">void</span> 
+<span class="n">push_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="p">,</span> <span class="n">_Mutable_RandomAccessIterator</span><span class="p">);</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="k">typename</span> <span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">_RandomAccessIterator</span><span class="o">&gt;::</span><span class="n">value_type</span><span class="p">,</span>
+                 <span class="n">_LessThanComparable</span><span class="p">);</span>
+  <span class="n">__push_heap_aux</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__last</span><span class="p">,</span>
+                  <span class="n">__DISTANCE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">),</span> <span class="n">__VALUE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">));</span>
+<span class="p">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="pop_heap">pop_heap</h2>
+<p>调整相关节点，使得上部全部填满，最底层空出区域。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Distance</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="kt">void</span> 
+<span class="n">__adjust_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Distance</span> <span class="n">__holeIndex</span><span class="p">,</span>
+              <span class="n">_Distance</span> <span class="n">__len</span><span class="p">,</span> <span class="n">_Tp</span> <span class="n">__value</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">_Distance</span> <span class="n">__topIndex</span> <span class="o">=</span> <span class="n">__holeIndex</span><span class="p">;</span>
+  <span class="n">_Distance</span> <span class="n">__secondChild</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">__holeIndex</span> <span class="o">+</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">__secondChild</span> <span class="o">&lt;</span> <span class="n">__len</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__secondChild</span><span class="p">)</span> <span class="o">&lt;</span> <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="p">(</span><span class="n">__secondChild</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+      <span class="n">__secondChild</span><span class="o">--</span><span class="p">;</span>
+    <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__holeIndex</span><span class="p">)</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__secondChild</span><span class="p">);</span>
+    <span class="n">__holeIndex</span> <span class="o">=</span> <span class="n">__secondChild</span><span class="p">;</span>
+    <span class="n">__secondChild</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">__secondChild</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">__secondChild</span> <span class="o">==</span> <span class="n">__len</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__holeIndex</span><span class="p">)</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="p">(</span><span class="n">__secondChild</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
+    <span class="n">__holeIndex</span> <span class="o">=</span> <span class="n">__secondChild</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">__push_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__holeIndex</span><span class="p">,</span> <span class="n">__topIndex</span><span class="p">,</span> <span class="n">__value</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Distance</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">void</span> 
+<span class="n">__pop_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">,</span>
+           <span class="n">_RandomAccessIterator</span> <span class="n">__result</span><span class="p">,</span> <span class="n">_Tp</span> <span class="n">__value</span><span class="p">,</span> <span class="n">_Distance</span><span class="o">*</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">//把first放到last-1
+</span><span class="c1"></span>  <span class="o">*</span><span class="n">__result</span> <span class="o">=</span> <span class="o">*</span><span class="n">__first</span><span class="p">;</span>
+  <span class="c1">//重新整理first到last-1之间重新成为heap
+</span><span class="c1"></span>  <span class="n">__adjust_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">_Distance</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">_Distance</span><span class="p">(</span><span class="n">__last</span> <span class="o">-</span> <span class="n">__first</span><span class="p">),</span> <span class="n">__value</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">void</span> 
+<span class="n">__pop_heap_aux</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">,</span>
+               <span class="n">_Tp</span><span class="o">*</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">//pop出的是最大值，也就是删除掉first，把first放到last-1，然后重新整理first到last-1之间重新成为heap
+</span><span class="c1"></span>  <span class="c1">//这样之后只要去取last-1的值，就是弹出的值了。
+</span><span class="c1"></span>  <span class="n">__pop_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__last</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">__last</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> 
+             <span class="n">_Tp</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">__last</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">__DISTANCE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="c1">//pop
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">void</span> <span class="n">pop_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span> 
+                     <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="p">,</span> <span class="n">_Mutable_RandomAccessIterator</span><span class="p">);</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="k">typename</span> <span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">_RandomAccessIterator</span><span class="o">&gt;::</span><span class="n">value_type</span><span class="p">,</span>
+                 <span class="n">_LessThanComparable</span><span class="p">);</span>
+  <span class="n">__pop_heap_aux</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__last</span><span class="p">,</span> <span class="n">__VALUE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="make_heap">make_heap</h2>
+<p>不断调用__adjust_heap调整heap的话，最终会是一个heap</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Distance</span><span class="o">&gt;</span>
+<span class="kt">void</span> 
+<span class="n">__make_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span>
+            <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">,</span> <span class="n">_Tp</span><span class="o">*</span><span class="p">,</span> <span class="n">_Distance</span><span class="o">*</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">__last</span> <span class="o">-</span> <span class="n">__first</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+  <span class="n">_Distance</span> <span class="n">__len</span> <span class="o">=</span> <span class="n">__last</span> <span class="o">-</span> <span class="n">__first</span><span class="p">;</span>
+  <span class="n">_Distance</span> <span class="n">__parent</span> <span class="o">=</span> <span class="p">(</span><span class="n">__len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+    
+  <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">__adjust_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__parent</span><span class="p">,</span> <span class="n">__len</span><span class="p">,</span> <span class="n">_Tp</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">__first</span> <span class="o">+</span> <span class="n">__parent</span><span class="p">)));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">__parent</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="n">__parent</span><span class="o">--</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">void</span> 
+<span class="n">make_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="p">,</span> <span class="n">_Mutable_RandomAccessIterator</span><span class="p">);</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="k">typename</span> <span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">_RandomAccessIterator</span><span class="o">&gt;::</span><span class="n">value_type</span><span class="p">,</span>
+                 <span class="n">_LessThanComparable</span><span class="p">);</span>
+  <span class="n">__make_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__last</span><span class="p">,</span>
+              <span class="n">__VALUE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">),</span> <span class="n">__DISTANCE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="sort_heap">sort_heap</h2>
+<p>对一个heap一直pop，最大值移到末尾，那么就是增序序列 了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_RandomAccessIterator</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">sort_heap</span><span class="p">(</span><span class="n">_RandomAccessIterator</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_RandomAccessIterator</span> <span class="n">__last</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="n">_RandomAccessIterator</span><span class="p">,</span> <span class="n">_Mutable_RandomAccessIterator</span><span class="p">);</span>
+  <span class="n">__STL_REQUIRES</span><span class="p">(</span><span class="k">typename</span> <span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">_RandomAccessIterator</span><span class="o">&gt;::</span><span class="n">value_type</span><span class="p">,</span>
+                 <span class="n">_LessThanComparable</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">__last</span> <span class="o">-</span> <span class="n">__first</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">pop_heap</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__last</span><span class="o">--</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="priority_queue">priority_queue</h1>
+<p>优先弹出权值高的项目，用上面的max_heap就能够实现。
+操作不多。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> 
+          <span class="k">class</span> <span class="nc">_Sequence</span> <span class="n">__STL_DEPENDENT_DEFAULT_TMPL</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span><span class="p">),</span>
+          <span class="k">class</span> <span class="nc">_Compare</span>
+          <span class="n">__STL_DEPENDENT_DEFAULT_TMPL</span><span class="p">(</span><span class="n">less</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">_Sequence</span><span class="o">::</span><span class="n">value_type</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">priority_queue</span> <span class="p">{</span>
+<span class="p">......</span>
+<span class="k">protected</span><span class="o">:</span>
+  <span class="n">_Sequence</span> <span class="n">c</span><span class="p">;</span>
+  <span class="n">_Compare</span> <span class="n">comp</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">priority_queue</span><span class="p">()</span> <span class="o">:</span> <span class="n">c</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="k">explicit</span> <span class="nf">priority_queue</span><span class="p">(</span><span class="k">const</span> <span class="n">_Compare</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span>  <span class="n">c</span><span class="p">(),</span> <span class="n">comp</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="n">priority_queue</span><span class="p">(</span><span class="k">const</span> <span class="n">_Compare</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="k">const</span> <span class="n">_Sequence</span><span class="o">&amp;</span> <span class="n">__s</span><span class="p">)</span> 
+    <span class="o">:</span> <span class="n">c</span><span class="p">(</span><span class="n">__s</span><span class="p">),</span> <span class="n">comp</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> 
+    <span class="p">{</span> <span class="n">make_heap</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">comp</span><span class="p">);</span> <span class="p">}</span>
+<span class="p">.....</span>
+  <span class="kt">bool</span> <span class="n">empty</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">size_type</span> <span class="nf">size</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="p">}</span>
+  <span class="n">const_reference</span> <span class="nf">top</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">c</span><span class="p">.</span><span class="n">front</span><span class="p">();</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">push</span><span class="p">(</span><span class="k">const</span> <span class="n">value_type</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">__STL_TRY</span> <span class="p">{</span>
+      <span class="n">c</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">__x</span><span class="p">);</span> 
+      <span class="n">push_heap</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">comp</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">__STL_UNWIND</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">clear</span><span class="p">());</span>
+  <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">pop</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">__STL_TRY</span> <span class="p">{</span>
+      <span class="n">pop_heap</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">comp</span><span class="p">);</span>
+      <span class="n">c</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="n">__STL_UNWIND</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">clear</span><span class="p">());</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item><item>
+    <title>[读书笔记] stl源码剖析 第三章 迭代器</title>
+    <link>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/</link>
+    <pubDate>Thu, 17 Nov 2016 20:32:26 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/</guid>
+    <description><![CDATA[<p>迭代器是一种抽象的设计概念。iterator模式：提供一种方法，使能够依序寻访某个聚合物所含的各个元素，而又无需暴露该聚合物的内部表述方式。</p>
+<h1 id="迭代器的设计思维-stl关键所在">迭代器的设计思维-stl关键所在</h1>
+<p>STL的中心思想在于：将数据容器和算法分开，彼此独立设计。容器和算法的泛型化。
+迭代器就是扮演着粘胶角色。</p>
+<h1 id="迭代器是一种smart-pointer">迭代器是一种smart pointer</h1>
+<p>list迭代器stl的实现</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//listnode的基础类
+</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_node_base</span> <span class="p">{</span>
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_next</span><span class="p">;</span>
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_prev</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">//listnode
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">_List_node</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_node_base</span> <span class="p">{</span>
+  <span class="n">_Tp</span> <span class="n">_M_data</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">//迭代器基础类
+</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_iterator_base</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">size_t</span>                     <span class="n">size_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                  <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">bidirectional_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_node</span><span class="p">;</span><span class="c1">//包含一个node
+</span><span class="c1"></span>
+  <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">_List_node_base</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_M_node</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="n">_List_iterator_base</span><span class="p">()</span> <span class="p">{}</span>
+
+  <span class="kt">void</span> <span class="nf">_M_incr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">_M_decr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_prev</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">==</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">!=</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>  
+<span class="c1">//迭代器
+</span><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ref</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ptr</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">_List_iterator</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_iterator_base</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="n">_Tp</span><span class="o">*&gt;</span>             <span class="n">iterator</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">*&gt;</span> <span class="n">const_iterator</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Ref</span><span class="p">,</span><span class="n">_Ptr</span><span class="o">&gt;</span>             <span class="n">_Self</span><span class="p">;</span>
+
+  <span class="k">typedef</span> <span class="n">_Tp</span> <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Ptr</span> <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Ref</span> <span class="n">reference</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span> <span class="n">_Node</span><span class="p">;</span>
+
+  <span class="n">_List_iterator</span><span class="p">(</span><span class="n">_Node</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="n">_List_iterator</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="n">_List_iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">iterator</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="n">reference</span> <span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="p">((</span><span class="n">_Node</span><span class="o">*</span><span class="p">)</span> <span class="n">_M_node</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_M_data</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="cp">#ifndef __SGI_STL_NO_ARROW_OPERATOR
+</span><span class="cp"></span>  <span class="n">pointer</span> <span class="k">operator</span><span class="o">-&gt;</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="o">&amp;</span><span class="p">(</span><span class="k">operator</span><span class="o">*</span><span class="p">());</span> <span class="p">}</span>
+<span class="cp">#endif </span><span class="cm">/* __SGI_STL_NO_ARROW_OPERATOR */</span><span class="cp">
+</span><span class="cp"></span>  <span class="c1">//重载了几个操作实现了迭代器，不是很复杂
+</span><span class="c1"></span>  <span class="c1">//++i
+</span><span class="c1"></span>  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">++</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">//i++
+</span><span class="c1"></span>  <span class="n">_Self</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">--</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">_Self</span> <span class="k">operator</span><span class="o">--</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="traits编程技法">Traits编程技法</h1>
+<p>之前就见到用过，通过类型获取，其余的类型。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Category</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Distance</span> <span class="o">=</span> <span class="n">ptrdiff_t</span><span class="p">,</span>
+          <span class="k">class</span> <span class="nc">_Pointer</span> <span class="o">=</span> <span class="n">_Tp</span><span class="o">*</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Reference</span> <span class="o">=</span> <span class="n">_Tp</span><span class="o">&amp;&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">_Category</span>  <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span>        <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Distance</span>  <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Pointer</span>   <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Reference</span> <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Iterator</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator_traits</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">iterator_category</span> <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">value_type</span>        <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">difference_type</span>   <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">pointer</span>           <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">reference</span>         <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">//对原生指针特化
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">*&gt;</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">random_access_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span>                         <span class="n">value_type</span><span class="p">;</span>
+  <span class="c1">//ptrdiff_t是C/C++标准库中定义的一个与机器相关的数据类型。ptrdiff_t类型变量通常用来保存两个指针减法操作的结果。ptrdiff_t定义在stddef.h（cstddef）这个文件内。ptrdiff_t通常被定义为long int类型。
+</span><span class="c1"></span>  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                   <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span><span class="o">*</span>                        <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span><span class="o">&amp;</span>                        <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator_traits</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">*&gt;</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">random_access_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span>                         <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                   <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">*</span>                  <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span>                  <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>迭代器的分类：
+input iter：只读iter
+output iter:只写iter
+forward iter:允许写入型算法在这种迭代器所形成的区间操作，前向迭代器
+bidirectional iterator：双向移动iter。
+random access iter：前三种支持++,第四种支持++ &ndash;。这种支持所有指针的算术能力。</p>
+
+typedef typename _Iterator::iterator_category iterator_category;的作用就是能够在编译器发现迭代器的类型，选用最合适的函数版本。
+```cpp
+struct input_iterator_tag {};
+struct output_iterator_tag {};
+struct forward_iterator_tag : public input_iterator_tag {};
+struct bidirectional_iterator_tag : public forward_iterator_tag {};
+struct random_access_iterator_tag : public bidirectional_iterator_tag {};
+```
+例子
+```cpp
+template <class _InputIter, class _Distance>
+inline void __advance(_InputIter& __i, _Distance __n, input_iterator_tag) {
+  while (__n--) ++__i;
+}
+<p>template &lt;class _BidirectionalIterator, class _Distance&gt;
+inline void __advance(_BidirectionalIterator&amp; __i, _Distance __n,
+bidirectional_iterator_tag) {
+__STL_REQUIRES(_BidirectionalIterator, _BidirectionalIterator);
+if (__n &gt;= 0)
+while (__n&ndash;) ++__i;
+else
+while (__n++) &ndash;__i;
+}</p>
+<p>template &lt;class _RandomAccessIterator, class _Distance&gt;
+inline void __advance(_RandomAccessIterator&amp; __i, _Distance __n,
+random_access_iterator_tag) {
+__STL_REQUIRES(_RandomAccessIterator, _RandomAccessIterator);
+__i += __n;
+}</p>
+<p>template &lt;class _InputIterator, class _Distance&gt;
+inline void advance(_InputIterator&amp; __i, _Distance __n) {
+__STL_REQUIRES(_InputIterator, _InputIterator);
+//通过下面的函数，选用合适的版本
+//不需要传递参数，能够在编译器选定版本
+__advance(__i, __n, iterator_category(__i));
+}</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback"># __type_traits
+提供一种机制，允许针对不同的型别熟悉，完成函数派送。
+在内存配置器中就用到了，比如有没有拷贝构造函数等
+
+```cpp
+struct __true_type {
+};
+
+struct __false_type {
+};
+//选择使用__false_type为struct的目的是为了类型推倒，而不是使用bool值作为参数的话只是运行时的选择。
+template &lt;class _Tp&gt;
+struct __type_traits { 
+   typedef __true_type     this_dummy_member_must_be_first;
+                   /* Do not remove this member. It informs a compiler which
+                      automatically specializes __type_traits that this
+                      __type_traits template is special. It just makes sure that
+                      things work if an implementation is using a template
+                      called __type_traits for something unrelated. */
+
+   /* The following restrictions should be observed for the sake of
+      compilers which automatically produce type specific specializations 
+      of this class:
+          - You may reorder the members below if you wish
+          - You may remove any of the members below if you wish
+          - You must not rename members without making the corresponding
+            name change in the compiler
+          - Members you add will be treated like regular members unless
+            you add the appropriate support in the compiler. */
+ 
+
+   typedef __false_type    has_trivial_default_constructor;
+   typedef __false_type    has_trivial_copy_constructor;
+   typedef __false_type    has_trivial_assignment_operator;
+   typedef __false_type    has_trivial_destructor;
+   typedef __false_type    is_POD_type;
+};
+
+</code></pre></td></tr></table>
+</div>
+</div><p>然后在这个文件里定义了大量的特化，主要是特化C++标准类型。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">__STL_TEMPLATE_NULL</span> <span class="k">struct</span> <span class="nc">__type_traits</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="p">{</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_default_constructor</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_copy_constructor</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_assignment_operator</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_destructor</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">is_POD_type</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">//等。。。
+</span></code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item><item>
+    <title>[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器</title>
+    <link>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/</link>
+    <pubDate>Wed, 16 Nov 2016 08:32:26 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/</guid>
+    <description><![CDATA[<h1 id="概论">概论</h1>
+<p>第一章基本都是C++基础的知识，读了《C++ Primer》的话都懂。关于各种C++的特性、STL特性都有。</p>
+<h2 id="stl六大组件-功能与运用">STL六大组件 功能与运用</h2>
+<p>STL提供六大组件，彼此可以组合套用</p>
+<ol>
+<li>容器：各种数据结构。Vector,list,deque,set,map</li>
+<li>算法：各种常用算法如sort,search,copy,erase</li>
+<li>迭代器：扮演容器与算法之间的粘合剂，所谓的泛型指针。五种类型</li>
+<li>仿函数：行为类似函数，可以作为算法的某种策略。仿函数是重载了()的class或者class template，一般函数指针可视为狭义的仿函数</li>
+<li>配接器：一种用来修饰容器或者仿函数或迭代器接口的东西。</li>
+<li>配置器：负责控件的配置与管理。</li>
+</ol>
+
+# 空间配置器
+SGI STL时间了一个专属的，拥有次层配置能力的、效率优越的特殊配置器。
+SGI STL的缺省分配器都是其自己的分配器。
+## SGI特殊的空间配置器 std::alloc
+使用::construct() ::destroy()构造和析构
+使用alloc::allocate() alloc::deallocate()分配 释放
+```cpp
+//直接利用这个类能够用指定类型指针，转换为其他引用等
+template <class _Tp>
+struct iterator_traits<const _Tp*> {
+  typedef random_access_iterator_tag iterator_category;
+  typedef _Tp                         value_type;
+  typedef ptrdiff_t                   difference_type;
+  typedef const _Tp*                  pointer;
+  typedef const _Tp&                  reference;
+};
+```
+```cpp
+//如果有non-trivial 析构函数
+template <class _ForwardIterator>
+void
+__destroy_aux(_ForwardIterator __first, _ForwardIterator __last, __false_type)
+{
+  for ( ; __first != __last; ++__first)
+    destroy(&*__first);
+}
+//如果没有non-trivial 析构函数
+template <class _ForwardIterator> 
+inline void __destroy_aux(_ForwardIterator, _ForwardIterator, __true_type) {}
+<p>template &lt;class _ForwardIterator, class _Tp&gt;
+inline void
+__destroy(_ForwardIterator __first, _ForwardIterator __last, _Tp*)
+{
+typedef typename __type_traits&lt;_Tp&gt;::has_trivial_destructor
+_Trivial_destructor;
+__destroy_aux(__first, __last, _Trivial_destructor());//_Trivial_destructor()将会是_true_type 或者_false_type
+//利用模板和特化
+}</p>
+<p>template <class _ForwardIterator>
+inline void _Destroy(_ForwardIterator __first, _ForwardIterator __last) {
+__destroy(__first, __last, __VALUE_TYPE(__first));//__VALUE_TYPE(__first)获取到了类型的指针，然后调用上面函数
+//利用模板和特化
+}</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">## 空间的配置与释放 std::alloc
+sgi设计了双层级配置器，第一级配置器直接使用malloc()和free()，第二级配置器则视情况采用不同的策略。
+当分配大于128bytes时候调用第一级，小于128时候，为了降低额外负担，使用负责的memory pool整理方式。
+### 第一级配置器 __malloc_alloc_template剖析
+以malloc free realloc实现。
+然后自己实现了一个new handler机制。
+```cpp
+template &lt;int __inst&gt;
+void*
+__malloc_alloc_template&lt;__inst&gt;::_S_oom_malloc(size_t __n)
+{
+    void (* __my_malloc_handler)();
+    void* __result;
+
+    for (;;) {
+        __my_malloc_handler = __malloc_alloc_oom_handler;
+        if (0 == __my_malloc_handler) { __THROW_BAD_ALLOC; }
+        (*__my_malloc_handler)();
+        __result = malloc(__n);
+        if (__result) return(__result);
+    }
+}
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="第二级配置器">第二级配置器</h3>
+<p>SIG第二级配置器的做法，如果区块够大，超过128bytes时候，就移交第一级配置器处理。当区块小鱼128bytes时候，则以内存池管理。每次配置一大块内存，并维护对应之自由链表，下次若再有相同大小的内存需求从free-lists中拨出。如果客端释放小额区块，就由配置器回收到fres-lists中。
+分配区块时候，自动上调到8的倍数，并维护16个fres-lists,分别管理大小为8/16/24/32/40/48/56/64/72/80/88/96/104/112/120/128的小额区块。</p>
+<blockquote>
+<p>其实这里和公司用的NG_malloc是一样的策略。ng_malloc之前对于大小的区分是256k的样子，更大。后来又改写了，支持更大的内存块了。</p>
+</blockquote>
+<p>节点如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="nl">__PRIVATE</span><span class="p">:</span>
+  <span class="k">union</span> <span class="nc">_Obj</span> <span class="p">{</span>
+        <span class="k">union</span> <span class="nc">_Obj</span><span class="o">*</span> <span class="n">_M_free_list_link</span><span class="p">;</span>
+        <span class="kt">char</span> <span class="n">_M_client_data</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>    <span class="cm">/* The client sees this.        */</span>
+  <span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>使用union的话，可以不用每次都去转换。char _M_client_data的存在是，方便去取首地址。实际上下面用到的就是_M_free_list_link，用来作为链表。这样的话，就可以用一个4字节的空间(32位机器指针大小)，实现两个功能。而不是使用struct，因为那样就会浪费空间。</p>
+<h4 id="空间配置函数allocate">空间配置函数allocate()</h4>
+<p>功能：判断大小，大于128用第一级分配，小于128就查找free list。如果free list中有可用的区块，就直接拿来用，如果没有就将区块大小上调至8的倍数边界，然后调用refill()，准备为free list重新填充空间。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp">  <span class="k">static</span> <span class="kt">void</span><span class="o">*</span> <span class="nf">allocate</span><span class="p">(</span><span class="n">size_t</span> <span class="n">__n</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">void</span><span class="o">*</span> <span class="n">__ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="c1">//超过设定的最大值就调用第一级配置器，STL设置为128
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">__n</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_MAX_BYTES</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">__ret</span> <span class="o">=</span> <span class="n">malloc_alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">//寻找合适的free lists中适当的一个
+</span><span class="c1"></span>      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span>
+          <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+      <span class="c1">// Acquire the lock here with a constructor call.
+</span><span class="c1"></span>      <span class="c1">// This ensures that it is released in exit or during stack
+</span><span class="c1"></span>      <span class="c1">// unwinding.
+</span><span class="c1"></span><span class="cp">#     ifndef _NOTHREADS
+</span><span class="cp"></span>      <span class="cm">/*REFERENCED*/</span>
+      <span class="c1">//多线程锁
+</span><span class="c1"></span>      <span class="n">_Lock</span> <span class="n">__lock_instance</span><span class="p">;</span>
+<span class="cp">#     endif
+</span><span class="cp"></span>      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__RESTRICT</span> <span class="n">__result</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">__result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1">//没找到的话，就重新填充free list
+</span><span class="c1"></span>        <span class="n">__ret</span> <span class="o">=</span> <span class="n">_S_refill</span><span class="p">(</span><span class="n">_S_round_up</span><span class="p">(</span><span class="n">__n</span><span class="p">));</span>
+      <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">//指向后一个成员
+</span><span class="c1"></span>        <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__result</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span><span class="p">;</span>
+        <span class="n">__ret</span> <span class="o">=</span> <span class="n">__result</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">__ret</span><span class="p">;</span>
+  <span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="空间释放函数-deallocate">空间释放函数 deallocate()</h4>
+<p>先判断大小，大于128调用第一级，小于128找出对应的free list，将区块回收。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cm">/* __p may not be 0 */</span>
+  <span class="k">static</span> <span class="kt">void</span> <span class="nf">deallocate</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">__p</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">__n</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">__n</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_MAX_BYTES</span><span class="p">)</span>
+      <span class="n">malloc_alloc</span><span class="o">::</span><span class="n">deallocate</span><span class="p">(</span><span class="n">__p</span><span class="p">,</span> <span class="n">__n</span><span class="p">);</span>
+    <span class="k">else</span> <span class="p">{</span>
+      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span>  <span class="n">__my_free_list</span>
+          <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+      <span class="n">_Obj</span><span class="o">*</span> <span class="n">__q</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">__p</span><span class="p">;</span>
+
+      <span class="c1">// acquire lock
+</span><span class="c1"></span><span class="cp">#       ifndef _NOTHREADS
+</span><span class="cp"></span>      <span class="cm">/*REFERENCED*/</span>
+      <span class="n">_Lock</span> <span class="n">__lock_instance</span><span class="p">;</span>
+<span class="cp">#       endif </span><span class="cm">/* _NOTHREADS */</span><span class="cp">
+</span><span class="cp"></span>      <span class="n">__q</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+      <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__q</span><span class="p">;</span>
+      <span class="c1">// lock is released here
+</span><span class="c1"></span>    <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="重新填充free-lists">重新填充free lists</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span> <span class="n">__threads</span><span class="p">,</span> <span class="kt">int</span> <span class="n">__inst</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="o">*</span>
+<span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span> <span class="n">__inst</span><span class="o">&gt;::</span><span class="n">_S_refill</span><span class="p">(</span><span class="n">size_t</span> <span class="n">__n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">__nobjs</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+    <span class="c1">//尝试分配空间 __nobjs是引用传递，作为返回值
+</span><span class="c1"></span>    <span class="kt">char</span><span class="o">*</span> <span class="n">__chunk</span> <span class="o">=</span> <span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__n</span><span class="p">,</span> <span class="n">__nobjs</span><span class="p">);</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span><span class="p">;</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__result</span><span class="p">;</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__current_obj</span><span class="p">;</span>
+    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__next_obj</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">__i</span><span class="p">;</span>
+    
+    <span class="c1">//对只分配出一个的时候的优化
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="mi">1</span> <span class="o">==</span> <span class="n">__nobjs</span><span class="p">)</span> <span class="k">return</span><span class="p">(</span><span class="n">__chunk</span><span class="p">);</span>
+    <span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__n</span><span class="p">);</span>
+
+    <span class="c1">//形成链表
+</span><span class="c1"></span>    <span class="cm">/* Build free list in chunk */</span>
+      <span class="n">__result</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">__chunk</span><span class="p">;</span>
+      <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__next_obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)(</span><span class="n">__chunk</span> <span class="o">+</span> <span class="n">__n</span><span class="p">);</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">__i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="p">;</span> <span class="n">__i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">__current_obj</span> <span class="o">=</span> <span class="n">__next_obj</span><span class="p">;</span>
+        <span class="n">__next_obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">__next_obj</span> <span class="o">+</span> <span class="n">__n</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">__nobjs</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">__i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">__current_obj</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">__current_obj</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="n">__next_obj</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="内存池">内存池</h4>
+<p>从内存池中取空间给free list 使用，是chunk_alloc的工作</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span> <span class="n">__threads</span><span class="p">,</span> <span class="kt">int</span> <span class="n">__inst</span><span class="o">&gt;</span>
+<span class="kt">char</span><span class="o">*</span>
+<span class="n">__default_alloc_template</span><span class="o">&lt;</span><span class="n">__threads</span><span class="p">,</span> <span class="n">__inst</span><span class="o">&gt;::</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">size_t</span> <span class="n">__size</span><span class="p">,</span> 
+                                                            <span class="kt">int</span><span class="o">&amp;</span> <span class="n">__nobjs</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">char</span><span class="o">*</span> <span class="n">__result</span><span class="p">;</span><span class="c1">//返回值
+</span><span class="c1"></span>    <span class="n">size_t</span> <span class="n">__total_bytes</span> <span class="o">=</span> <span class="n">__size</span> <span class="o">*</span> <span class="n">__nobjs</span><span class="p">;</span><span class="c1">//需要分配的空间大小
+</span><span class="c1"></span>    <span class="n">size_t</span> <span class="n">__bytes_left</span> <span class="o">=</span> <span class="n">_S_end_free</span> <span class="o">-</span> <span class="n">_S_start_free</span><span class="p">;</span><span class="c1">//内存池剩余空间
+</span><span class="c1"></span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">__bytes_left</span> <span class="o">&gt;=</span> <span class="n">__total_bytes</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">__result</span> <span class="o">=</span> <span class="n">_S_start_free</span><span class="p">;</span><span class="c1">//返回
+</span><span class="c1"></span>        <span class="n">_S_start_free</span> <span class="o">+=</span> <span class="n">__total_bytes</span><span class="p">;</span><span class="c1">//内存池可用空间起始处后移
+</span><span class="c1"></span>        <span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">__bytes_left</span> <span class="o">&gt;=</span> <span class="n">__size</span><span class="p">)</span> <span class="p">{</span><span class="c1">//能够分配一部分空间
+</span><span class="c1"></span>        <span class="n">__nobjs</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">__bytes_left</span><span class="o">/</span><span class="n">__size</span><span class="p">);</span><span class="c1">//判断能够分配的块数
+</span><span class="c1"></span>        <span class="n">__total_bytes</span> <span class="o">=</span> <span class="n">__size</span> <span class="o">*</span> <span class="n">__nobjs</span><span class="p">;</span>
+        <span class="n">__result</span> <span class="o">=</span> <span class="n">_S_start_free</span><span class="p">;</span>
+        <span class="n">_S_start_free</span> <span class="o">+=</span> <span class="n">__total_bytes</span><span class="p">;</span><span class="c1">//与上同
+</span><span class="c1"></span>        <span class="k">return</span><span class="p">(</span><span class="n">__result</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span><span class="c1">//不能够分配一块的大小
+</span><span class="c1"></span>        <span class="n">size_t</span> <span class="n">__bytes_to_get</span> <span class="o">=</span> 
+	  <span class="mi">2</span> <span class="o">*</span> <span class="n">__total_bytes</span> <span class="o">+</span> <span class="n">_S_round_up</span><span class="p">(</span><span class="n">_S_heap_size</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">);</span>
+        <span class="c1">// Try to make use of the left-over piece.
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">__bytes_left</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span><span class="c1">//把剩余空间，分配到合适的free list
+</span><span class="c1"></span>            <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span> <span class="o">=</span>
+                        <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__bytes_left</span><span class="p">);</span>
+
+            <span class="p">((</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">_S_start_free</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+            <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Obj</span><span class="o">*</span><span class="p">)</span><span class="n">_S_start_free</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+        <span class="c1">//从堆上重新分配出部分空间
+</span><span class="c1"></span>        <span class="n">_S_start_free</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">__bytes_to_get</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">==</span> <span class="n">_S_start_free</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">size_t</span> <span class="n">__i</span><span class="p">;</span>
+            <span class="n">_Obj</span><span class="o">*</span> <span class="n">__STL_VOLATILE</span><span class="o">*</span> <span class="n">__my_free_list</span><span class="p">;</span>
+	    <span class="n">_Obj</span><span class="o">*</span> <span class="n">__p</span><span class="p">;</span>
+            <span class="c1">// Try to make do with what we have.  That can&#39;t
+</span><span class="c1"></span>            <span class="c1">// hurt.  We do not try smaller requests, since that tends
+</span><span class="c1"></span>            <span class="c1">// to result in disaster on multi-process machines.
+</span><span class="c1"></span>            <span class="k">for</span> <span class="p">(</span><span class="n">__i</span> <span class="o">=</span> <span class="n">__size</span><span class="p">;</span>
+                 <span class="n">__i</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_MAX_BYTES</span><span class="p">;</span>
+                 <span class="n">__i</span> <span class="o">+=</span> <span class="p">(</span><span class="n">size_t</span><span class="p">)</span> <span class="n">_ALIGN</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">_S_free_list</span> <span class="o">+</span> <span class="n">_S_freelist_index</span><span class="p">(</span><span class="n">__i</span><span class="p">);</span>
+                <span class="n">__p</span> <span class="o">=</span> <span class="o">*</span><span class="n">__my_free_list</span><span class="p">;</span>
+                <span class="c1">//malloc失败的话，在现有的free list中找未用的、足够大的fee list分配
+</span><span class="c1"></span>                <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">!=</span> <span class="n">__p</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="o">*</span><span class="n">__my_free_list</span> <span class="o">=</span> <span class="n">__p</span> <span class="o">-&gt;</span> <span class="n">_M_free_list_link</span><span class="p">;</span>
+                    <span class="n">_S_start_free</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">__p</span><span class="p">;</span>
+                    <span class="n">_S_end_free</span> <span class="o">=</span> <span class="n">_S_start_free</span> <span class="o">+</span> <span class="n">__i</span><span class="p">;</span>
+                    <span class="k">return</span><span class="p">(</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__size</span><span class="p">,</span> <span class="n">__nobjs</span><span class="p">));</span>
+                    <span class="c1">// Any leftover piece will eventually make it to the
+</span><span class="c1"></span>                    <span class="c1">// right free list.
+</span><span class="c1"></span>                <span class="p">}</span>
+            <span class="p">}</span>
+	    <span class="n">_S_end_free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>	<span class="c1">// In case of exception.
+</span><span class="c1"></span>            <span class="n">_S_start_free</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc_alloc</span><span class="o">::</span><span class="n">allocate</span><span class="p">(</span><span class="n">__bytes_to_get</span><span class="p">);</span>
+            <span class="c1">// This should either throw an
+</span><span class="c1"></span>            <span class="c1">// exception or remedy the situation.  Thus we assume it
+</span><span class="c1"></span>            <span class="c1">// succeeded.
+</span><span class="c1"></span>        <span class="p">}</span>
+        <span class="c1">//拿到新空间
+</span><span class="c1"></span>        <span class="n">_S_heap_size</span> <span class="o">+=</span> <span class="n">__bytes_to_get</span><span class="p">;</span>
+        <span class="n">_S_end_free</span> <span class="o">=</span> <span class="n">_S_start_free</span> <span class="o">+</span> <span class="n">__bytes_to_get</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">_S_chunk_alloc</span><span class="p">(</span><span class="n">__size</span><span class="p">,</span> <span class="n">__nobjs</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="内存基本处理工具">内存基本处理工具</h3>
+<p>uninitialized_copy、uninitialized_fill、uninitialized_fill_n用来处理一些特殊的复制构造的情况。</p>
+<h4 id="uninitialized_fill_n实现">uninitialized_fill_n实现</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp">
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="n">_ForwardIter</span> 
+<span class="n">uninitialized_fill_n</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">__uninitialized_fill_n</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__n</span><span class="p">,</span> <span class="n">__x</span><span class="p">,</span> <span class="n">__VALUE_TYPE</span><span class="p">(</span><span class="n">__first</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp1</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="n">_ForwardIter</span> 
+<span class="n">__uninitialized_fill_n</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="n">_Tp1</span><span class="o">*</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">__type_traits</span><span class="o">&lt;</span><span class="n">_Tp1</span><span class="o">&gt;::</span><span class="n">is_POD_type</span> <span class="n">_Is_POD</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nf">__uninitialized_fill_n_aux</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__n</span><span class="p">,</span> <span class="n">__x</span><span class="p">,</span> <span class="n">_Is_POD</span><span class="p">());</span><span class="c1">//判断有没有复制构造函数，调用不同的函数处理
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//没有复制构造函数的版本
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="n">_ForwardIter</span>
+<span class="n">__uninitialized_fill_n_aux</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="n">__true_type</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">fill_n</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__n</span><span class="p">,</span> <span class="n">__x</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="c1">//有复制构造函数的版本
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_ForwardIter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Size</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="n">_ForwardIter</span>
+<span class="n">__uninitialized_fill_n_aux</span><span class="p">(</span><span class="n">_ForwardIter</span> <span class="n">__first</span><span class="p">,</span> <span class="n">_Size</span> <span class="n">__n</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">,</span> <span class="n">__false_type</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">_ForwardIter</span> <span class="n">__cur</span> <span class="o">=</span> <span class="n">__first</span><span class="p">;</span>
+  <span class="n">__STL_TRY</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="p">;</span> <span class="n">__n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="o">--</span><span class="n">__n</span><span class="p">,</span> <span class="o">++</span><span class="n">__cur</span><span class="p">)</span>
+      <span class="n">_Construct</span><span class="p">(</span><span class="o">&amp;*</span><span class="n">__cur</span><span class="p">,</span> <span class="n">__x</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">__cur</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">__STL_UNWIND</span><span class="p">(</span><span class="n">_Destroy</span><span class="p">(</span><span class="n">__first</span><span class="p">,</span> <span class="n">__cur</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>uninitialized_copy、uninitialized_fill的实现类似</p>]]></description>
+</item></channel>
+</rss>

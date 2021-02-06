@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>[读书笔记] stl源码剖析 第三章 迭代器 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="[读书笔记] stl源码剖析 第三章 迭代器" />
+<meta property="og:description" content="迭代器是一种抽象的设计概念。iterator模式：提供一种方法，使能够依序寻访某个聚合物所含的各个元素，而又无需暴露该聚合物的内部表述方式。
+迭代器的设计思维-stl关键所在
+STL的中心思想在于：将数据容器和算法分开，彼此独立设计。容器和算法的泛型化。
+迭代器就是扮演着粘胶角色。
+迭代器是一种smart pointer
+list迭代器stl的实现
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+
+
+//listnode的基础类
+struct _List_node_base {
+  _List_node_base* _M_next;
+  _List_node_base* _M_prev;
+};
+//listnode
+template &lt;class _Tp&gt;
+struct _List_node : public _List_node_base {
+  _Tp _M_data;
+};
+
+//迭代器基础类
+struct _List_iterator_base {
+  typedef size_t                     size_type;
+  typedef ptrdiff_t                  difference_type;
+  typedef bidirectional_iterator_tag iterator_category;
+
+  _List_node_base* _M_node;//包含一个node
+
+  _List_iterator_base(_List_node_base* __x) : _M_node(__x) {}
+  _List_iterator_base() {}
+
+  void _M_incr() { _M_node = _M_node-&gt;_M_next; }
+  void _M_decr() { _M_node = _M_node-&gt;_M_prev; }
+
+  bool operator==(const _List_iterator_base&amp; __x) const {
+    return _M_node == __x._M_node;
+  }
+  bool operator!=(const _List_iterator_base&amp; __x) const {
+    return _M_node != __x._M_node;
+  }
+};  
+//迭代器
+template&lt;class _Tp, class _Ref, class _Ptr&gt;
+struct _List_iterator : public _List_iterator_base {
+  typedef _List_iterator&lt;_Tp,_Tp&amp;,_Tp*&gt;             iterator;
+  typedef _List_iterator&lt;_Tp,const _Tp&amp;,const _Tp*&gt; const_iterator;
+  typedef _List_iterator&lt;_Tp,_Ref,_Ptr&gt;             _Self;
+
+  typedef _Tp value_type;
+  typedef _Ptr pointer;
+  typedef _Ref reference;
+  typedef _List_node&lt;_Tp&gt; _Node;
+
+  _List_iterator(_Node* __x) : _List_iterator_base(__x) {}
+  _List_iterator() {}
+  _List_iterator(const iterator&amp; __x) : _List_iterator_base(__x._M_node) {}
+
+  reference operator*() const { return ((_Node*) _M_node)-&gt;_M_data; }
+
+#ifndef __SGI_STL_NO_ARROW_OPERATOR
+  pointer operator-&gt;() const { return &amp;(operator*()); }
+#endif /* __SGI_STL_NO_ARROW_OPERATOR */
+  //重载了几个操作实现了迭代器，不是很复杂
+  //&#43;&#43;i
+  _Self&amp; operator&#43;&#43;() { 
+    this-&gt;_M_incr();
+    return *this;
+  }
+  //i&#43;&#43;
+  _Self operator&#43;&#43;(int) { 
+    _Self __tmp = *this;
+    this-&gt;_M_incr();
+    return __tmp;
+  }
+  _Self&amp; operator--() { 
+    this-&gt;_M_decr();
+    return *this;
+  }
+  _Self operator--(int) { 
+    _Self __tmp = *this;
+    this-&gt;_M_decr();
+    return __tmp;
+  }
+};
+
+
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2016-11-17T20:32:26+00:00" />
+<meta property="article:modified_time" content="2016-11-17T20:32:26+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="[读书笔记] stl源码剖析 第三章 迭代器"/>
+<meta name="twitter:description" content="迭代器是一种抽象的设计概念。iterator模式：提供一种方法，使能够依序寻访某个聚合物所含的各个元素，而又无需暴露该聚合物的内部表述方式。
+迭代器的设计思维-stl关键所在
+STL的中心思想在于：将数据容器和算法分开，彼此独立设计。容器和算法的泛型化。
+迭代器就是扮演着粘胶角色。
+迭代器是一种smart pointer
+list迭代器stl的实现
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+
+
+//listnode的基础类
+struct _List_node_base {
+  _List_node_base* _M_next;
+  _List_node_base* _M_prev;
+};
+//listnode
+template &lt;class _Tp&gt;
+struct _List_node : public _List_node_base {
+  _Tp _M_data;
+};
+
+//迭代器基础类
+struct _List_iterator_base {
+  typedef size_t                     size_type;
+  typedef ptrdiff_t                  difference_type;
+  typedef bidirectional_iterator_tag iterator_category;
+
+  _List_node_base* _M_node;//包含一个node
+
+  _List_iterator_base(_List_node_base* __x) : _M_node(__x) {}
+  _List_iterator_base() {}
+
+  void _M_incr() { _M_node = _M_node-&gt;_M_next; }
+  void _M_decr() { _M_node = _M_node-&gt;_M_prev; }
+
+  bool operator==(const _List_iterator_base&amp; __x) const {
+    return _M_node == __x._M_node;
+  }
+  bool operator!=(const _List_iterator_base&amp; __x) const {
+    return _M_node != __x._M_node;
+  }
+};  
+//迭代器
+template&lt;class _Tp, class _Ref, class _Ptr&gt;
+struct _List_iterator : public _List_iterator_base {
+  typedef _List_iterator&lt;_Tp,_Tp&amp;,_Tp*&gt;             iterator;
+  typedef _List_iterator&lt;_Tp,const _Tp&amp;,const _Tp*&gt; const_iterator;
+  typedef _List_iterator&lt;_Tp,_Ref,_Ptr&gt;             _Self;
+
+  typedef _Tp value_type;
+  typedef _Ptr pointer;
+  typedef _Ref reference;
+  typedef _List_node&lt;_Tp&gt; _Node;
+
+  _List_iterator(_Node* __x) : _List_iterator_base(__x) {}
+  _List_iterator() {}
+  _List_iterator(const iterator&amp; __x) : _List_iterator_base(__x._M_node) {}
+
+  reference operator*() const { return ((_Node*) _M_node)-&gt;_M_data; }
+
+#ifndef __SGI_STL_NO_ARROW_OPERATOR
+  pointer operator-&gt;() const { return &amp;(operator*()); }
+#endif /* __SGI_STL_NO_ARROW_OPERATOR */
+  //重载了几个操作实现了迭代器，不是很复杂
+  //&#43;&#43;i
+  _Self&amp; operator&#43;&#43;() { 
+    this-&gt;_M_incr();
+    return *this;
+  }
+  //i&#43;&#43;
+  _Self operator&#43;&#43;(int) { 
+    _Self __tmp = *this;
+    this-&gt;_M_incr();
+    return __tmp;
+  }
+  _Self&amp; operator--() { 
+    this-&gt;_M_decr();
+    return *this;
+  }
+  _Self operator--(int) { 
+    _Self __tmp = *this;
+    this-&gt;_M_decr();
+    return __tmp;
+  }
+};
+
+
+"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" /><link rel="prev" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" /><link rel="next" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E5%BA%8F%E5%88%97%E5%BC%8F%E5%AE%B9%E5%99%A8/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "[读书笔记] stl源码剖析 第三章 迭代器",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "stl源码剖析","wordcount":  774 ,
+        "url": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8\/","datePublished": "2016-11-17T20:32:26+00:00","dateModified": "2016-11-17T20:32:26+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">[读书笔记] stl源码剖析 第三章 迭代器</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2016-11-17">2016-11-17</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;774 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;4 minutes&nbsp;<span id="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" class="leancloud_visitors" data-flag-title="[读书笔记] stl源码剖析 第三章 迭代器">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents"></nav></div>
+            </div><div class="content" id="content"><p>迭代器是一种抽象的设计概念。iterator模式：提供一种方法，使能够依序寻访某个聚合物所含的各个元素，而又无需暴露该聚合物的内部表述方式。</p>
+<h1 id="迭代器的设计思维-stl关键所在">迭代器的设计思维-stl关键所在</h1>
+<p>STL的中心思想在于：将数据容器和算法分开，彼此独立设计。容器和算法的泛型化。
+迭代器就是扮演着粘胶角色。</p>
+<h1 id="迭代器是一种smart-pointer">迭代器是一种smart pointer</h1>
+<p>list迭代器stl的实现</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//listnode的基础类
+</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_node_base</span> <span class="p">{</span>
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_next</span><span class="p">;</span>
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_prev</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">//listnode
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">_List_node</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_node_base</span> <span class="p">{</span>
+  <span class="n">_Tp</span> <span class="n">_M_data</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">//迭代器基础类
+</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_iterator_base</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">size_t</span>                     <span class="n">size_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                  <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">bidirectional_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+
+  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_node</span><span class="p">;</span><span class="c1">//包含一个node
+</span><span class="c1"></span>
+  <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">_List_node_base</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_M_node</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="n">_List_iterator_base</span><span class="p">()</span> <span class="p">{}</span>
+
+  <span class="kt">void</span> <span class="nf">_M_incr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="p">;</span> <span class="p">}</span>
+  <span class="kt">void</span> <span class="nf">_M_decr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_prev</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">==</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">!=</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>  
+<span class="c1">//迭代器
+</span><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ref</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ptr</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">_List_iterator</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_iterator_base</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="n">_Tp</span><span class="o">*&gt;</span>             <span class="n">iterator</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">*&gt;</span> <span class="n">const_iterator</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Ref</span><span class="p">,</span><span class="n">_Ptr</span><span class="o">&gt;</span>             <span class="n">_Self</span><span class="p">;</span>
+
+  <span class="k">typedef</span> <span class="n">_Tp</span> <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Ptr</span> <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Ref</span> <span class="n">reference</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span> <span class="n">_Node</span><span class="p">;</span>
+
+  <span class="n">_List_iterator</span><span class="p">(</span><span class="n">_Node</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="n">_List_iterator</span><span class="p">()</span> <span class="p">{}</span>
+  <span class="n">_List_iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">iterator</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="n">reference</span> <span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="p">((</span><span class="n">_Node</span><span class="o">*</span><span class="p">)</span> <span class="n">_M_node</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_M_data</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="cp">#ifndef __SGI_STL_NO_ARROW_OPERATOR
+</span><span class="cp"></span>  <span class="n">pointer</span> <span class="k">operator</span><span class="o">-&gt;</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="o">&amp;</span><span class="p">(</span><span class="k">operator</span><span class="o">*</span><span class="p">());</span> <span class="p">}</span>
+<span class="cp">#endif </span><span class="cm">/* __SGI_STL_NO_ARROW_OPERATOR */</span><span class="cp">
+</span><span class="cp"></span>  <span class="c1">//重载了几个操作实现了迭代器，不是很复杂
+</span><span class="c1"></span>  <span class="c1">//++i
+</span><span class="c1"></span>  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">++</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">//i++
+</span><span class="c1"></span>  <span class="n">_Self</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">--</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">_Self</span> <span class="k">operator</span><span class="o">--</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="traits编程技法">Traits编程技法</h1>
+<p>之前就见到用过，通过类型获取，其余的类型。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Category</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Distance</span> <span class="o">=</span> <span class="n">ptrdiff_t</span><span class="p">,</span>
+          <span class="k">class</span> <span class="nc">_Pointer</span> <span class="o">=</span> <span class="n">_Tp</span><span class="o">*</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Reference</span> <span class="o">=</span> <span class="n">_Tp</span><span class="o">&amp;&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">_Category</span>  <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span>        <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Distance</span>  <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Pointer</span>   <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Reference</span> <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Iterator</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator_traits</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">iterator_category</span> <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">value_type</span>        <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">difference_type</span>   <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">pointer</span>           <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">typename</span> <span class="n">_Iterator</span><span class="o">::</span><span class="n">reference</span>         <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">//对原生指针特化
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator_traits</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">*&gt;</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">random_access_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span>                         <span class="n">value_type</span><span class="p">;</span>
+  <span class="c1">//ptrdiff_t是C/C++标准库中定义的一个与机器相关的数据类型。ptrdiff_t类型变量通常用来保存两个指针减法操作的结果。ptrdiff_t定义在stddef.h（cstddef）这个文件内。ptrdiff_t通常被定义为long int类型。
+</span><span class="c1"></span>  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                   <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span><span class="o">*</span>                        <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span><span class="o">&amp;</span>                        <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">iterator_traits</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">*&gt;</span> <span class="p">{</span>
+  <span class="k">typedef</span> <span class="n">random_access_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">_Tp</span>                         <span class="n">value_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                   <span class="n">difference_type</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">*</span>                  <span class="n">pointer</span><span class="p">;</span>
+  <span class="k">typedef</span> <span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span>                  <span class="n">reference</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>迭代器的分类：
+input iter：只读iter
+output iter:只写iter
+forward iter:允许写入型算法在这种迭代器所形成的区间操作，前向迭代器
+bidirectional iterator：双向移动iter。
+random access iter：前三种支持++,第四种支持++ &ndash;。这种支持所有指针的算术能力。</p>
+<img src="/img/20161116205706.png" alt=""/>
+typedef typename _Iterator::iterator_category iterator_category;的作用就是能够在编译器发现迭代器的类型，选用最合适的函数版本。
+```cpp
+struct input_iterator_tag {};
+struct output_iterator_tag {};
+struct forward_iterator_tag : public input_iterator_tag {};
+struct bidirectional_iterator_tag : public forward_iterator_tag {};
+struct random_access_iterator_tag : public bidirectional_iterator_tag {};
+```
+例子
+```cpp
+template <class _InputIter, class _Distance>
+inline void __advance(_InputIter& __i, _Distance __n, input_iterator_tag) {
+  while (__n--) ++__i;
+}
+<p>template &lt;class _BidirectionalIterator, class _Distance&gt;
+inline void __advance(_BidirectionalIterator&amp; __i, _Distance __n,
+bidirectional_iterator_tag) {
+__STL_REQUIRES(_BidirectionalIterator, _BidirectionalIterator);
+if (__n &gt;= 0)
+while (__n&ndash;) ++__i;
+else
+while (__n++) &ndash;__i;
+}</p>
+<p>template &lt;class _RandomAccessIterator, class _Distance&gt;
+inline void __advance(_RandomAccessIterator&amp; __i, _Distance __n,
+random_access_iterator_tag) {
+__STL_REQUIRES(_RandomAccessIterator, _RandomAccessIterator);
+__i += __n;
+}</p>
+<p>template &lt;class _InputIterator, class _Distance&gt;
+inline void advance(_InputIterator&amp; __i, _Distance __n) {
+__STL_REQUIRES(_InputIterator, _InputIterator);
+//通过下面的函数，选用合适的版本
+//不需要传递参数，能够在编译器选定版本
+__advance(__i, __n, iterator_category(__i));
+}</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback"># __type_traits
+提供一种机制，允许针对不同的型别熟悉，完成函数派送。
+在内存配置器中就用到了，比如有没有拷贝构造函数等
+
+```cpp
+struct __true_type {
+};
+
+struct __false_type {
+};
+//选择使用__false_type为struct的目的是为了类型推倒，而不是使用bool值作为参数的话只是运行时的选择。
+template &lt;class _Tp&gt;
+struct __type_traits { 
+   typedef __true_type     this_dummy_member_must_be_first;
+                   /* Do not remove this member. It informs a compiler which
+                      automatically specializes __type_traits that this
+                      __type_traits template is special. It just makes sure that
+                      things work if an implementation is using a template
+                      called __type_traits for something unrelated. */
+
+   /* The following restrictions should be observed for the sake of
+      compilers which automatically produce type specific specializations 
+      of this class:
+          - You may reorder the members below if you wish
+          - You may remove any of the members below if you wish
+          - You must not rename members without making the corresponding
+            name change in the compiler
+          - Members you add will be treated like regular members unless
+            you add the appropriate support in the compiler. */
+ 
+
+   typedef __false_type    has_trivial_default_constructor;
+   typedef __false_type    has_trivial_copy_constructor;
+   typedef __false_type    has_trivial_assignment_operator;
+   typedef __false_type    has_trivial_destructor;
+   typedef __false_type    is_POD_type;
+};
+
+</code></pre></td></tr></table>
+</div>
+</div><p>然后在这个文件里定义了大量的特化，主要是特化C++标准类型。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">__STL_TEMPLATE_NULL</span> <span class="k">struct</span> <span class="nc">__type_traits</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="p">{</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_default_constructor</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_copy_constructor</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_assignment_operator</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">has_trivial_destructor</span><span class="p">;</span>
+   <span class="k">typedef</span> <span class="n">__true_type</span>    <span class="n">is_POD_type</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">//等。。。
+</span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2016-11-17</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第三章 迭代器" data-hashtags="stl源码剖析"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" data-hashtag="stl源码剖析"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第三章 迭代器"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第三章 迭代器"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/" data-title="[读书笔记] stl源码剖析 第三章 迭代器"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">stl源码剖析</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/" class="prev" rel="prev" title="[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器"><i class="fas fa-angle-left fa-fw"></i>[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器</a>
+            <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E5%BA%8F%E5%88%97%E5%BC%8F%E5%AE%B9%E5%99%A8/" class="next" rel="next" title="[读书笔记] stl源码剖析 第四章 序列式容器">[读书笔记] stl源码剖析 第四章 序列式容器<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

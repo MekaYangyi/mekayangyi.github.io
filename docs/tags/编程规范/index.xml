@@ -1,0 +1,273 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>编程规范 - Tag - 鉴心</title>
+        <link>http://coderyang.com/tags/%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/</link>
+        <description>编程规范 - Tag - 鉴心</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 06 Nov 2016 15:47:25 &#43;0000</lastBuildDate><atom:link href="http://coderyang.com/tags/%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/" rel="self" type="application/rss+xml" /><item>
+    <title>阅读谷歌编程规范</title>
+    <link>http://coderyang.com/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/</link>
+    <pubDate>Sun, 06 Nov 2016 15:47:25 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/</guid>
+    <description><![CDATA[<h1 id="事情的起因">事情的起因</h1>
+<p>好的东西就是这样，你每次看都能够有新的收获。
+这次也一样，读了一遍谷歌编程规范，又有些新的理解，也有一些需要重新让自己记住的点。
+遂记录下来，成此博文。</p>
+<h1 id="头文件">头文件</h1>
+<h2 id="define保护">#define保护</h2>
+<p>谷歌的格式是
+当是： <PROJECT> _ <PATH> _ <FILE> <em>H</em>
+为保证唯一性，头文件的命名应基于其所在项目源代码树的全路径。例如，项目 foo 中的头
+文件 foo/src/bar/baz.h 按如下方式保护：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#ifndef FOO_BAR_BAZ_H_
+</span><span class="cp">#define FOO_BAR_BAZ_H_
+</span><span class="cp"></span><span class="p">...</span>
+<span class="cp">#endif </span><span class="c1">// FOO_BAR_BAZ_H_
+</span></code></pre></td></tr></table>
+</div>
+</div><p>比较起来我们的格式是使用项目前缀来防止重复，考虑到我们项目的规模一般是不会重复的，因为文件命名上就不一致。</p>
+<h2 id="头文件依赖">头文件依赖</h2>
+<p>尽量使用前置声明减少头文件的依赖。
+因为引入一个新的头文件，头文件改变时，包含这个头文件的其他头文件也会被重新编译。
+1.强数据成员声明为Foo* Foo&amp;
+2.参数、返回值类型为Foo的函数，只是声明
+3.今天数据成员的类型可以被声明为Foo，因为静态数据成员定义在类定义之外
+至于使用指针成员替代成员对象，则会降低可读性，执行效率，不要这样做。</p>
+<h2 id="内联函数">内联函数</h2>
+<p>少于十行的函数定义为内联函数。
+小巧的代码更好的利用指令缓存。
+短小的内联函数直接放在.h文件中，对于比较复杂的内联应该放在-inl.h文件中</p>
+<h2 id="函数参数的顺序">函数参数的顺序</h2>
+<p>输入参数在前，输出在后。</p>
+<h2 id="包含文件顺序">包含文件顺序</h2>
+<p>C库 C++库 其他库 项目内的
+头文件应该有带有目录信息,不要使用当前目录和父目录</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">举例来说， google-awesome-project/src/foo/internal/fooserver.cc 的包含次序如下 ：
+#include &#34;foo/public/fooserver.h&#34; // 优先位置
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;hash_map&gt;
+#include &lt;vector&gt;
+#include &#34;base/basictypes.h&#34;
+#include &#34;base/commandlineflags.h&#34;
+#include &#34;foo/public/bar.h&#34;
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="作用域">作用域</h1>
+<h2 id="命名空间">命名空间</h2>
+<p>在.CC文件中，允许甚至提倡使用不具名命名空间，以避免运行时候的命名冲突。
+最好不要使用using，不要声明命名空间std下的恩和内容。</p>
+<h2 id="嵌套类">嵌套类</h2>
+<p>公开嵌套类作为接口的一部分时候，虽然可以直接放在全局作用域中，但是最好还是放在命名空间里。
+使用起来的话，</p>
+<h2 id="非成员函数静态成员函数和全局函数">非成员函数、静态成员函数和全局函数</h2>
+<p>尽量放在命名空间里。</p>
+<h2 id="局部变量">局部变量</h2>
+<p>将函数变量尽可能置于最小作用域内，在声明变量时候将其初始化。靠近第一次使用，利于阅读。</p>
+<h2 id="全局变量">全局变量</h2>
+<p>全局变量的构造函数、西沟函数以及初始化操作的调用顺序只是被部分规定，每次生产可能会有变化。
+很多可以用单例模式替代。</p>
+<h1 id="类">类</h1>
+<h2 id="构造函数中只进行哪些没有实际意义的初始化在init中集中初始化有意义的数据">构造函数中只进行哪些没有实际意义的初始化。在Init中集中初始化有意义的数据。</h2>
+<p>构造函数的问题是，没有异常处理。</p>
+<h2 id="明确的构造函数">明确的构造函数</h2>
+<p>使用explicit，防止自动转换。</p>
+<h2 id="拷贝构造函数">拷贝构造函数</h2>
+<p>大量类并不要拷贝构造函数，所以应该使用DISALLOW_COPY_AND_ASSIGN来防止拷贝构造函数的自动生成</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">// 禁止使用拷贝构造函数和赋值操作的宏
+// 应在类的 private:中使用
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+TypeName(const TypeName&amp;); \
+void operator=(const TypeName&amp;)
+class Foo {
+public:
+Foo(int f);
+~Foo();
+private:
+DISALLOW_COPY_AND_ASSIGN(Foo);
+};
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="继承">继承</h2>
+<p>使用组合一般都比使用继承合适，继承只使用public继承
+虚析构函数只在有继承同时有虚函数的时候使用。</p>
+<h2 id="接口">接口</h2>
+<p>接口是指满足特定条件的类，这些类以Interface为后缀
+定义：纯接口</p>
+<blockquote>
+<p>只有纯虚函数和静态函数
+没有非静态数据成员
+没有定义任何构造函数，如果有，也不含参数，并且为protected
+如果是子类，也只能继承满足上述条件并以Interface为后缀的类</p>
+</blockquote>
+<h2 id="操作符重载">操作符重载</h2>
+<p>除了少数特定环境外，不要重载操作符。
+缺点</p>
+<blockquote>
+<p>混淆你的直觉，让你误以为费时的操作和内建操作一样轻巧
+查找重载操作符的调用处困难
+有的操作符可以对指针进行操作
+重载的副作用，重载操作符&amp;的类不能被前置声明</p>
+</blockquote>
+<h2 id="声明次序">声明次序</h2>
+<p>在类中使用特定的声明次序：public:在 private:之前，成员函数在数据成员（变量）前。
+定义次序如下：public:、protected:、private:，如果那一块没有，直接忽略即可。
+每一块中，声明次序一般如下：</p>
+<ol>
+<li>typedefs 和 enums；</li>
+<li>常量；</li>
+<li>构造函数；</li>
+<li>析构函数；</li>
+<li>成员函数，含静态成员函数；</li>
+<li>数据成员，含静态数据成员。
+宏 DISALLOW_COPY_AND_ASSIGN 置于 private:块之后，作为类的最后部分。参考 拷
+贝构造函数。
+.cc 文件中函数的定义应尽可能和声明次序一致。
+不要将大型函数内联到类的定义中，通常，只有那些没有特别意义的或者性能要求高的，并
+且是比较短小的函数才被定义为内联函数。更多细节参考译文第一篇的 内联函数。</li>
+</ol>
+<h2 id="编写短小函数">编写短小函数</h2>
+<p>超过40行，考虑分割。</p>
+<h1 id="google特有的风情">Google特有的风情</h1>
+<h2 id="智能指针">智能指针</h2>
+<p>需要使用智能指针的话scoped_ptr完全可以胜任。特殊情况下使用share_ptr。不要使用auto_ptr。
+倾向于设计对象隶属明确的代码。最明确的对象隶属是根本不使用指针，直接将对象作为一个域或者局部变量使用。</p>
+<h1 id="其他c特征">其他C++特征</h1>
+<h2 id="引用参数">引用参数</h2>
+<p>所有按引用传递的参数必须加上const</p>
+<h2 id="缺省参数">缺省参数</h2>
+<p>禁止使用缺省函数参数，所有参数必须明确指定的话，避免程序员不知道存在的缺省参数。</p>
+<h2 id="编程数组和alloca">编程数组和alloca</h2>
+<p>禁止使用变长数组。使用安全的分配器。</p>
+<h2 id="友元">友元</h2>
+<p>将一个单元测试用类声明为待测类的友元，很方便。</p>
+<h2 id="不使用c异常">不使用C++异常</h2>
+<h2 id="不使用rtti">不使用RTTI</h2>
+<p>直接利用虚函数处理不同类型就好了。</p>
+<h2 id="类型转换">类型转换</h2>
+<p>使用 static_cast
+比较好处理，直接查找static_cast，就能找到哪里用了转换。C语言转换语义模糊。</p>
+<ol>
+<li>static_cast：和 C 风格转换相似可做值的强制转换，或指针的父类到子类的明确的向上
+转换；</li>
+<li>const_cast：移除 const 属性；</li>
+<li>reinterpret_cast：指针类型和整型或其他指针间不安全的相互转换，仅在你对所做一
+切了然于心时使用；</li>
+<li>dynamic_cast：除测试外不要使用，除单元测试外，如果你需要在运行时确定类型信
+息，说明设计有缺陷（参考  RTTI）。</li>
+</ol>
+<h2 id="流-streams">流 streams</h2>
+<p>只在记录日志的时候使用。
+其他时候使用printf替代。
+估计是stream的构造使用成本高，printf简单直接。
+然后steam重载&laquo;会产生很多意想不到的错误，在深入理解C++面向对象的书里面也有提到。</p>
+<h2 id="前置自增和自减">前置自增和自减</h2>
+<p>效率更高。
+对于简单数值来说无所谓，但是对于迭代器这种，前置更好。</p>
+<h2 id="const的使用">const的使用</h2>
+<p>在能够使用const的时候使用const.</p>
+<h2 id="整型">整型</h2>
+<p>C++中使用 stdint.h中的确定大小整型
+不要使用无符号，使用断言声明变量非负数。也就是在传参的时候，在执行前断言判断。</p>
+<h2 id="预处理宏">预处理宏</h2>
+<p>宏尽量被内联函数、枚举和常量替代
+下面给出的用法模式可以避免一些使用宏的问题，供使用宏时参考：</p>
+<ol>
+<li>不要在.h 文件中定义宏；</li>
+<li>使用前正确#define，使用后正确#undef；</li>
+<li>不要只是对已经存在的宏使用#undef，选择一个不会冲突的名称；</li>
+<li>不使用会导致不稳定的 C++构造（unbalanced C++ constructs，译者注） 的宏，
+至少文档说明其行为。
+像我们项目里的宏，完全应该被替代，起码使用一个命名空间，防止污染全局空间事情的发生。</li>
+</ol>
+<h1 id="命名约定">命名约定</h1>
+<h2 id="通用命名规则">通用命名规则</h2>
+<p>不缩写
+易于理解第一</p>
+<h1 id="注释">注释</h1>
+<h2 id="todo注释">TODO注释</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// TODO(kl@gmail.com): Use a &#34;*&#34; here for concatenation operator.
+</span><span class="c1">// TODO(Zeke) change this to use relations.
+</span></code></pre></td></tr></table>
+</div>
+</div><h1 id="格式">格式</h1>
+<h2 id="swich">swich</h2>
+<p>如果 default 永不会执行，可以简单的使用 assert：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">switch</span> <span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">case</span> <span class="mi">0</span><span class="o">:</span> <span class="p">{</span> <span class="c1">// 2 space indent
+</span><span class="c1"></span><span class="p">...</span> <span class="c1">// 4 space indent
+</span><span class="c1"></span><span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">case</span> <span class="mi">1</span><span class="o">:</span> <span class="p">{</span>
+<span class="p">...</span>
+<span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">default</span><span class="o">:</span> <span class="p">{</span>
+<span class="n">assert</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item></channel>
+</rss>

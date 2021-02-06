@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>读书摘录-调试九法：软硬件错误的排查之道 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="读书摘录-调试九法：软硬件错误的排查之道" />
+<meta property="og:description" content="【美】阿甘斯
+第3章 理解系统
+2017-04-07
+你必须掌握系统的工作原理以及它是如何设计的。在某些情况下，还要知道为什么这样设计。如果你没有理解系统中的某个部分，那么这通常就是出问题的地方。（这不仅仅是“墨菲定律”的问题，如果你不能理解你所设计的系统，你的工作可能会变得一团糟。）
+3.1 阅读手册
+2017-04-07
+如果你是一位工程师，正在调试自己公司的产品，那么你需要读一读内部手册。工程师们设计它是用来做什么的？读一下功能说明以及所有的设计规范，研究一下图表、时序图和状态机。分析它们的代码，还要读一下注释。（是的，读一下注释，这非常重要。）一定要检查产品的设计。查明构建它的工程师们打算用它来做什么（除了用它来赚钱买辆宝马车以外）。
+注意，手册上的信息也不可全信。手册（以及那些只想着赚钱买宝马车的工程师们）可能也是错的，很多难以发现的bug就出现在这里。但你仍需要了解他们的想法，哪怕其中有些信息是很难接受的。
+3.2 逐字逐句阅读整个手册
+2017-04-07
+参考设计和样本程序给出了产品的一种使用方式，有时这些就是能获得的全部文档了。但是，在使用这些设计时一定要注意，创建它们的人往往只了解他们的产品，而没有遵循好的设计实践，或者不是为真实应用而设计的（最常见的缺点是不能进行错误恢复）。不要照搬这些设计，如果你没有在开始的时候发现bug，那么将来也会发现。此外，即使是最好的参考设计可能也不会完全符合应用程序的特定需求，而不符合的地方可能就是出问题的地方。当我照搬了朋友的微处理器设计时，就发生了问题，因为他的设计无法处理中" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" />
+<meta property="og:image" content="http://coderyang.com/logo.png"/>
+<meta property="article:published_time" content="2017-04-30T16:54:08+00:00" />
+<meta property="article:modified_time" content="2017-04-30T16:54:08+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://coderyang.com/logo.png"/>
+
+<meta name="twitter:title" content="读书摘录-调试九法：软硬件错误的排查之道"/>
+<meta name="twitter:description" content="【美】阿甘斯
+第3章 理解系统
+2017-04-07
+你必须掌握系统的工作原理以及它是如何设计的。在某些情况下，还要知道为什么这样设计。如果你没有理解系统中的某个部分，那么这通常就是出问题的地方。（这不仅仅是“墨菲定律”的问题，如果你不能理解你所设计的系统，你的工作可能会变得一团糟。）
+3.1 阅读手册
+2017-04-07
+如果你是一位工程师，正在调试自己公司的产品，那么你需要读一读内部手册。工程师们设计它是用来做什么的？读一下功能说明以及所有的设计规范，研究一下图表、时序图和状态机。分析它们的代码，还要读一下注释。（是的，读一下注释，这非常重要。）一定要检查产品的设计。查明构建它的工程师们打算用它来做什么（除了用它来赚钱买辆宝马车以外）。
+注意，手册上的信息也不可全信。手册（以及那些只想着赚钱买宝马车的工程师们）可能也是错的，很多难以发现的bug就出现在这里。但你仍需要了解他们的想法，哪怕其中有些信息是很难接受的。
+3.2 逐字逐句阅读整个手册
+2017-04-07
+参考设计和样本程序给出了产品的一种使用方式，有时这些就是能获得的全部文档了。但是，在使用这些设计时一定要注意，创建它们的人往往只了解他们的产品，而没有遵循好的设计实践，或者不是为真实应用而设计的（最常见的缺点是不能进行错误恢复）。不要照搬这些设计，如果你没有在开始的时候发现bug，那么将来也会发现。此外，即使是最好的参考设计可能也不会完全符合应用程序的特定需求，而不符合的地方可能就是出问题的地方。当我照搬了朋友的微处理器设计时，就发生了问题，因为他的设计无法处理中"/>
+<meta name="application-name" content="鉴心">
+<meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" /><link rel="prev" href="http://coderyang.com/vs2017%E4%B8%8Evs2005%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3/" /><link rel="next" href="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%BC%96%E7%A8%8B%E5%A4%A7%E5%B8%88%E8%AE%BF%E8%B0%88%E5%BD%95/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "读书摘录-调试九法：软硬件错误的排查之道",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "杂谈","wordcount":  173 ,
+        "url": "http:\/\/coderyang.com\/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93\/","datePublished": "2017-04-30T16:54:08+00:00","dateModified": "2017-04-30T16:54:08+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "杨一"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="鉴心">鉴心</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="鉴心">鉴心</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/MekaYangyi" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">读书摘录-调试九法：软硬件错误的排查之道</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%91%98%E5%BD%95/"><i class="far fa-folder fa-fw"></i>摘录</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2017-04-30">2017-04-30</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;173 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;One minute&nbsp;<span id="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" class="leancloud_visitors" data-flag-title="读书摘录-调试九法：软硬件错误的排查之道">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents"></nav></div>
+            </div><div class="content" id="content"><p>【美】阿甘斯</p>
+<p>第3章 理解系统
+2017-04-07
+你必须掌握系统的工作原理以及它是如何设计的。在某些情况下，还要知道为什么这样设计。如果你没有理解系统中的某个部分，那么这通常就是出问题的地方。（这不仅仅是“墨菲定律”的问题，如果你不能理解你所设计的系统，你的工作可能会变得一团糟。）</p>
+<p>3.1 阅读手册
+2017-04-07
+如果你是一位工程师，正在调试自己公司的产品，那么你需要读一读内部手册。工程师们设计它是用来做什么的？读一下功能说明以及所有的设计规范，研究一下图表、时序图和状态机。分析它们的代码，还要读一下注释。（是的，读一下注释，这非常重要。）一定要检查产品的设计。查明构建它的工程师们打算用它来做什么（除了用它来赚钱买辆宝马车以外）。
+注意，手册上的信息也不可全信。手册（以及那些只想着赚钱买宝马车的工程师们）可能也是错的，很多难以发现的bug就出现在这里。但你仍需要了解他们的想法，哪怕其中有些信息是很难接受的。</p>
+<p>3.2 逐字逐句阅读整个手册
+2017-04-07
+参考设计和样本程序给出了产品的一种使用方式，有时这些就是能获得的全部文档了。但是，在使用这些设计时一定要注意，创建它们的人往往只了解他们的产品，而没有遵循好的设计实践，或者不是为真实应用而设计的（最常见的缺点是不能进行错误恢复）。不要照搬这些设计，如果你没有在开始的时候发现bug，那么将来也会发现。此外，即使是最好的参考设计可能也不会完全符合应用程序的特定需求，而不符合的地方可能就是出问题的地方。当我照搬了朋友的微处理器设计时，就发生了问题，因为他的设计无法处理中</p>
+<p>3.3 知道什么是正常的
+2017-04-07
+当你检查系统时，必须知道系统的正常工作状态。如果你不知道低位字节首先由使用了Intel芯片的PC程序来处理，那么你会认为所有长字（longword）都是随意处理的。如果你不知道缓存是干什么的，就会非常奇怪有些数据为什么没有马上写入内存。如果你不了解三态（tri-state）数据总线的工作原理，你将会认为它们可能是主板上的故障信号。如果你从未听说过电锯，你可能会认为那个发出讨厌的嗡嗡声的东西一定是出了什么毛病。知道什么是正常的可以帮助你注意到什么是不正常的。
+你必须掌握一些你所工作的技术领域的基础知识。如果我不知道时钟选通脉冲和地址线是做什么的，那么即使我读了手册之后也无法理解中断问题。本书中几乎所有的（即使不是全部的话）示例都假定人们已经掌握了系统工具原理的一些基本知识。（如果我在前面使你误认为读完本书就可以调试任何技术领域的bug，那么请恕我无心之过。如果你是一位游戏编程人员，最好不要去管核电厂的调试。如果你不是医生，那么就不要试图诊断你手臂上的灰绿色斑点是什么。如果你是一位政客，那么就不要介入任何有关bug的事情。）</p>
+<p>3.7 小结
+2017-04-07
+理解系统
+这是第一条规则，因为它是最重要的。
+阅读手册。它会告诉你在使用除草机时，要在除草头上涂润滑油，这样除草绳就不会被烧化。
+仔细阅读每个细节。有关微处理器如何处理中断的详细信息就隐藏在数据手册的第37页。
+掌握基础知识。电锯本来就会发出很大的噪声。
+了解工作流程。引擎的转速可能与轮胎的转速不同，这是由传动轴造成的。
+了解工具。弄清楚体温计的哪一端才是用来测量体温的，弄清楚Glitch-O-Matic逻辑分析器的强大功能是如何使用的。
+查阅细节。连爱因斯坦都会去查阅细节，而Kneejerk却盲目相信自己的记忆力</p>
+<p>第4章 制造失败
+2017-04-09
+“当你发现一个故障时该怎么办？”他会回答说：“试着让它再次发生。”（Charlie是一位训练有素的调试人员）。这样做有3个原因。
+可以观察它。要观察错误（下一节将更详细地讨论这个问题），就必须使它发生。我们必须尽可能有规律地制造失败。在前面讲的电视游戏的例子中，当问题发生时我可以集中注意力观察示波器（虽然当时我已经很疲倦）。
+可以专心查找原因。准确地知道问题在什么条件下会发生，有助于集中精力查找原因（但是请注意，有时这会产生误导，例如，“烤箱只有在你把面包放进去的时候才会把面包烤焦，因此问题就出在面包上。”这个问题后文也会详细讨论。）
+可以判断是否已修复问题。当你认为已经修复了问题时，如何才能确信它确实已被修复呢？那就是明确知道问题是如何发生的。当问题没有修复时，如果你执行X操作，失败率为100%；在修复问题后，再执行X操作，如果失败率为0，那么你知道bug确实已被修复。（我这么说并不多余。很多时候，开发人员在修复bug时会修改软件，然后在一个与当初发现bug的不同条件下测试新软件。软件当然能运行，即使他在代码中输入一行打油诗，而他也高兴地回家了。然而，几星期后，在测试过程中，或者更糟，在客户现场，软件再次失败。后文将讨论更多这方面的内容。</p>
+<p>4.4 不要模拟失败
+2017-04-09
+记住，这并不意味着不能用自动化过程来引发失败，也不意味着在这个过程中不能采用一些起到放大效果的措施。自动测试能够使间歇性的问题更快发生，例如电视游戏的例子。放大效果可以使得细微的问题更明显，例如在修窗户的例子中，我可以用喷水管来找到漏雨的窗户，而不用等待偶尔才有的暴风雨来检查。这两种技术都有助于引发失败，而不是模拟失败的机理。所做的改变应该是一些高层次的改变，只影响错误发生的频率，而不影响错误的发生方式。
+此外，还要注意不要画蛇添足，引发新的问题。不要因为假设芯片的问题是由于热量引起的，就用热风枪来给芯片加热以模拟错误，这样只会把芯片烧化，然后你会误认为bug完全就是电路板上那堆被烧化的塑料。如果我用消防用的水龙来检查漏雨问题，可能会断定问题显然就是出在被击碎的窗子上。</p>
+<p>4.9 小结
+2017-04-10
+制造失败
+虽然看起来很简单，但如果不制造失败的话，调试就会变得很困难。
+制造失败。目的是为了观察它，找到原因，并检查是否已修复。
+从头开始。修车工需要知道汽车车窗在被冻结之前你洗过车。
+引发失败。用喷水管向漏雨的那扇窗子喷水。
+但不要模拟失败。用喷水管向漏雨的那扇窗子喷水，而不要向另一扇不同的、“类似的”窗子喷水。
+查找不受你控制的条件（正是它导致了间歇性失败）。改变能够改变的每件事情，振动、摇晃、扭曲，直到再现失败。
+记录每件事情，并找到间歇性bug的特征。我们的绑定系统总是只在呼叫顺序错乱时才会失败。
+不要过于相信统计数据。绑定问题看起来与时间段有关，但实际上真正的原因是当地的年轻人占用了电话线路。
+要认识到“那”是可能会发生的。甚至冰淇淋的口味也会影响汽车的发动。
+永远不要丢掉一个调试工具。自动击球板可能在某一天就会派上用场。</p>
+<p>5.6 猜测只是为了确定搜索的重点目标
+2017-04-11
+不要想，而要看”并不意味着不能做任何猜想。事实上猜测是好事，特别是当你理解了系统之后。你的猜测可能很接近事实，但猜测只是为了确定搜索的重点。在尝试修复问题之前，仍需要再次看到失败，以便确认你的猜测是正确的。</p>
+<p>5.7 小结
+2017-04-11
+不要想，而要看
+凭空想象，问题可能有几千条原因。而实际的原因只有去看了才能发现。
+观察失败。高级工程师看到了真实的问题，并且能够找到原因。而初级工程师们认为他们知道错误发生在哪里，结果他们修复的地方根本没有出错。
+查看细节。听到水泵似乎发出声音时不要停下来。到地下室查明是哪个水泵。
+植入插装工具。使用源代码调试器、调试日志、状态消息、信号灯和臭鸡蛋的气味。
+添加外部插装工具。使用分析器、示波器、量表、金属检测仪、心电图仪和肥皂泡。
+不要害怕深入研究。虽然它是软件成品，但它出问题了，你必须打开并修复它。
+注意海森堡效应。不要让仪器影响了系统。
+猜测只是为了确定搜索的重点。大胆地猜测内存时序发生了错误，但在修复之前应该先查看它。</p>
+<p>6.4 修复已知bug
+2017-04-12
+有时，我们很难相信一个系统中会有多个bug，就像在旅店预订的例子中一样。这使得用“分而治之”原则隔离每个bug变得更加困难。因此，如果同时出现了多个问题，当你确实查明了其中的一个问题时，应该立即修复它，然后再查找其他问题。我总听人们说“那里出问题了，但它不可能影响我们正在查找的问题。”事实上，它确实（而且经常）会产生影响。如果你修复了已知的错误，就可以专心致志地查找其他问题。在旅店预订系统中，技术人员只有在修复了转接盒中的双向电阻阻值过高的问题之后，才能够发现速度最慢的那台终端的接线问题。
+有时修复了一个问题，另一个问题也解决了，两个问题实际上是同一个bug。
+此外，如果修复某个问题对其他的问题有影响，一定要首先修复它之后再测试其他的问题。如果修复了一个问题后将会引发新的问题，那么你可以尽早发现，并有更多时间处理新的问题。</p>
+<p>6.5 首先消除噪声干扰
+2017-04-12
+人们也很容易成为一个“完美主义者”，为了达到全面的高质量把你发现的所有不好的设计都“修复”一遍。你可能只是因为先前的程序员编写的GOTO语句看起来很差劲就删掉它们，但是，如果它们并没有实际引起问题，最好还是保留它们吧。</p>
+<p>6.6 小结
+2017-04-12
+分而治之
+当bug的藏身之地不断被缩小一半时，它将很难再隐藏下去。
+通过逐次逼近缩小搜索范围。猜测1～100内的一个数字，只需7次。
+确定范围。如果数字是135而你却认为它在1～100内，那么你必须扩大范围。
+确定你位于bug的哪一侧。如果你所在的位置有排放物，则排放管就在上游。如果没有排放物，则排放管就在下游。
+使用易于查看的测试模式。从干净、清澈的水开始，以便当排放物进入河流中时很容易看到它。
+从有问题的一端开始搜索。如果你验证的是正确的部分，那么需要验证的地方太多了。应该从有问题的地方开始，然后向后追查原因。
+修复已知bug。bug互相保护，互相隐藏。因此一旦找到，立即修复它们。
+首先消除噪声干扰。注意那些导致系统问题的干扰因素。但对一些无足轻重的问题不要过于极端，也不要为了追求完美而去修改所有地方。</p>
+<p>第7章 一次只改一个地方
+2017-04-12
+我们的软件工程师为了修复问题而更改了一个地方，但这个修改并没有解决问题，而他认为这不会产生什么影响。这是一个非常错误的假设。它确实有影响，它使得音频数据发生错误，只是两次错误与一次错误也没有什么太大的区别。当原来的错误被修复后，他犯的错误仍然存在，因此声音的质量仍很差。当他的修改没有解决问题时，应该立即把它改回来。
+註: 经常遇到</p>
+<p>7.2 用双手抓住黄铜杆
+2017-04-23
+在很多情况下，你可能想改变系统的不同部分，以便看看它们是否对问题有影响。这往往是一个危险的信号，说明你正在猜测，而不是使用插装工具来观察正在发生什么。你正在改变条件，而不是捕捉错误的自然发生。这可能会把最初的错误隐藏起来，而且引起更多错误。</p>
+<p>7.5 自从上一次能够正常工作以来你更改了什么
+2017-04-23
+有时，正常的系统和错误的系统之间的区别是由于一项更改造成的。做了更改之后，正常的系统开始出现故障。一种非常有效的办法是找出第一个导致系统出错的版本，尽管这可能需要连续测试原来的版本，直到找到没有故障的版本。一旦找到了这个版本，再前进到下一个版本，验证故障是否再次出现。做完这一步之后，至少可以把问题的范围限定到两个版本之间所做的修改。
+2017-04-23
+问题已经存在了很长时间，但只是某个地方（例如时序或数据库大小）被改变之后，它才显露出来</p>
+<p>7.6 小结
+2017-04-23
+一次只改一个地方
+我们在生活中要有一点先见之明。如果你所做的更改没有起到预期的作用，那么就把它改回来。它们可能会产生无法预料的影响。
+隔离关键因素。如果你在检查日照时间的影响，就不要改变灌溉方案。
+用双手抓住黄铜杆。如果你在不知道具体发生了什么问题的情况下就试图去修理核潜艇，可能会引发一次水下的切尔诺贝利爆炸。
+一次只改一个测试。我之所以知道我的VGA采集相位被破坏了，就是因为其他东西都没有发生改变。
+与正常情况进行比较。如果所有出错的情况都有一些特征，而这些特征是正常情况所没有的，那么
+你就找到了问题所在。
+确定自从上一次正常工作以来你改变了什么地方。我的工友改变了唱机转盘上的唱头，因此这是一个很好的调试起点。</p>
+<p>8.6 小结
+2017-04-23
+保持审计跟踪
+不要只是在心里记住“保持审计跟踪”这条规则，而要把它写下来。
+把你的操作、操作的顺序和结果全部记录下来。你上一次喝咖啡是什么时候？你的头痛是从什么时候开始的？
+要知道，任何细节都可能是重要的。视频压缩芯片的崩溃是由于格子衬衫造成的。
+把事件关联到一起。“它发出噪声，从21:04:53开始，持续4秒”比仅仅说“它发出噪声”要好得多。
+用于设计的审计跟踪在测试中也非常有用。软件配置控制工具可以告诉你哪次修订引入了bug。
+把事情记录下来！无论那个时刻多么恐怖，都要把它记到备忘录中，这样你才不会忘记。</p>
+<p>9.4 小结
+2017-04-23
+检查插头
+一些显而易见的假设往往是错误的。请恕我赘述，假设错误通常是最容易修复的错误。
+置疑你的假设。是否运行了正确的代码？是不是燃气用完了？插头是否已插好？
+从头开始。是否正确地对内存进行了初始化？是否按了除草机上的“primer bulb”按钮？开关是否已打开？
+对工具进行测试。是否运行了正确的编译器？燃料油表是否被粘住了？量表是不是没电了？</p>
+<p>10.5 小结
+2017-04-23
+获得全新观点
+不管怎样，你都需要休息一下，喝杯咖啡。
+征求别人的意见。甚至一个不说话的人体模特也能帮助你认识到你先前没有注意到的事情。
+获取专业知识。只有VGA视频采集卡的厂商才能够肯定相位功能发生了错误。
+听取别人的经验。别人会告诉你车内顶灯的线被挤压出来了。
+帮助无处不在。同事、供应商、网络，还有书店，都在等待着为你提供帮助。
+放下面子。bug发生了。以除掉bug为自豪，而不要非得以自己除掉bug才为自豪。
+报告症状，而不要讲你的理论。不要把别人拖进你的思维定式中。
+你提出的问题不必十分肯定。甚至连“穿了格子衬衫”这样的事情也可以提出来。</p>
+<p>11.6 小结
+2017-04-23
+如果你不修复bug，它将依然存在
+现在你已经掌握了所有的技术，没有理由再让bug存在了。
+查证问题确实已被修复。不要假设是电路的问题，而仍然让汽车带着脏的滤油嘴上路。
+查证确实是你的修复措施解决了问题。口中大喊“Wubba!”并不是使计算机打开的窍门。
+要知道，bug从来不会自己消失。使用最初导致它失败的方法再次制造失败。如果必须交付产品，那么就在产品中设计一个用于捕捉bug的“陷阱”，以便产品在客户现场发生失败时，把它捉住。
+从根本上解决问题。在烧坏另一台变压器之前，先把无用的8音轨磁带卡座扔掉。
+对过程进行修复。不要只是擦掉地上的油，而要纠正设计机器的方式。</p>
+<p>14.3 小结
+2017-04-25
+从帮助台得到的观点是不明确的
+只能通过远程方式了解问题，眼睛和耳朵接收到的信息并不十分准确，而且关键是时间紧迫。
+遵循规则。无论用户多么糊涂，都必须找到应用规则的途径。
+对行动和结果加以确认。用户会误解你的意思，同时会犯错误。通过确认他们所说和所做的一切可以及早发现这些问题。
+使用自动工具。不要让用户参与系统生成的日志和远程监控与控制工具。
+即使是最简单的假设也需要确认。是的，有些人就是不知道有电才能使用字处理器。
+使用可用的故障检修指南。要处理的很可能就是已知的、好的设计。不要忽略历史。
+帮助完善故障检修指南。如果找到了某个已知系统的一个新问题，将解决问题的所有内容进行归档可以帮助下一位支持人员。</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2017-04-30</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" data-title="读书摘录-调试九法：软硬件错误的排查之道" data-hashtags="杂谈"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" data-hashtag="杂谈"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" data-title="读书摘录-调试九法：软硬件错误的排查之道"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" data-title="读书摘录-调试九法：软硬件错误的排查之道"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/" data-title="读书摘录-调试九法：软硬件错误的排查之道"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%9D%82%E8%B0%88/">杂谈</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/vs2017%E4%B8%8Evs2005%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3/" class="prev" rel="prev" title="vs2017与vs2005冲突解决"><i class="fas fa-angle-left fa-fw"></i>vs2017与vs2005冲突解决</a>
+            <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%BC%96%E7%A8%8B%E5%A4%A7%E5%B8%88%E8%AE%BF%E8%B0%88%E5%BD%95/" class="next" rel="next" title="读书摘录-编程大师访谈录">读书摘录-编程大师访谈录<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2016 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">杨一</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":1024},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Your comment ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.en","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
