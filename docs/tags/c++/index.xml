@@ -1,9 +1,451 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>C&#43;&#43; - Tag - 鉴心</title>
+        <title>c&#43;&#43; - Tag - 鉴心</title>
         <link>http://coderyang.com/tags/c&#43;&#43;/</link>
-        <description>C&#43;&#43; - Tag - 鉴心</description>
-        <generator>Hugo -- gohugo.io</generator><language>en</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sat, 20 Aug 2016 09:15:53 &#43;0000</lastBuildDate><atom:link href="http://coderyang.com/tags/c&#43;&#43;/" rel="self" type="application/rss+xml" /><item>
+        <description>c&#43;&#43; - Tag - 鉴心</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sat, 19 Sep 2020 16:04:59 &#43;0000</lastBuildDate><atom:link href="http://coderyang.com/tags/c&#43;&#43;/" rel="self" type="application/rss+xml" /><item>
+    <title>简易function</title>
+    <link>http://coderyang.com/function/</link>
+    <pubDate>Sat, 19 Sep 2020 16:04:59 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/function/</guid>
+    <description><![CDATA[<p>本文主要讲一下怎么实现一个简易版本的function&lt;&gt;模板，从c++ templates第二版摘出，相应的技巧在timer中一些应用。</p>
+<h2 id="出发点">出发点</h2>
+<p>一个简单的例子，下面这个模板上述能够接受任意可调用的对象，lambda表达式、函数指针、仿函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">F</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">for_int_up</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">print_int</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">count</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39; &#39;</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">for_int_up</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">sum</span><span class="p">](</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">sum</span> <span class="o">+=</span> <span class="n">i</span><span class="p">;</span>
+    <span class="p">});</span>
+    
+    <span class="n">for_int_up</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">print_int</span><span class="p">);</span>
+    
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>像for_int_up这样的函数其实有两个问题：</p>
+<ul>
+<li>使用了模板将函数内部实现暴露。</li>
+<li>造成代码膨胀，for_int_up函数还比较小，如果是一个很大的函数，代码膨胀会厉害的多。</li>
+</ul>
+<p>于是为了解决上面两个问题，可能尝试用下面这个方案，这也是我们代码中常见的解决方案。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">for_int_up</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">f</span><span class="p">)(</span><span class="kt">int</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>考虑到有可能有需要带上参数的需求，我们可能会写成这样。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">for_int_up</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">f</span><span class="p">)(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">),</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">sum</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="o">*</span><span class="n">sum</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">;</span>
+    <span class="o">*</span><span class="n">sum</span> <span class="o">+=</span> <span class="n">i</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">for_int_up</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">sum</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">j</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>使用函数指针替代模板，for_int_up只接受函数指针，无法接收lambda表达式、仿函数。</p>
+<p>带参数的方案基本上能够满足需求，只是需要将函数与数据分离，代码相对难写，强转可能存在错误。</p>
+<p>本质上带参数void*的方案是在抹除类型信息。</p>
+<p>基于以上的需求标准库里的std::function&lt;&gt;就应运而生了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">for_int_up</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>std::function&lt;void(int)&gt;能够接收任意返回值是void，参数为int的函数指针、lambda表达式、仿函数。</p>
+<p>上面两个问题一下就得到了解决，内部实现可以隐藏起来，同时模板范围缩小到std::function，即使for_int_up再大也不会出现代码膨胀很厉害的情况。</p>
+<h2 id="广义的函数指针">广义的函数指针</h2>
+<p>std::function实际上是一个广义上的C++函数指针，需要支持一下操作：</p>
+<ul>
+<li>在调用者只知道入参与返回值的情况，可以调用执行，不需要理解内部具体实现。</li>
+<li>支持复制、移动。</li>
+<li>可以被入参与返回值相同的函数指针、lambda表达式、仿函数、std::function初始化</li>
+<li>支持null状态</li>
+</ul>
+<h2 id="实现">实现</h2>
+<p>下面我们会实现一个简易版本的std::function，FUNCTION_PTR。FUNCTION_PTR会支持上面提到的所有特性。</p>
+<p>functionptr.hpp</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// 原始模板，因为实际上FUNCTION_PTR模板参数只有一个，所以需要这个原始模板:
+</span><span class="c1">// 模板参数是一个函数类型
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">T</span> <span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">FUNCTION_PTR</span><span class="p">;</span>
+
+<span class="c1">// 偏特化，提取出变参Args为所有参数，R为返回值
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">R</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Args</span> <span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">FUNCTION_PTR</span><span class="o">&lt;</span> <span class="n">R</span><span class="p">(</span> <span class="n">Args</span><span class="p">...</span> <span class="p">)</span> <span class="o">&gt;</span> <span class="p">{</span>
+   <span class="k">private</span><span class="o">:</span>
+    <span class="n">FUNCTOR_BRIDGE</span><span class="o">&lt;</span> <span class="n">R</span><span class="p">,</span> <span class="n">Args</span><span class="p">...</span> <span class="o">&gt;</span> <span class="o">*</span><span class="n">bridge</span><span class="p">;</span> <span class="c1">// 核心类，参数类型信息，提供抽象的invoke。
+</span><span class="c1"></span>
+   <span class="k">public</span><span class="o">:</span>
+    <span class="c1">// 构造:
+</span><span class="c1"></span>    <span class="n">FUNCTION_PTR</span><span class="p">()</span> <span class="o">:</span> <span class="n">bridge</span><span class="p">(</span> <span class="k">nullptr</span> <span class="p">)</span> <span class="p">{}</span> <span class="c1">// 默认为空
+</span><span class="c1"></span>    <span class="n">FUNCTION_PTR</span><span class="p">(</span><span class="n">FUNCTION_PTR</span> <span class="k">const</span> <span class="o">&amp;</span><span class="n">other</span> <span class="p">);</span>  <span class="c1">// see functionptr-cpinv.hpp
+</span><span class="c1"></span>    <span class="n">FUNCTION_PTR</span><span class="p">(</span><span class="n">FUNCTION_PTR</span> <span class="o">&amp;</span><span class="n">other</span> <span class="p">)</span>
+        <span class="o">:</span> <span class="n">FUNCTION_PTR</span><span class="p">(</span> <span class="k">static_cast</span><span class="o">&lt;</span> <span class="n">FUNCTION_PTR</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">other</span> <span class="p">)</span> <span class="p">)</span> <span class="p">{}</span>
+    <span class="n">FUNCTION_PTR</span><span class="p">(</span> <span class="n">FUNCTION_PTR</span> <span class="o">&amp;&amp;</span><span class="n">other</span> <span class="p">)</span> <span class="o">:</span> <span class="n">bridge</span><span class="p">(</span> <span class="n">other</span><span class="p">.</span><span class="n">bridge</span> <span class="p">)</span>
+    <span class="p">{</span>
+         <span class="c1">// 移动构造，所有权转移
+</span><span class="c1"></span>        <span class="n">other</span><span class="p">.</span><span class="n">bridge</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// 从任意函数对象构造:
+</span><span class="c1"></span>    <span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">F</span> <span class="o">&gt;</span>
+    <span class="n">FUNCTION_PTR</span><span class="p">(</span> <span class="n">F</span> <span class="o">&amp;&amp;</span><span class="n">f</span> <span class="p">);</span>  <span class="c1">// see functionptr-init.hpp
+</span><span class="c1"></span>    
+    <span class="c1">// 赋值操作符:
+</span><span class="c1"></span>    <span class="n">FUNCTION_PTR</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span> <span class="n">FUNCTION_PTR</span> <span class="k">const</span> <span class="o">&amp;</span><span class="n">other</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">FUNCTION_PTR</span> <span class="nf">tmp</span><span class="p">(</span> <span class="n">other</span> <span class="p">);</span>
+        <span class="n">swap</span><span class="p">(</span> <span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">tmp</span> <span class="p">);</span>
+        <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">FUNCTION_PTR</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span> <span class="n">FUNCTION_PTR</span> <span class="o">&amp;&amp;</span><span class="n">other</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">delete</span> <span class="n">bridge</span><span class="p">;</span>
+        <span class="n">bridge</span> <span class="o">=</span> <span class="n">other</span><span class="p">.</span><span class="n">bridge</span><span class="p">;</span>
+        <span class="n">other</span><span class="p">.</span><span class="n">bridge</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+        <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// 从任意函数对象复制:
+</span><span class="c1"></span>    <span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">F</span> <span class="o">&gt;</span>
+    <span class="n">FUNCTION_PTR</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span> <span class="n">F</span> <span class="o">&amp;&amp;</span><span class="n">f</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">FUNCTION_PTR</span> <span class="nf">tmp</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span> <span class="n">F</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">f</span> <span class="p">)</span> <span class="p">);</span> <span class="c1">// 先构造一个临时对象
+</span><span class="c1"></span>        <span class="n">swap</span><span class="p">(</span> <span class="o">*</span><span class="k">this</span><span class="p">,</span> <span class="n">tmp</span> <span class="p">);</span> <span class="c1">// 调用swap
+</span><span class="c1"></span>        <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// 析构:
+</span><span class="c1"></span>    <span class="o">~</span><span class="n">FUNCTION_PTR</span><span class="p">(</span> <span class="p">)</span> <span class="p">{</span> <span class="k">delete</span> <span class="n">bridge</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">friend</span> <span class="kt">void</span> <span class="nf">swap</span><span class="p">(</span> <span class="n">FUNCTION_PTR</span> <span class="o">&amp;</span><span class="n">fp1</span><span class="p">,</span> <span class="n">FUNCTION_PTR</span> <span class="o">&amp;</span><span class="n">fp2</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">swap</span><span class="p">(</span> <span class="n">fp1</span><span class="p">.</span><span class="n">bridge</span><span class="p">,</span> <span class="n">fp2</span><span class="p">.</span><span class="n">bridge</span> <span class="p">);</span>
+    <span class="p">}</span>
+    <span class="c1">// bool隐式转换，便于if判断
+</span><span class="c1"></span>    <span class="k">explicit</span> <span class="k">operator</span> <span class="nf">bool</span><span class="p">(</span> <span class="p">)</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">bridge</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">;</span> <span class="p">}</span>
+    <span class="c1">// ()操作符重载:
+</span><span class="c1"></span>    <span class="n">R</span> <span class="nf">operator</span><span class="p">(</span> <span class="p">)(</span> <span class="n">Args</span><span class="p">...</span> <span class="n">args</span> <span class="p">)</span> <span class="k">const</span><span class="p">;</span>  <span class="c1">// see functionptr-cpinv.hpp
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到FUNCTION_PTR包含一个FUNCTOR_BRIDGE&lt; R, Args&hellip; &gt;成员，它负责存储具体的功能对象，并将具体类型擦除了。</p>
+<p>functorbridge.hpp</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// FUNCTOR_BRIDGE只是一个抽象类，定义了几个基本接口
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">R</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Args</span> <span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">FUNCTOR_BRIDGE</span> <span class="p">{</span>
+   <span class="k">public</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="o">~</span><span class="n">FUNCTOR_BRIDGE</span><span class="p">(</span> <span class="p">)</span> <span class="p">{}</span>
+    <span class="k">virtual</span> <span class="n">FUNCTOR_BRIDGE</span> <span class="o">*</span><span class="nf">clone</span><span class="p">(</span> <span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 复制接口
+</span><span class="c1"></span>    <span class="k">virtual</span> <span class="n">R</span> <span class="nf">invoke</span><span class="p">(</span> <span class="n">Args</span><span class="p">...</span> <span class="n">args</span> <span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 调用接口
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>bridge/functionptr-cpinv.hpp</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// 基于FUNCTOR_BRIDGE的抽象接口，我们能够实现FUNCTION_PTR复制与调用
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">R</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Args</span> <span class="o">&gt;</span>
+<span class="n">FUNCTION_PTR</span><span class="o">&lt;</span> <span class="n">R</span><span class="p">(</span> <span class="n">Args</span><span class="p">...</span> <span class="p">)</span> <span class="o">&gt;::</span><span class="n">FUNCTION_PTR</span><span class="p">(</span> <span class="n">FUNCTION_PTR</span> <span class="k">const</span> <span class="o">&amp;</span><span class="n">other</span> <span class="p">)</span>
+    <span class="o">:</span> <span class="n">bridge</span><span class="p">(</span> <span class="k">nullptr</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="n">other</span><span class="p">.</span><span class="n">bridge</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="n">bridge</span> <span class="o">=</span> <span class="n">other</span><span class="p">.</span><span class="n">bridge</span><span class="o">-&gt;</span><span class="n">clone</span><span class="p">(</span> <span class="p">);</span> <span class="c1">// 复制
+</span><span class="c1"></span>    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">R</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Args</span> <span class="o">&gt;</span>
+<span class="n">R</span> <span class="n">FUNCTION_PTR</span><span class="o">&lt;</span> <span class="n">R</span><span class="p">(</span> <span class="n">Args</span><span class="p">...</span> <span class="p">)</span> <span class="o">&gt;::</span><span class="k">operator</span><span class="p">(</span> <span class="p">)(</span> <span class="n">Args</span><span class="p">...</span> <span class="n">args</span> <span class="p">)</span> <span class="k">const</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">bridge</span><span class="o">-&gt;</span><span class="n">invoke</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span> <span class="n">Args</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">args</span> <span class="p">)...</span> <span class="p">);</span> <span class="c1">// 调用，完美转发
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>bridge/specificfunctorbridge.hpp</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// 真正存储实际的可调用对象，继承自FUNCTOR_BRIDGE，利用多态实现类型的擦除
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">FUNCTOR</span><span class="p">,</span> <span class="k">typename</span> <span class="n">R</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Args</span> <span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">SPECIFIC_FUNCTOR_BRIDGE</span> <span class="o">:</span> <span class="k">public</span> <span class="n">FUNCTOR_BRIDGE</span><span class="o">&lt;</span> <span class="n">R</span><span class="p">,</span> <span class="n">Args</span><span class="p">...</span> <span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">FUNCTOR</span> <span class="n">functor</span><span class="p">;</span>
+
+   <span class="k">public</span><span class="o">:</span>
+    <span class="c1">// 构造
+</span><span class="c1"></span>    <span class="c1">// 这里用了一个单独的FUNCTOR_FWD而不是FUNCTOR，因为有可能FUNCTOR_FWD类型与FUNCTOR
+</span><span class="c1"></span>    <span class="c1">// 不一样，存在隐式转换
+</span><span class="c1"></span>    <span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">FUNCTOR_FWD</span> <span class="o">&gt;</span>
+    <span class="n">SPECIFIC_FUNCTOR_BRIDGE</span><span class="p">(</span> <span class="n">FUNCTOR_FWD</span> <span class="o">&amp;&amp;</span><span class="n">functor</span> <span class="p">)</span>
+        <span class="o">:</span> <span class="n">functor</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span> <span class="n">FUNCTOR_FWD</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">functor</span> <span class="p">)</span> <span class="p">)</span> 
+    <span class="p">{</span>
+    <span class="p">}</span>
+    <span class="k">virtual</span> <span class="n">SPECIFIC_FUNCTOR_BRIDGE</span> <span class="o">*</span><span class="nf">clone</span><span class="p">(</span> <span class="p">)</span> <span class="k">const</span> <span class="k">override</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">SPECIFIC_FUNCTOR_BRIDGE</span><span class="p">(</span> <span class="n">functor</span> <span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">virtual</span> <span class="n">R</span> <span class="nf">invoke</span><span class="p">(</span> <span class="n">Args</span><span class="p">...</span> <span class="n">args</span> <span class="p">)</span> <span class="k">const</span> <span class="k">override</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">functor</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span> <span class="n">Args</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">args</span> <span class="p">)...</span> <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>functionptr-init.hpp</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// 任意类型转换为FUNCTION_PTR
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">R</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Args</span> <span class="o">&gt;</span>
+<span class="k">template</span> <span class="o">&lt;</span> <span class="k">typename</span> <span class="n">F</span> <span class="o">&gt;</span>
+<span class="n">FUNCTION_PTR</span><span class="o">&lt;</span> <span class="n">R</span><span class="p">(</span> <span class="n">Args</span><span class="p">...</span> <span class="p">)</span> <span class="o">&gt;::</span><span class="n">FUNCTION_PTR</span><span class="p">(</span> <span class="n">F</span> <span class="o">&amp;&amp;</span><span class="n">f</span> <span class="p">)</span> <span class="o">:</span> <span class="n">bridge</span><span class="p">(</span> <span class="k">nullptr</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">FUNCTOR</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">decay_t</span><span class="o">&lt;</span> <span class="n">F</span> <span class="o">&gt;</span><span class="p">;</span> <span class="c1">// 类型退化
+</span><span class="c1"></span>    <span class="k">using</span> <span class="n">BRIDGE</span> <span class="o">=</span> <span class="n">SPECIFIC_FUNCTOR_BRIDGE</span><span class="o">&lt;</span> <span class="n">FUNCTOR</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">Args</span><span class="p">...</span> <span class="o">&gt;</span><span class="p">;</span>
+    <span class="n">bridge</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BRIDGE</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span> <span class="n">F</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">f</span> <span class="p">)</span> <span class="p">);</span> <span class="c1">// 生成brige
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>到此基本上FUNCTION_PTR已经实现完成了。</p>
+<h2 id="其他">其他</h2>
+<ul>
+<li>最终版本欠缺一个小功能判断FUNCTION_PTR内部存储的可调用对象是否相等。</li>
+<li>FUNCTION_PTR将所有可调用对象都转换为了一次虚函数的调用，降低了性能。</li>
+<li>每创建一个FUNCTION_PTR都需要一次堆内存分配。</li>
+<li>gcc4.8中的std::function对于小对象不会进行堆内存的分配。</li>
+<li>项目里的实践见timer.hpp：T_TIMER_FACTORY、TIMER_FACTORY、T_TIMER、TIMER。</li>
+</ul>
+]]></description>
+</item><item>
     <title>[读书笔记] 深入探索C&#43;&#43;对象模型 第六章 执行期语意学</title>
     <link>http://coderyang.com/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E5%85%AD%E7%AB%A0-%E6%89%A7%E8%A1%8C%E6%9C%9F%E8%AF%AD%E6%84%8F%E5%AD%A6/</link>
     <pubDate>Sat, 20 Aug 2016 09:15:53 &#43;0000</pubDate>

@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2018-12-29T08:31:58+00:00" />
+<meta property="og:updated_time" content="2021-02-06T15:15:40+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,252 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%B7%B3%E8%B7%83%E8%A1%A8/">redis源码阅读-跳跃表</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-08">2017-07-08</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>跳跃表一种有序数据结构，每个节点维护多个指向其他节点的指针，达到快速访问节点的目的。</p>
+<p>大部分情况下跳跃表的效率可以和平衡数媲美，实现比平衡树简单，不少程序使用跳跃表来代替平衡树。</p>
+<p>跳跃表有时会作为有序集合的实现。以分值排序。</p>
+<h2 id="结构体">结构体</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 跳跃表节点
+</span><span class="c1"></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="p">{</span>
+    <span class="n">robj</span> <span class="o">*</span><span class="n">obj</span><span class="p">;</span> <span class="c1">// 保存的对象
+</span><span class="c1"></span>    <span class="kt">double</span> <span class="n">score</span><span class="p">;</span> <span class="c1">// 分值 跳跃表按照分值进行排序
+</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">backward</span><span class="p">;</span> <span class="c1">// 上一节点
+</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">zskiplistLevel</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">forward</span><span class="p">;</span> <span class="c1">// 前进指针
+</span><span class="c1"></span>        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">span</span><span class="p">;</span> <span class="c1">// 跨度 记录两个节点之间的距离
+</span><span class="c1"></span>    <span class="p">}</span> <span class="n">level</span><span class="p">[];</span> <span class="c1">// 层
+</span><span class="c1"></span><span class="p">}</span> <span class="n">zskiplistNode</span><span class="p">;</span>
+
+<span class="c1">// 跳跃表
+</span><span class="c1"></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">zskiplist</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">header</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span> <span class="c1">// 头、尾指针
+</span><span class="c1"></span>    <span class="n">PORT_ULONG</span> <span class="n">length</span><span class="p">;</span> <span class="c1">// 跳跃表长度
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">level</span><span class="p">;</span> <span class="c1">// 层数最大节点层数
+</span><span class="c1"></span><span class="p">}</span> <span class="n">zskiplist</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="跳跃表的创建">跳跃表的创建</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 创建节点
+</span><span class="c1"></span><span class="n">zskiplistNode</span> <span class="o">*</span><span class="nf">zslCreateNode</span><span class="p">(</span><span class="kt">int</span> <span class="n">level</span><span class="p">,</span> <span class="kt">double</span> <span class="n">score</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 申请内存
+</span><span class="c1"></span>    <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">zn</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">zn</span><span class="p">)</span><span class="o">+</span><span class="n">level</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">zskiplistLevel</span><span class="p">));</span>
+    <span class="n">zn</span><span class="o">-&gt;</span><span class="n">score</span> <span class="o">=</span> <span class="n">score</span><span class="p">;</span> <span class="c1">// 赋值分数
+</span><span class="c1"></span>    <span class="n">zn</span><span class="o">-&gt;</span><span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="p">;</span> <span class="c1">// 设定成员对象
+</span><span class="c1"></span>    <span class="k">return</span> <span class="n">zn</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 创建跳跃表
+</span><span class="c1"></span><span class="n">zskiplist</span> <span class="o">*</span><span class="nf">zslCreate</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">j</span><span class="p">;</span>
+    <span class="n">zskiplist</span> <span class="o">*</span><span class="n">zsl</span><span class="p">;</span>
+
+    <span class="c1">// 申请内存
+</span><span class="c1"></span>    <span class="n">zsl</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">zsl</span><span class="p">));</span>
+    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">level</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 设置层数初始为1
+</span><span class="c1"></span>    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 设置长度初始为0
+</span><span class="c1"></span>
+    <span class="c1">// 创建头节点 层数为32 分数为0
+</span><span class="c1"></span>    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span> <span class="o">=</span> <span class="n">zslCreateNode</span><span class="p">(</span><span class="n">ZSKIPLIST_MAXLEVEL</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="c1">// 将每层的forward指针指向null，跨度0
+</span><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">ZSKIPLIST_MAXLEVEL</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span><span class="o">-&gt;</span><span class="n">level</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">forward</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span><span class="o">-&gt;</span><span class="n">level</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">span</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// 设定backward指向null
+</span><span class="c1"></span>    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span><span class="o">-&gt;</span><span class="n">backward</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">tail</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">zsl</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%B7%B3%E8%B7%83%E8%A1%A8/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AD%97%E5%85%B8/">redis源码阅读-字典</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-06-30">2017-06-30</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>Redis字典由哈希表实现的保存键值对的抽象数据结构。</p>
+<p>实现文件在dict.h\dict.c中。</p>
+<h2 id="哈希表">哈希表</h2>
+<p>Redis字典结构体定义。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictEntry</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">;</span><span class="c1">// key 键
+</span><span class="c1"></span>    <span class="k">union</span> <span class="p">{</span>
+        <span class="kt">void</span> <span class="o">*</span><span class="n">val</span><span class="p">;</span>
+        <span class="n">uint64_t</span> <span class="n">u64</span><span class="p">;</span>
+        <span class="n">int64_t</span> <span class="n">s64</span><span class="p">;</span>
+        <span class="kt">double</span> <span class="n">d</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">v</span><span class="p">;</span><span class="c1">// 值，支持多种类型,使用联合。
+</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">dictEntry</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="c1">// 下一个点 采用链式来解决索引冲突问题
+</span><span class="c1"></span><span class="p">}</span> <span class="n">dictEntry</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictType</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">hashFunction</span><span class="p">)(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span><span class="c1">// hash函数
+</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">keyDup</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span><span class="c1">// key复制函数
+</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">valDup</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span><span class="c1">// value复制函数
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">keyCompare</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key1</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key2</span><span class="p">);</span><span class="c1">// key比较函数
+</span><span class="c1"></span>    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">keyDestructor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span><span class="c1">// key释放函数
+</span><span class="c1"></span>    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">valDestructor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span><span class="c1">// value释放函数
+</span><span class="c1"></span><span class="p">}</span> <span class="n">dictType</span><span class="p">;</span>
+
+<span class="cm">/* This is our hash table structure. Every dictionary has two of this as we
+</span><span class="cm"> * implement incremental rehashing, for the old to the new table. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictht</span> <span class="p">{</span>
+    <span class="n">dictEntry</span> <span class="o">**</span><span class="n">table</span><span class="p">;</span><span class="c1">// 指针的数组头的指针
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">size</span><span class="p">;</span><span class="c1">// 大小
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">sizemask</span><span class="p">;</span><span class="c1">// 大小的掩码 总是等于size-1
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">used</span><span class="p">;</span><span class="c1">// 被使用的节点数
+</span><span class="c1"></span><span class="p">}</span> <span class="n">dictht</span><span class="p">;</span><span class="c1">// hash表
+</span><span class="c1"></span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dict</span> <span class="p">{</span>
+    <span class="n">dictType</span> <span class="o">*</span><span class="n">type</span><span class="p">;</span><span class="c1">// 绑定的函数
+</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">;</span><span class="c1">// 私有数据
+</span><span class="c1"></span>    <span class="n">dictht</span> <span class="n">ht</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span><span class="c1">// hash表，一般只使用[0]，在rehash的时候使用[1]
+</span><span class="c1"></span>    <span class="kt">long</span> <span class="n">rehashidx</span><span class="p">;</span> <span class="c1">// 记录rehash的进度，不进行rehash的时候为-1
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">iterators</span><span class="p">;</span> <span class="cm">/* number of iterators currently running */</span>
+<span class="p">}</span> <span class="n">dict</span><span class="p">;</span><span class="c1">// 字典
+</span><span class="c1"></span>
+<span class="cm">/* If safe is set to 1 this is a safe iterator, that means, you can call
+</span><span class="cm"> * dictAdd, dictFind, and other functions against the dictionary even while
+</span><span class="cm"> * iterating. Otherwise it is a non safe iterator, and only dictNext()
+</span><span class="cm"> * should be called while iterating. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictIterator</span> <span class="p">{</span>
+    <span class="n">dict</span> <span class="o">*</span><span class="n">d</span><span class="p">;</span>
+    <span class="kt">long</span> <span class="n">index</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">table</span><span class="p">,</span> <span class="n">safe</span><span class="p">;</span>
+    <span class="n">dictEntry</span> <span class="o">*</span><span class="n">entry</span><span class="p">,</span> <span class="o">*</span><span class="n">nextEntry</span><span class="p">;</span>
+    <span class="cm">/* unsafe iterator fingerprint for misuse detection. */</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">fingerprint</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">dictIterator</span><span class="p">;</span><span class="c1">// 迭代器
+</span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AD%97%E5%85%B8/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%BC%96%E7%A8%8B%E5%A4%A7%E5%B8%88%E8%AE%BF%E8%B0%88%E5%BD%95/">读书摘录-编程大师访谈录</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-05-04">2017-05-04</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%91%98%E5%BD%95/"><i class="far fa-folder fa-fw"></i>摘录</a></span></div><div class="content"><p>【美】Susan Lammers</p>
+<p>第1篇　查尔斯•西蒙尼
+2017-04-30
+采访者：编程是一种技巧或技能吗？ 西蒙尼：什么是编程？人们对此一直各持己见。有人说它是科学，有人说它是艺术，还有人称之为技能或手艺。我认为这三方面兼而有之。我们喜欢说它蕴含大量艺术成分，但是我们都知道它里面更多的是科学。 孩子们在学校里学习数学，高中毕业时，他们会以为数学就是加法和乘法，甚或代数和微积分。其实，算术，即使简单如加法的运算，背后也有令人难以置信的科学理论作支持。 计算机编程背后也有大量科学理论作支持。例如，哥德尔定理的数学证明冗长而复杂，但是如果借用计算机科学的图灵定理，证明起来不费吹灰之力。信息理论和计算机科学其他领域对数学影响巨大，反之亦然。 编程包含有大量科学，同时，它也有点像手艺。实际上，在许多人看来，编程是一项复杂的技能，这跟工具制造很像，需要精雕细琢。我认为，只要将科学、艺术和技能这三者拿捏得恰到好处，你就能取得一些引人瞩目的成绩。
+2017-04-30
+别人读几段你的源代码，有没有可能断定“这代码是查尔斯·西蒙尼写的”？ 西蒙尼：噢，是的，毫无疑问。是不是我本人写的可能很难分辨，但有一点是确定无疑的：只要看了代码，你就能知道它是不是我的团队写的，或者是不是受我的影响写的。这是因为我从1972年起写的代码都遵循特定的命名规范，许多人称之为“匈牙利命名法”。你一眼就能分辨出哪些代码是受我的影响写出来的，包括Microsoft Word、Multiplan和Bravo，以及其他许多遵循这些规范写成的程序。
+註: 原来是他
+2017-04-30
+进入公司第一天，程序员就会拿到几本书。其中一本是数学家乔治·波利亚写的《怎样解题》。（西蒙尼边说边从他办公桌旁的书柜里取出那本书，翻到某一页。）这两页很重要。这本书的其余内容就是基于这两页展开的。这就像一张问题求解的检查单。这是起飞前、起飞和着陆检查单。它不会教你如何飞行，但是如果不照做，即使你已经懂得怎么飞行，也有可能会坠机身亡。 求解问题时，我们遵循以下四个步骤：首先理解问题，然后拟定计划，接着执行计划，最后回顾整个过程。这样的书我们大概有四本，我觉得我们能使程序员比刚加入公司时变得更加优秀。</p></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%BC%96%E7%A8%8B%E5%A4%A7%E5%B8%88%E8%AE%BF%E8%B0%88%E5%BD%95/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%9D%82%E8%B0%88/">杂谈</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/">读书摘录-调试九法：软硬件错误的排查之道</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-04-30">2017-04-30</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%91%98%E5%BD%95/"><i class="far fa-folder fa-fw"></i>摘录</a></span></div><div class="content"><p>【美】阿甘斯</p>
 <p>第3章 理解系统
@@ -178,66 +424,6 @@
 </div>
 </div></div><div class="post-footer">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E9%93%BE%E8%A1%A8/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2sds/">redis源码阅读-动态字符串sds</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-26">2017-03-26</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>Redis没有使用c语言的字符串结构，自己设计了一个简单的动态字符串。特点是：修改时大小不足则扩容，大小足够直接使用不缩小。末尾使用‘\0’，与c语言字符串兼容。</p>
-<p>sds的源代码在sds.h与sds.c中。</p>
-<h2 id="sds的定义">sds的定义</h2>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="kt">char</span> <span class="o">*</span><span class="n">sds</span><span class="p">;</span><span class="c1">// 兼容C
-</span><span class="c1"></span>
-<span class="k">struct</span> <span class="n">sdshdr</span> <span class="p">{</span>
-    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">len</span><span class="p">;</span><span class="c1">// 字符串长度
-</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">free</span><span class="p">;</span><span class="c1">// 未分配的空间
-</span><span class="c1"></span>    <span class="kt">char</span> <span class="n">buf</span><span class="p">[];</span><span class="c1">// 末尾&#39;/0&#39;的C风格字符串
-</span><span class="c1"></span><span class="p">};</span><span class="c1">// SDS的实际结构，兼容char*则返回buf地址
-</span></code></pre></td></tr></table>
-</div>
-</div><h2 id="sds这样设计的优点">SDS这样设计的优点：</h2>
-<ol>
-<li>重用部分C字符串库函数的函数。</li>
-<li>在常数复杂度的情况下获取字符串长度(以下代码)。</li>
-<li>杜绝缓冲区溢出，通过获取空余空间函数，来进行处理(sdscat函数)。</li>
-<li>减少字符串内存的重分配。不足则分配更大的空间，足够也不减少空间，而是记录新的len、free值。</li>
-<li>二进制兼容。C字符串以空字符结尾，而某些二进制数据中间可能存在空字符。SDS兼容该种数据。</li>
-</ol></div><div class="post-footer">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2sds/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E6%80%9D%E7%BB%B4%E6%96%B9%E5%BC%8F/">读书摘录-程序员的思维方式</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-26">2017-03-26</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%91%98%E5%BD%95/"><i class="far fa-folder fa-fw"></i>摘录</a></span></div><div class="content"><p>2.2 德雷福斯模型的5个阶段</p>
-<p>2017-01-24</p>
-<p>但是，如果给新手提供与情境无关的规则去参照，他们就会变得能干起来。也就是说，需要这种形式的规则：“当X发生时，执行Y。”换言之，需要一份指令清单。
-图2-2　玉米饼食谱，不过你知道需要烹饪多长时间吗
-这就是呼叫中心的工作原理。你可以雇用一大批对当前技术没有很多经验的人，然后让他们按照一个决策树按部就班地执行下去。</p>
-<p>3.3 L型和R型的特征</p>
-<p>2017-02-06</p>
-<p>事实上，综合是一项非常强大的学习技术，以至于麻省理工学院媒体实验室的尼葛洛庞蒂在Don&rsquo;t Dissect the Frog, Build It [Neg94]中建议，真正想要了解一只青蛙，传统的解剖不是办法，更好的方式是构造一只青蛙。
-也就是说，要求学生构造一个具有青蛙特征的生物。这是一种伟大的方式，可以真正了解到，什么使青蛙成之为青蛙，以及青蛙如何适应其特定环境。这是一个综合学习的绝佳例子。</p>
-<p>4.4 收获R型线索</p>
-<p>2017-02-08</p>
-<p>这种方法为什么会起作用？我认为这是因为晨写让毫无防备的大脑倾倒想法。早上刚起床时，你还没有像你想的那样清醒。潜意识仍然占主角。你还没有提起所有防备，也还未适应有限的现实世界。你可以直接连通R型，至少一小会儿。</p>
-<p>2017-02-08</p>
-<p>你需要培养一种非目标驱动的思维方式。正如庞加莱所做，把一切都写在纸上（或者编辑器中，如果你必须得这么做的话），然后不去管它。不要试图思考。记住它，如布朗所说，不要关注它。只要简单地记住它。让事实和问题自由地搅和、浸泡（我们将在8.2节讨论这一话题）</p></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E6%80%9D%E7%BB%B4%E6%96%B9%E5%BC%8F/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%9D%82%E8%B0%88/">杂谈</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">redis源码阅读-内存分配</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-21">2017-03-21</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。</p>
-<h2 id="内存分配器的选择">内存分配器的选择</h2>
-<p>redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。</p></div><div class="post-footer">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">

@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2018-12-29T08:31:58+00:00" />
+<meta property="og:updated_time" content="2021-02-06T15:15:40+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,66 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2sds/">redis源码阅读-动态字符串sds</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-26">2017-03-26</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>Redis没有使用c语言的字符串结构，自己设计了一个简单的动态字符串。特点是：修改时大小不足则扩容，大小足够直接使用不缩小。末尾使用‘\0’，与c语言字符串兼容。</p>
+<p>sds的源代码在sds.h与sds.c中。</p>
+<h2 id="sds的定义">sds的定义</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="kt">char</span> <span class="o">*</span><span class="n">sds</span><span class="p">;</span><span class="c1">// 兼容C
+</span><span class="c1"></span>
+<span class="k">struct</span> <span class="n">sdshdr</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">len</span><span class="p">;</span><span class="c1">// 字符串长度
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">free</span><span class="p">;</span><span class="c1">// 未分配的空间
+</span><span class="c1"></span>    <span class="kt">char</span> <span class="n">buf</span><span class="p">[];</span><span class="c1">// 末尾&#39;/0&#39;的C风格字符串
+</span><span class="c1"></span><span class="p">};</span><span class="c1">// SDS的实际结构，兼容char*则返回buf地址
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="sds这样设计的优点">SDS这样设计的优点：</h2>
+<ol>
+<li>重用部分C字符串库函数的函数。</li>
+<li>在常数复杂度的情况下获取字符串长度(以下代码)。</li>
+<li>杜绝缓冲区溢出，通过获取空余空间函数，来进行处理(sdscat函数)。</li>
+<li>减少字符串内存的重分配。不足则分配更大的空间，足够也不减少空间，而是记录新的len、free值。</li>
+<li>二进制兼容。C字符串以空字符结尾，而某些二进制数据中间可能存在空字符。SDS兼容该种数据。</li>
+</ol></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2sds/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E6%80%9D%E7%BB%B4%E6%96%B9%E5%BC%8F/">读书摘录-程序员的思维方式</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-26">2017-03-26</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%91%98%E5%BD%95/"><i class="far fa-folder fa-fw"></i>摘录</a></span></div><div class="content"><p>2.2 德雷福斯模型的5个阶段</p>
+<p>2017-01-24</p>
+<p>但是，如果给新手提供与情境无关的规则去参照，他们就会变得能干起来。也就是说，需要这种形式的规则：“当X发生时，执行Y。”换言之，需要一份指令清单。
+图2-2　玉米饼食谱，不过你知道需要烹饪多长时间吗
+这就是呼叫中心的工作原理。你可以雇用一大批对当前技术没有很多经验的人，然后让他们按照一个决策树按部就班地执行下去。</p>
+<p>3.3 L型和R型的特征</p>
+<p>2017-02-06</p>
+<p>事实上，综合是一项非常强大的学习技术，以至于麻省理工学院媒体实验室的尼葛洛庞蒂在Don&rsquo;t Dissect the Frog, Build It [Neg94]中建议，真正想要了解一只青蛙，传统的解剖不是办法，更好的方式是构造一只青蛙。
+也就是说，要求学生构造一个具有青蛙特征的生物。这是一种伟大的方式，可以真正了解到，什么使青蛙成之为青蛙，以及青蛙如何适应其特定环境。这是一个综合学习的绝佳例子。</p>
+<p>4.4 收获R型线索</p>
+<p>2017-02-08</p>
+<p>这种方法为什么会起作用？我认为这是因为晨写让毫无防备的大脑倾倒想法。早上刚起床时，你还没有像你想的那样清醒。潜意识仍然占主角。你还没有提起所有防备，也还未适应有限的现实世界。你可以直接连通R型，至少一小会儿。</p>
+<p>2017-02-08</p>
+<p>你需要培养一种非目标驱动的思维方式。正如庞加莱所做，把一切都写在纸上（或者编辑器中，如果你必须得这么做的话），然后不去管它。不要试图思考。记住它，如布朗所说，不要关注它。只要简单地记住它。让事实和问题自由地搅和、浸泡（我们将在8.2节讨论这一话题）</p></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E6%80%9D%E7%BB%B4%E6%96%B9%E5%BC%8F/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%9D%82%E8%B0%88/">杂谈</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">redis源码阅读-内存分配</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-21">2017-03-21</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>redis的内存分配主要就是对malloc和free进行了一层简单的封装。具体的实现在zmalloc.h和zmalloc.c中。</p>
+<h2 id="内存分配器的选择">内存分配器的选择</h2>
+<p>redis支持多种内存分配器，可以选择的分配器tcmalloc、jemalloc、dlmalloc、malloc/malloc.h(apple)，这几个分配器自带内存大小的记录。如果不进行设置，则默认使用malloc进行分配。</p></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/">redis源码阅读-开始</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-21">2017-03-21</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content">自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行阅读的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
 Redis的介绍 redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
@@ -155,347 +215,6 @@ Redis的介绍 redis是一个使用C编写的key-value数据库。性能极高�
 <img src="/img/第一次使用gitlab/22-04-07.jpg" alt=""/></p></div><div class="post-footer">
         <a href="/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%BD%BF%E7%94%A8gitlab/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/gitlab/">gitlab</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">[读书笔记] stl源码剖析 总结</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-11-21">2016-11-21</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content">大致上是将STL源码剖析看过了一篇。 前三章看到比较认真，后面几章就看到比较粗略了。 我想STL的精髓正是在内存配置、迭代器、容器中。 至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。 我的计划是在未来的一小段日子里实现一个小型的stl，所谓实现，可能也不过是重新将sgi的代码打一遍罢了。不过对于整个stl的理解，我相信会更好一些。 之后我应该会更新一些写小型stl遇到的问题和解决方案。 项目的地址： https://github.com/MekaYangyi/STL/</div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">stl源码剖析</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E5%BA%8F%E5%88%97%E5%BC%8F%E5%AE%B9%E5%99%A8/">[读书笔记] stl源码剖析 第四章 序列式容器</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-11-20">2016-11-20</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><p>容器分类
-<img src="/img/20161120124915.png" alt=""/></p>
-<h1 id="vector">vector</h1>
-<p>vector还是比较简单，也就是一个动态数组，提供了些操作，带三个指针，start/finish/end
-核心就是动态调整内存的方法，也就是满了开大一倍空间，拷贝过去。
-push_back等操作都是值语义的，拷贝传进来的内容放入到vector中。
-因为是连续的空间，所有元素连续存储在一整块内存上，迭代器直接用的原始指针。</p>
-<h1 id="list">list</h1>
-<p>list复杂些.
-模型和常见的list是一致的，动态创建节点，插入。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span><span class="lnt">61
-</span><span class="lnt">62
-</span><span class="lnt">63
-</span><span class="lnt">64
-</span><span class="lnt">65
-</span><span class="lnt">66
-</span><span class="lnt">67
-</span><span class="lnt">68
-</span><span class="lnt">69
-</span><span class="lnt">70
-</span><span class="lnt">71
-</span><span class="lnt">72
-</span><span class="lnt">73
-</span><span class="lnt">74
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">struct</span> <span class="nc">_List_node_base</span> <span class="p">{</span>
-  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_next</span><span class="p">;</span>
-  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_prev</span><span class="p">;</span>
-<span class="p">};</span>
-
-<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
-<span class="k">struct</span> <span class="nc">_List_node</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_node_base</span> <span class="p">{</span>
-  <span class="n">_Tp</span> <span class="n">_M_data</span><span class="p">;</span>
-<span class="p">};</span>
-
-<span class="c1">//迭代器base
-</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_iterator_base</span> <span class="p">{</span>
-  <span class="k">typedef</span> <span class="n">size_t</span>                     <span class="n">size_type</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                  <span class="n">difference_type</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">bidirectional_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
-
-  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_node</span><span class="p">;</span><span class="c1">//节点指针
-</span><span class="c1"></span>
-  <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">_List_node_base</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_M_node</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
-  <span class="n">_List_iterator_base</span><span class="p">()</span> <span class="p">{}</span>
-
-  <span class="kt">void</span> <span class="nf">_M_incr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">void</span> <span class="nf">_M_decr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_prev</span><span class="p">;</span> <span class="p">}</span>
-
-  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">==</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">!=</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">};</span>  
-
-<span class="c1">//迭代器,重载了++ -- == * -&gt;等操作
-</span><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ref</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ptr</span><span class="o">&gt;</span>
-<span class="k">struct</span> <span class="nc">_List_iterator</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_iterator_base</span> <span class="p">{</span>
-  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="n">_Tp</span><span class="o">*&gt;</span>             <span class="n">iterator</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">*&gt;</span> <span class="n">const_iterator</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Ref</span><span class="p">,</span><span class="n">_Ptr</span><span class="o">&gt;</span>             <span class="n">_Self</span><span class="p">;</span>
-
-  <span class="k">typedef</span> <span class="n">_Tp</span> <span class="n">value_type</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_Ptr</span> <span class="n">pointer</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_Ref</span> <span class="n">reference</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span> <span class="n">_Node</span><span class="p">;</span>
-
-  <span class="n">_List_iterator</span><span class="p">(</span><span class="n">_Node</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
-  <span class="n">_List_iterator</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="n">_List_iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">iterator</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">)</span> <span class="p">{}</span>
-
-  <span class="n">reference</span> <span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="p">((</span><span class="n">_Node</span><span class="o">*</span><span class="p">)</span> <span class="n">_M_node</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_M_data</span><span class="p">;</span> <span class="p">}</span>
-
-<span class="cp">#ifndef __SGI_STL_NO_ARROW_OPERATOR
-</span><span class="cp"></span>  <span class="n">pointer</span> <span class="k">operator</span><span class="o">-&gt;</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="o">&amp;</span><span class="p">(</span><span class="k">operator</span><span class="o">*</span><span class="p">());</span> <span class="p">}</span>
-<span class="cp">#endif </span><span class="cm">/* __SGI_STL_NO_ARROW_OPERATOR */</span><span class="cp">
-</span><span class="cp"></span>
-  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">++</span><span class="p">()</span> <span class="p">{</span> 
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="n">_Self</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
-    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">--</span><span class="p">()</span> <span class="p">{</span> 
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="n">_Self</span> <span class="k">operator</span><span class="o">--</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
-    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">};</span>
-
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E5%BA%8F%E5%88%97%E5%BC%8F%E5%AE%B9%E5%99%A8/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">stl源码剖析</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/">[读书笔记] stl源码剖析 第三章 迭代器</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-11-17">2016-11-17</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><p>迭代器是一种抽象的设计概念。iterator模式：提供一种方法，使能够依序寻访某个聚合物所含的各个元素，而又无需暴露该聚合物的内部表述方式。</p>
-<h1 id="迭代器的设计思维-stl关键所在">迭代器的设计思维-stl关键所在</h1>
-<p>STL的中心思想在于：将数据容器和算法分开，彼此独立设计。容器和算法的泛型化。
-迭代器就是扮演着粘胶角色。</p>
-<h1 id="迭代器是一种smart-pointer">迭代器是一种smart pointer</h1>
-<p>list迭代器stl的实现</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span><span class="lnt">61
-</span><span class="lnt">62
-</span><span class="lnt">63
-</span><span class="lnt">64
-</span><span class="lnt">65
-</span><span class="lnt">66
-</span><span class="lnt">67
-</span><span class="lnt">68
-</span><span class="lnt">69
-</span><span class="lnt">70
-</span><span class="lnt">71
-</span><span class="lnt">72
-</span><span class="lnt">73
-</span><span class="lnt">74
-</span><span class="lnt">75
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//listnode的基础类
-</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_node_base</span> <span class="p">{</span>
-  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_next</span><span class="p">;</span>
-  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_prev</span><span class="p">;</span>
-<span class="p">};</span>
-<span class="c1">//listnode
-</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="o">&gt;</span>
-<span class="k">struct</span> <span class="nc">_List_node</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_node_base</span> <span class="p">{</span>
-  <span class="n">_Tp</span> <span class="n">_M_data</span><span class="p">;</span>
-<span class="p">};</span>
-
-<span class="c1">//迭代器基础类
-</span><span class="c1"></span><span class="k">struct</span> <span class="nc">_List_iterator_base</span> <span class="p">{</span>
-  <span class="k">typedef</span> <span class="n">size_t</span>                     <span class="n">size_type</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">ptrdiff_t</span>                  <span class="n">difference_type</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">bidirectional_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
-
-  <span class="n">_List_node_base</span><span class="o">*</span> <span class="n">_M_node</span><span class="p">;</span><span class="c1">//包含一个node
-</span><span class="c1"></span>
-  <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">_List_node_base</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_M_node</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
-  <span class="n">_List_iterator_base</span><span class="p">()</span> <span class="p">{}</span>
-
-  <span class="kt">void</span> <span class="nf">_M_incr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_next</span><span class="p">;</span> <span class="p">}</span>
-  <span class="kt">void</span> <span class="nf">_M_decr</span><span class="p">()</span> <span class="p">{</span> <span class="n">_M_node</span> <span class="o">=</span> <span class="n">_M_node</span><span class="o">-&gt;</span><span class="n">_M_prev</span><span class="p">;</span> <span class="p">}</span>
-
-  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">==</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">_List_iterator_base</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">_M_node</span> <span class="o">!=</span> <span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">};</span>  
-<span class="c1">//迭代器
-</span><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_Tp</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ref</span><span class="p">,</span> <span class="k">class</span> <span class="nc">_Ptr</span><span class="o">&gt;</span>
-<span class="k">struct</span> <span class="nc">_List_iterator</span> <span class="o">:</span> <span class="k">public</span> <span class="n">_List_iterator_base</span> <span class="p">{</span>
-  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="n">_Tp</span><span class="o">*&gt;</span>             <span class="n">iterator</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">&amp;</span><span class="p">,</span><span class="k">const</span> <span class="n">_Tp</span><span class="o">*&gt;</span> <span class="n">const_iterator</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_List_iterator</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="p">,</span><span class="n">_Ref</span><span class="p">,</span><span class="n">_Ptr</span><span class="o">&gt;</span>             <span class="n">_Self</span><span class="p">;</span>
-
-  <span class="k">typedef</span> <span class="n">_Tp</span> <span class="n">value_type</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_Ptr</span> <span class="n">pointer</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_Ref</span> <span class="n">reference</span><span class="p">;</span>
-  <span class="k">typedef</span> <span class="n">_List_node</span><span class="o">&lt;</span><span class="n">_Tp</span><span class="o">&gt;</span> <span class="n">_Node</span><span class="p">;</span>
-
-  <span class="n">_List_iterator</span><span class="p">(</span><span class="n">_Node</span><span class="o">*</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">)</span> <span class="p">{}</span>
-  <span class="n">_List_iterator</span><span class="p">()</span> <span class="p">{}</span>
-  <span class="n">_List_iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">iterator</span><span class="o">&amp;</span> <span class="n">__x</span><span class="p">)</span> <span class="o">:</span> <span class="n">_List_iterator_base</span><span class="p">(</span><span class="n">__x</span><span class="p">.</span><span class="n">_M_node</span><span class="p">)</span> <span class="p">{}</span>
-
-  <span class="n">reference</span> <span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="p">((</span><span class="n">_Node</span><span class="o">*</span><span class="p">)</span> <span class="n">_M_node</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">_M_data</span><span class="p">;</span> <span class="p">}</span>
-
-<span class="cp">#ifndef __SGI_STL_NO_ARROW_OPERATOR
-</span><span class="cp"></span>  <span class="n">pointer</span> <span class="k">operator</span><span class="o">-&gt;</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="o">&amp;</span><span class="p">(</span><span class="k">operator</span><span class="o">*</span><span class="p">());</span> <span class="p">}</span>
-<span class="cp">#endif </span><span class="cm">/* __SGI_STL_NO_ARROW_OPERATOR */</span><span class="cp">
-</span><span class="cp"></span>  <span class="c1">//重载了几个操作实现了迭代器，不是很复杂
-</span><span class="c1"></span>  <span class="c1">//++i
-</span><span class="c1"></span>  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">++</span><span class="p">()</span> <span class="p">{</span> 
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="c1">//i++
-</span><span class="c1"></span>  <span class="n">_Self</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
-    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_incr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="n">_Self</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">--</span><span class="p">()</span> <span class="p">{</span> 
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-  <span class="p">}</span>
-  <span class="n">_Self</span> <span class="k">operator</span><span class="o">--</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span> 
-    <span class="n">_Self</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_M_decr</span><span class="p">();</span>
-    <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">};</span>
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%BF%AD%E4%BB%A3%E5%99%A8/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">stl源码剖析</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>

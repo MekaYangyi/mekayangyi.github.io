@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2018-12-29T08:31:58+00:00" />
+<meta property="og:updated_time" content="2021-02-06T15:15:40+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,543 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%AE%A2%E9%98%85%E4%B8%8E%E5%8F%91%E5%B8%83/">Redis源码阅读-订阅与发布</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-12">2017-07-12</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>Redis的发布与订阅主要是实现客户端订阅一个频道或者模式，当某客户端向一个频道发送消息时，该频道或者匹配模式订阅者都能够收到消息。</p>
+<h2 id="频道的订阅与退订">频道的订阅与退订</h2>
+<p>Redis在服务器结构体中的pubsub_channels字典中保存了所有的频道订阅关系。pubsub_channels键为频道，值为订阅的客户端组成的链表。</p>
+<p>客户端结构体的pubsub_channels保存了客户端订阅的所有频道，pubsub_channels的键为频道，值为空。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">redisServer</span> <span class="p">{</span>
+  <span class="c1">// ...
+</span><span class="c1"></span>  <span class="n">dict</span> <span class="o">*</span><span class="n">pubsub_channels</span><span class="p">;</span>  <span class="c1">// 保存所有的频道订阅关系
+</span><span class="c1"></span>  <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">redisClient</span> <span class="p">{</span>
+  <span class="c1">// ...
+</span><span class="c1"></span>  <span class="n">dict</span> <span class="o">*</span><span class="n">pubsub_channels</span><span class="p">;</span> <span class="c1">// 记录客户端订阅的频道
+</span><span class="c1"></span>  <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="订阅">订阅</h2>
+<p>源码如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 订阅命令处理函数
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">subscribeCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">j</span><span class="p">;</span>
+
+    <span class="c1">// 遍历指令中的所有频道
+</span><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">argc</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">pubsubSubscribeChannel</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">argv</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+    <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_PUBSUB</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 设置客户端c订阅频道channel
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">pubsubSubscribeChannel</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">channel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">dictEntry</span> <span class="o">*</span><span class="n">de</span><span class="p">;</span>
+    <span class="n">list</span> <span class="o">*</span><span class="n">clients</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">retval</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="cm">/* Add the channel to the client -&gt; channels hash table */</span>
+    <span class="c1">// 将channels加倒c-&gt;c-&gt;pubsub_channels的字典里
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">dictAdd</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">pubsub_channels</span><span class="p">,</span><span class="n">channel</span><span class="p">,</span><span class="nb">NULL</span><span class="p">)</span> <span class="o">==</span> <span class="n">DICT_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">retval</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="n">incrRefCount</span><span class="p">(</span><span class="n">channel</span><span class="p">);</span>
+        <span class="cm">/* Add the client to the channel -&gt; list of clients hash table */</span>
+        <span class="c1">// 找出服务器中的频道
+</span><span class="c1"></span>        <span class="n">de</span> <span class="o">=</span> <span class="n">dictFind</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">pubsub_channels</span><span class="p">,</span><span class="n">channel</span><span class="p">);</span>
+        
+        <span class="c1">// 不存在就添加一个频道
+</span><span class="c1"></span>        <span class="c1">// 获取客户端链表
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">de</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">clients</span> <span class="o">=</span> <span class="n">listCreate</span><span class="p">();</span>
+            <span class="n">dictAdd</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">pubsub_channels</span><span class="p">,</span><span class="n">channel</span><span class="p">,</span><span class="n">clients</span><span class="p">);</span>
+            <span class="n">incrRefCount</span><span class="p">(</span><span class="n">channel</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">clients</span> <span class="o">=</span> <span class="n">dictGetVal</span><span class="p">(</span><span class="n">de</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 添加到客户端链表尾部
+</span><span class="c1"></span>        <span class="n">listAddNodeTail</span><span class="p">(</span><span class="n">clients</span><span class="p">,</span><span class="n">c</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="cm">/* Notify the client */</span>
+    <span class="c1">// 回复客户端
+</span><span class="c1"></span>    <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">mbulkhdr</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span>
+    <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">subscribebulk</span><span class="p">);</span>
+    <span class="n">addReplyBulk</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">channel</span><span class="p">);</span>
+    <span class="n">addReplyLongLong</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">clientSubscriptionsCount</span><span class="p">(</span><span class="n">c</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%AE%A2%E9%98%85%E4%B8%8E%E5%8F%91%E5%B8%83/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/">redis源码阅读-RDB持久化</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-12">2017-07-12</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>Redis是一个内存数据库，数据存储在内存之中。有一个问题就是如果数据不存储到硬盘，那么在服务器进程退出之后，服务器中所有的数据库数据就会丢失。</p>
+<p>Redis为了解决这个问题，提供了持久化功能，目前有两种一种是RDB持久化，一种是AOF持久化。</p>
+<p>RDB持久化是生成一个RDB文件，该文件是一个经过压缩的二进制文件，通过该文件可以还原数据库的状态。</p>
+<h2 id="rdb文件的保存命令">RDB文件的保存命令</h2>
+<p>Redis有两个命令可以生成RDB文件一个是SAVE，一个是BGSAVE。
+SAVE命令调用saveCommand进行处理</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">saveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 判断是否正在执行BGSAVE，是则退出
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Background save already in progress&#34;</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">//调用rdbSave生成RDB文件
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">rdbSave</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_filename</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">ok</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">err</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>BGSAVE调用bgsaveCommand进行处理</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">bgsaveCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 判断是否已经在执行BGSAVE
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Background save already in progress&#34;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">aof_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        
+    <span class="c1">// 判断是否在执行BGREWRIEAOF
+</span><span class="c1"></span>        <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Can&#39;t BGSAVE while AOF log rewriting is in progress&#34;</span><span class="p">);</span>
+    
+    <span class="c1">// 执行rdbSaveBackground 生成RDB文件
+</span><span class="c1"></span>    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">rdbSaveBackground</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_filename</span><span class="p">)</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReplyStatus</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;Background saving started&#34;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">err</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">rdbSaveBackground</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">filename</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">pid_t</span> <span class="n">childpid</span><span class="p">;</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">start</span><span class="p">;</span>
+
+    <span class="c1">// 如果BGSAVE正在执行直接返回
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+
+    <span class="c1">// 获取dirty数据 执行时间
+</span><span class="c1"></span>    <span class="n">server</span><span class="p">.</span><span class="n">dirty_before_bgsave</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="n">dirty</span><span class="p">;</span>
+    <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_try</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="c1">// fork() 开始前时间
+</span><span class="c1"></span>    <span class="n">start</span> <span class="o">=</span> <span class="n">ustime</span><span class="p">();</span>
+
+    <span class="c1">// 调用fork，克隆该进程
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">((</span><span class="n">childpid</span> <span class="o">=</span> <span class="n">fork</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">retval</span><span class="p">;</span>
+
+        <span class="cm">/* Child */</span>
+        <span class="n">closeListeningSockets</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="n">redisSetProcTitle</span><span class="p">(</span><span class="s">&#34;redis-rdb-bgsave&#34;</span><span class="p">);</span>
+
+        <span class="c1">// 执行保存操作
+</span><span class="c1"></span>        <span class="n">retval</span> <span class="o">=</span> <span class="n">rdbSave</span><span class="p">(</span><span class="n">filename</span><span class="p">);</span>
+
+        <span class="c1">// 打印 copy-on-write 时使用的内存数
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">retval</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">size_t</span> <span class="n">private_dirty</span> <span class="o">=</span> <span class="n">zmalloc_get_private_dirty</span><span class="p">();</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">private_dirty</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_NOTICE</span><span class="p">,</span>
+                    <span class="s">&#34;RDB: %zu MB of memory used by copy-on-write&#34;</span><span class="p">,</span>
+                    <span class="n">private_dirty</span><span class="o">/</span><span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">// 向父进程发送信号
+</span><span class="c1"></span>        <span class="n">exitFromChild</span><span class="p">((</span><span class="n">retval</span> <span class="o">==</span> <span class="n">REDIS_OK</span><span class="p">)</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="cm">/* Parent */</span>
+
+        <span class="c1">// 计算 fork() 执行的时间
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">stat_fork_time</span> <span class="o">=</span> <span class="n">ustime</span><span class="p">()</span><span class="o">-</span><span class="n">start</span><span class="p">;</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">stat_fork_rate</span> <span class="o">=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span> <span class="n">zmalloc_used_memory</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000000</span> <span class="o">/</span> <span class="n">server</span><span class="p">.</span><span class="n">stat_fork_time</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">);</span> <span class="cm">/* GB per second. */</span>
+        <span class="n">latencyAddSampleIfNeeded</span><span class="p">(</span><span class="s">&#34;fork&#34;</span><span class="p">,</span><span class="n">server</span><span class="p">.</span><span class="n">stat_fork_time</span><span class="o">/</span><span class="mi">1000</span><span class="p">);</span>
+        
+        <span class="c1">// 执行fork()错误信息
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">childpid</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">server</span><span class="p">.</span><span class="n">lastbgsave_status</span> <span class="o">=</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+            <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_WARNING</span><span class="p">,</span><span class="s">&#34;Can&#39;t save in background: fork: %s&#34;</span><span class="p">,</span>
+                <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+            <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">redisLog</span><span class="p">(</span><span class="n">REDIS_NOTICE</span><span class="p">,</span><span class="s">&#34;Background saving started by pid %d&#34;</span><span class="p">,</span><span class="n">childpid</span><span class="p">);</span>
+        
+        <span class="c1">// 记录数据库开始BGSAVE时间
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">rdb_save_time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+
+        <span class="c1">// 子进程ID 类型
+</span><span class="c1"></span>        <span class="n">server</span><span class="p">.</span><span class="n">rdb_child_pid</span> <span class="o">=</span> <span class="n">childpid</span><span class="p">;</span>
+        <span class="n">server</span><span class="p">.</span><span class="n">rdb_child_type</span> <span class="o">=</span> <span class="n">REDIS_RDB_CHILD_TYPE_DISK</span><span class="p">;</span>
+
+        <span class="c1">// 关闭自动Rehash
+</span><span class="c1"></span>        <span class="n">updateDictResizePolicy</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span> <span class="cm">/* unreached */</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-rdb%E6%8C%81%E4%B9%85%E5%8C%96/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B0%E6%8D%AE%E5%BA%93/">redis源码阅读-服务器</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-10">2017-07-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><h2 id="服务器">服务器</h2>
+<p>redis运行存在一个redis服务器结构，一个服务器中保存着n个数据库。</p>
+<p>dbnum由服务器配置决定，默认值为16。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">redisServer</span> <span class="p">{</span>
+    <span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">;</span>  <span class="c1">// Redis的数据库
+</span><span class="c1"></span>    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">dbnum</span><span class="p">;</span>  <span class="c1">// 表明数据库的数量
+</span><span class="c1"></span>    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">redisDb</span> <span class="p">{</span>
+    <span class="n">dict</span> <span class="o">*</span><span class="n">dict</span><span class="p">;</span>                 <span class="cm">/* 数据库键字典 */</span>
+    <span class="n">dict</span> <span class="o">*</span><span class="n">expires</span><span class="p">;</span>              <span class="cm">/* 键过期时间字典 */</span>
+    <span class="n">dict</span> <span class="o">*</span><span class="n">blocking_keys</span><span class="p">;</span>        <span class="cm">/* 处于阻塞状态的键 */</span>
+    <span class="n">dict</span> <span class="o">*</span><span class="n">ready_keys</span><span class="p">;</span>           <span class="cm">/* 可以解除阻塞的键 */</span>
+    <span class="n">dict</span> <span class="o">*</span><span class="n">watched_keys</span><span class="p">;</span>         <span class="cm">/* 被watch的键 */</span>
+    <span class="k">struct</span> <span class="n">evictionPoolEntry</span> <span class="o">*</span><span class="n">eviction_pool</span><span class="p">;</span>    <span class="cm">/* Eviction pool of keys */</span>
+    <span class="kt">int</span> <span class="n">id</span><span class="p">;</span>                     <span class="cm">/* 数据库编号 */</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">avg_ttl</span><span class="p">;</span>          <span class="cm">/* 数据库键的平均时间*/</span>
+<span class="p">}</span> <span class="n">redisDb</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="切换数据库">切换数据库</h2>
+<p>每个redis客户端都有自己的目标数据库，当客户端执行数据库读写命令，目标数据库是这些命令的操作对象。</p>
+<p>redis提供select命令来切换数据库，redisClient</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">redisClient</span> <span class="p">{</span> 
+    <span class="kt">int</span> <span class="n">fd</span><span class="p">;</span>  <span class="c1">// 套接字描述符
+</span><span class="c1"></span>    <span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">;</span> <span class="c1">// 当前正在使用的数据库
+</span><span class="c1"></span>    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kt">int</span> <span class="n">selectDb</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 校验id
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">id</span> <span class="o">&gt;=</span> <span class="n">server</span><span class="p">.</span><span class="n">dbnum</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">REDIS_ERR</span><span class="p">;</span>
+
+    <span class="c1">// 切换客户端数据库
+</span><span class="c1"></span>    <span class="n">c</span><span class="o">-&gt;</span><span class="n">db</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">server</span><span class="p">.</span><span class="n">db</span><span class="p">[</span><span class="n">id</span><span class="p">];</span>
+
+    <span class="k">return</span> <span class="n">REDIS_OK</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="数据库键空间">数据库键空间</h2>
+<p>Redis数据库存放的数据都是以键值对形式存在，redisDB结构的dict字典保存数据库中的所有键值对，这个字典被成为键空间。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c">
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">redisDb</span> <span class="p">{</span>
+    <span class="n">dict</span> <span class="o">*</span><span class="n">dict</span><span class="p">;</span>                 <span class="cm">/* 数据库键字典 */</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span> <span class="n">redisDb</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>键空间的键就是数据库的键，每个键都是一个字符串对象。</p>
+<p>键空间的值就是数据库的值，每个值可以是字符串对象、列表对象、哈希表对象、集合对象、有序集合对象中任意一种。</p>
+<h2 id="键空间的操作">键空间的操作</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="cm">/* db.c -- Keyspace access API */</span>
+<span class="kt">int</span> <span class="nf">removeExpire</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span><span class="c1">// 移除键的过期时间
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">propagateExpire</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">expireIfNeeded</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 检查是否过期，是则删除键
+</span><span class="c1"></span><span class="kt">long</span> <span class="kt">long</span> <span class="nf">getExpire</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 获取过期时间
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">setExpire</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">when</span><span class="p">);</span> <span class="c1">// 设定过期时间
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">lookupKey</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 从db中取出键key的值
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">lookupKeyRead</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 从db中取出键key的值
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">lookupKeyWrite</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 从db中取出键key的值
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">lookupKeyReadOrReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">reply</span><span class="p">);</span> <span class="c1">// 从db中取出键key的值
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">lookupKeyWriteOrReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">reply</span><span class="p">);</span><span class="c1">// 从db中取出键key的值
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">dbAdd</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">val</span><span class="p">);</span><span class="c1">// 尝试将键值对key\val添加到数据库中
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">dbOverwrite</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">val</span><span class="p">);</span> <span class="c1">// 重写指定键的值,键不存在的话终止
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">setKey</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">val</span><span class="p">);</span><span class="c1">// 设定指定键的值，不管存不存在
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">dbExists</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 判断指定键是否存在  
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">dbRandomKey</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">);</span> <span class="c1">// 随机从数据库中取出一个键，并以字符串对象的方式返回这个键
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">dbDelete</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 从数据库中删除给定的键
+</span><span class="c1"></span><span class="n">robj</span> <span class="o">*</span><span class="nf">dbUnshareStringValue</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">);</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="nf">emptyDb</span><span class="p">(</span><span class="kt">void</span><span class="p">(</span><span class="n">callback</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">));</span><span class="c1">// 情况所有数据
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">selectDb</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="kt">int</span> <span class="n">id</span><span class="p">);</span> <span class="c1">// 切换db
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">signalModifiedKey</span><span class="p">(</span><span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">signalFlushedDb</span><span class="p">(</span><span class="kt">int</span> <span class="n">dbid</span><span class="p">);</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">getKeysInSlot</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">hashslot</span><span class="p">,</span> <span class="n">robj</span> <span class="o">**</span><span class="n">keys</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">count</span><span class="p">);</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">countKeysInSlot</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">hashslot</span><span class="p">);</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">delKeysInSlot</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">hashslot</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">verifyClusterConfigWithData</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">scanGenericCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">cursor</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">parseScanCursorOrReply</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">cursor</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B0%E6%8D%AE%E5%BA%93/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/">redis源码阅读-对象</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-09">2017-07-09</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>之前阅读了redis用到的主要的数据结构，这些数据结构是redis对象基础。redis在这些基础数据结构之上创建了一个对象系统，这个系统包含字符串对象、列表对象、哈希对象、集合对象和有序集合对象五种类型的对象。</p>
 <p>redis执行命令前，先判断命令是否能够执行给定命令。根据不同场合选择使用不同的数据结构。</p>
@@ -331,252 +868,6 @@ address                                |                          |        |
 </div></div><div class="post-footer">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%B7%B3%E8%B7%83%E8%A1%A8/">redis源码阅读-跳跃表</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-08">2017-07-08</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>跳跃表一种有序数据结构，每个节点维护多个指向其他节点的指针，达到快速访问节点的目的。</p>
-<p>大部分情况下跳跃表的效率可以和平衡数媲美，实现比平衡树简单，不少程序使用跳跃表来代替平衡树。</p>
-<p>跳跃表有时会作为有序集合的实现。以分值排序。</p>
-<h2 id="结构体">结构体</h2>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 跳跃表节点
-</span><span class="c1"></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="p">{</span>
-    <span class="n">robj</span> <span class="o">*</span><span class="n">obj</span><span class="p">;</span> <span class="c1">// 保存的对象
-</span><span class="c1"></span>    <span class="kt">double</span> <span class="n">score</span><span class="p">;</span> <span class="c1">// 分值 跳跃表按照分值进行排序
-</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">backward</span><span class="p">;</span> <span class="c1">// 上一节点
-</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">zskiplistLevel</span> <span class="p">{</span>
-        <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">forward</span><span class="p">;</span> <span class="c1">// 前进指针
-</span><span class="c1"></span>        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">span</span><span class="p">;</span> <span class="c1">// 跨度 记录两个节点之间的距离
-</span><span class="c1"></span>    <span class="p">}</span> <span class="n">level</span><span class="p">[];</span> <span class="c1">// 层
-</span><span class="c1"></span><span class="p">}</span> <span class="n">zskiplistNode</span><span class="p">;</span>
-
-<span class="c1">// 跳跃表
-</span><span class="c1"></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">zskiplist</span> <span class="p">{</span>
-    <span class="k">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">header</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span> <span class="c1">// 头、尾指针
-</span><span class="c1"></span>    <span class="n">PORT_ULONG</span> <span class="n">length</span><span class="p">;</span> <span class="c1">// 跳跃表长度
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">level</span><span class="p">;</span> <span class="c1">// 层数最大节点层数
-</span><span class="c1"></span><span class="p">}</span> <span class="n">zskiplist</span><span class="p">;</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="跳跃表的创建">跳跃表的创建</h2>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 创建节点
-</span><span class="c1"></span><span class="n">zskiplistNode</span> <span class="o">*</span><span class="nf">zslCreateNode</span><span class="p">(</span><span class="kt">int</span> <span class="n">level</span><span class="p">,</span> <span class="kt">double</span> <span class="n">score</span><span class="p">,</span> <span class="n">robj</span> <span class="o">*</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// 申请内存
-</span><span class="c1"></span>    <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">zn</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">zn</span><span class="p">)</span><span class="o">+</span><span class="n">level</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">zskiplistLevel</span><span class="p">));</span>
-    <span class="n">zn</span><span class="o">-&gt;</span><span class="n">score</span> <span class="o">=</span> <span class="n">score</span><span class="p">;</span> <span class="c1">// 赋值分数
-</span><span class="c1"></span>    <span class="n">zn</span><span class="o">-&gt;</span><span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="p">;</span> <span class="c1">// 设定成员对象
-</span><span class="c1"></span>    <span class="k">return</span> <span class="n">zn</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// 创建跳跃表
-</span><span class="c1"></span><span class="n">zskiplist</span> <span class="o">*</span><span class="nf">zslCreate</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kt">int</span> <span class="n">j</span><span class="p">;</span>
-    <span class="n">zskiplist</span> <span class="o">*</span><span class="n">zsl</span><span class="p">;</span>
-
-    <span class="c1">// 申请内存
-</span><span class="c1"></span>    <span class="n">zsl</span> <span class="o">=</span> <span class="n">zmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">zsl</span><span class="p">));</span>
-    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">level</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 设置层数初始为1
-</span><span class="c1"></span>    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 设置长度初始为0
-</span><span class="c1"></span>
-    <span class="c1">// 创建头节点 层数为32 分数为0
-</span><span class="c1"></span>    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span> <span class="o">=</span> <span class="n">zslCreateNode</span><span class="p">(</span><span class="n">ZSKIPLIST_MAXLEVEL</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>
-
-    <span class="c1">// 将每层的forward指针指向null，跨度0
-</span><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">ZSKIPLIST_MAXLEVEL</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span><span class="o">-&gt;</span><span class="n">level</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">forward</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-        <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span><span class="o">-&gt;</span><span class="n">level</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">span</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="c1">// 设定backward指向null
-</span><span class="c1"></span>    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">header</span><span class="o">-&gt;</span><span class="n">backward</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    <span class="n">zsl</span><span class="o">-&gt;</span><span class="n">tail</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    <span class="k">return</span> <span class="n">zsl</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%B7%B3%E8%B7%83%E8%A1%A8/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AD%97%E5%85%B8/">redis源码阅读-字典</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-06-30">2017-06-30</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>Redis字典由哈希表实现的保存键值对的抽象数据结构。</p>
-<p>实现文件在dict.h\dict.c中。</p>
-<h2 id="哈希表">哈希表</h2>
-<p>Redis字典结构体定义。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictEntry</span> <span class="p">{</span>
-    <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">;</span><span class="c1">// key 键
-</span><span class="c1"></span>    <span class="k">union</span> <span class="p">{</span>
-        <span class="kt">void</span> <span class="o">*</span><span class="n">val</span><span class="p">;</span>
-        <span class="n">uint64_t</span> <span class="n">u64</span><span class="p">;</span>
-        <span class="n">int64_t</span> <span class="n">s64</span><span class="p">;</span>
-        <span class="kt">double</span> <span class="n">d</span><span class="p">;</span>
-    <span class="p">}</span> <span class="n">v</span><span class="p">;</span><span class="c1">// 值，支持多种类型,使用联合。
-</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">dictEntry</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="c1">// 下一个点 采用链式来解决索引冲突问题
-</span><span class="c1"></span><span class="p">}</span> <span class="n">dictEntry</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictType</span> <span class="p">{</span>
-    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">hashFunction</span><span class="p">)(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span><span class="c1">// hash函数
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">keyDup</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span><span class="c1">// key复制函数
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">valDup</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span><span class="c1">// value复制函数
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">keyCompare</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key1</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key2</span><span class="p">);</span><span class="c1">// key比较函数
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">keyDestructor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span><span class="c1">// key释放函数
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">valDestructor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span><span class="c1">// value释放函数
-</span><span class="c1"></span><span class="p">}</span> <span class="n">dictType</span><span class="p">;</span>
-
-<span class="cm">/* This is our hash table structure. Every dictionary has two of this as we
-</span><span class="cm"> * implement incremental rehashing, for the old to the new table. */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictht</span> <span class="p">{</span>
-    <span class="n">dictEntry</span> <span class="o">**</span><span class="n">table</span><span class="p">;</span><span class="c1">// 指针的数组头的指针
-</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">size</span><span class="p">;</span><span class="c1">// 大小
-</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">sizemask</span><span class="p">;</span><span class="c1">// 大小的掩码 总是等于size-1
-</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">used</span><span class="p">;</span><span class="c1">// 被使用的节点数
-</span><span class="c1"></span><span class="p">}</span> <span class="n">dictht</span><span class="p">;</span><span class="c1">// hash表
-</span><span class="c1"></span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dict</span> <span class="p">{</span>
-    <span class="n">dictType</span> <span class="o">*</span><span class="n">type</span><span class="p">;</span><span class="c1">// 绑定的函数
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">;</span><span class="c1">// 私有数据
-</span><span class="c1"></span>    <span class="n">dictht</span> <span class="n">ht</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span><span class="c1">// hash表，一般只使用[0]，在rehash的时候使用[1]
-</span><span class="c1"></span>    <span class="kt">long</span> <span class="n">rehashidx</span><span class="p">;</span> <span class="c1">// 记录rehash的进度，不进行rehash的时候为-1
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">iterators</span><span class="p">;</span> <span class="cm">/* number of iterators currently running */</span>
-<span class="p">}</span> <span class="n">dict</span><span class="p">;</span><span class="c1">// 字典
-</span><span class="c1"></span>
-<span class="cm">/* If safe is set to 1 this is a safe iterator, that means, you can call
-</span><span class="cm"> * dictAdd, dictFind, and other functions against the dictionary even while
-</span><span class="cm"> * iterating. Otherwise it is a non safe iterator, and only dictNext()
-</span><span class="cm"> * should be called while iterating. */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">dictIterator</span> <span class="p">{</span>
-    <span class="n">dict</span> <span class="o">*</span><span class="n">d</span><span class="p">;</span>
-    <span class="kt">long</span> <span class="n">index</span><span class="p">;</span>
-    <span class="kt">int</span> <span class="n">table</span><span class="p">,</span> <span class="n">safe</span><span class="p">;</span>
-    <span class="n">dictEntry</span> <span class="o">*</span><span class="n">entry</span><span class="p">,</span> <span class="o">*</span><span class="n">nextEntry</span><span class="p">;</span>
-    <span class="cm">/* unsafe iterator fingerprint for misuse detection. */</span>
-    <span class="kt">long</span> <span class="kt">long</span> <span class="n">fingerprint</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">dictIterator</span><span class="p">;</span><span class="c1">// 迭代器
-</span></code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AD%97%E5%85%B8/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%BC%96%E7%A8%8B%E5%A4%A7%E5%B8%88%E8%AE%BF%E8%B0%88%E5%BD%95/">读书摘录-编程大师访谈录</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-05-04">2017-05-04</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%91%98%E5%BD%95/"><i class="far fa-folder fa-fw"></i>摘录</a></span></div><div class="content"><p>【美】Susan Lammers</p>
-<p>第1篇　查尔斯•西蒙尼
-2017-04-30
-采访者：编程是一种技巧或技能吗？ 西蒙尼：什么是编程？人们对此一直各持己见。有人说它是科学，有人说它是艺术，还有人称之为技能或手艺。我认为这三方面兼而有之。我们喜欢说它蕴含大量艺术成分，但是我们都知道它里面更多的是科学。 孩子们在学校里学习数学，高中毕业时，他们会以为数学就是加法和乘法，甚或代数和微积分。其实，算术，即使简单如加法的运算，背后也有令人难以置信的科学理论作支持。 计算机编程背后也有大量科学理论作支持。例如，哥德尔定理的数学证明冗长而复杂，但是如果借用计算机科学的图灵定理，证明起来不费吹灰之力。信息理论和计算机科学其他领域对数学影响巨大，反之亦然。 编程包含有大量科学，同时，它也有点像手艺。实际上，在许多人看来，编程是一项复杂的技能，这跟工具制造很像，需要精雕细琢。我认为，只要将科学、艺术和技能这三者拿捏得恰到好处，你就能取得一些引人瞩目的成绩。
-2017-04-30
-别人读几段你的源代码，有没有可能断定“这代码是查尔斯·西蒙尼写的”？ 西蒙尼：噢，是的，毫无疑问。是不是我本人写的可能很难分辨，但有一点是确定无疑的：只要看了代码，你就能知道它是不是我的团队写的，或者是不是受我的影响写的。这是因为我从1972年起写的代码都遵循特定的命名规范，许多人称之为“匈牙利命名法”。你一眼就能分辨出哪些代码是受我的影响写出来的，包括Microsoft Word、Multiplan和Bravo，以及其他许多遵循这些规范写成的程序。
-註: 原来是他
-2017-04-30
-进入公司第一天，程序员就会拿到几本书。其中一本是数学家乔治·波利亚写的《怎样解题》。（西蒙尼边说边从他办公桌旁的书柜里取出那本书，翻到某一页。）这两页很重要。这本书的其余内容就是基于这两页展开的。这就像一张问题求解的检查单。这是起飞前、起飞和着陆检查单。它不会教你如何飞行，但是如果不照做，即使你已经懂得怎么飞行，也有可能会坠机身亡。 求解问题时，我们遵循以下四个步骤：首先理解问题，然后拟定计划，接着执行计划，最后回顾整个过程。这样的书我们大概有四本，我觉得我们能使程序员比刚加入公司时变得更加优秀。</p></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E7%BC%96%E7%A8%8B%E5%A4%A7%E5%B8%88%E8%AE%BF%E8%B0%88%E5%BD%95/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%9D%82%E8%B0%88/">杂谈</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>

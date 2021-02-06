@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2018-12-29T08:31:58+00:00" />
+<meta property="og:updated_time" content="2021-02-06T15:15:40+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,149 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/">[读书笔记] sicp 第三章 模块化 对象和状态</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><p>有效的程序综合还需要一些组织原则，它们能够指导我们系统化地完成系统的整体设计。特别的需要一些能够帮助我们构造起模块化的大型系统策略，也就是说，使这些系统能够“自然地”划分为一些具有内聚力的部分，使这些部分可以分别进行开发和维护。
+有一种非常强有力的设计策略，特别适合用于构造那类模拟真实物理系统的程序，那就是基于被模拟程序的结构去设计程序的结构。那么有关的物理系统里的每一个对象，我们构造起一个与之对象的计算对象；对该系统里的每种活动，我们在自己的计算系统里顶一种符号操作。采用这一策略时的希望是，在需要针对系统中的新对象或者新活动扩充对应的计算模型时候，我们能够不必对程序的组织方面做得很成功，那么在需要添加新特城或者排除旧东西里的错误时候，就只需要在系统里的一些小局部中工作。
+本章研究两种特点鲜明的策略。第一种策略将注意力集中在对象上，将大型系统看成一大批对象，它们的行为可能随着时间的进展而不断的变化。另一种组织策略将注意力集中在流过的系统的信息流上，非常像电子工程师观察一个信号处理系统。
+对于对象途径而言，我们必须关注计算对象可以怎样变化而又同时保持其标识。这将迫使我们抛弃老的计算的代换模型，转向更机械式的，理论上也更不同意把握的计算的环境模型。在处理对象、变化和标识时，各种困难的基本根源在于我们需要在这一计算模型中与时间搏斗。如果允许程序并发指向的可能性，事情会变得更困难许多。流方式特别能用于松解在我们模型中对时间的模拟与计算机求值过程中的各种时间发生的顺序。我们将通过一种称为延时求值的技术做到这一点。</p>
+<h1 id="赋值和局部状态">赋值和局部状态</h1>
+<p>一个由许多对象组成的系统里，其中的这些对象极少会是完全独立的。每个对象都可能通过交互作用，影响其他对象的状态，所谓交互就是建立起一个对象的状态变量与其他对象的状态变量之间的联系。确实如果一个系统中的状态变量可以分组，形成一些内部紧密结合的子系统，每个子系统与其他子系统之间只存在松散的练习，此时将这个系统看作是由一些独立对象组成的观点就会特别有用。
+对于一个系统的这种观点，有可能成为组织这一系统的计算模型的有力框架。要使这样的一个模型成为模块化的，就要求它能够分解为一批计算对象，使它们能够模拟系统里的实际对象。每个计算对象必须有它自己的一些局部状态变量，用于描述实际对象的状态。对于被模拟系统里的对象的状态是随着时间的变化的，与它们对象的计算对象的状态也必须变化。</p></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%B8%A6%E6%9C%89%E9%80%9A%E7%94%A8%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%9A%84%E7%B3%BB%E7%BB%9F/">[读书笔记] sicp 第二章 带有通用型操作的系统</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="通用型算术运算">通用型算术运算</h1>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">add</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">apply-generic</span> <span class="ss">&#39;add</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">sub</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">apply-generic</span> <span class="ss">&#39;sub</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">mul</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">apply-generic</span> <span class="ss">&#39;mul</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">div</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">apply-generic</span> <span class="ss">&#39;div</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">install-scheme-number-package</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">tag</span> <span class="nv">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">attach-tag</span> <span class="ss">&#39;scheme-number</span> <span class="nv">x</span><span class="p">))</span>
+  <span class="p">(</span><span class="nv">put</span> <span class="ss">&#39;add</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">scheme-number</span> <span class="nv">scheme-number</span><span class="p">)</span>
+       <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">tag</span> <span class="p">(</span><span class="nf">+</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nv">put</span> <span class="ss">&#39;sub</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">scheme-number</span> <span class="nv">scheme-number</span><span class="p">)</span>
+       <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">tag</span> <span class="p">(</span><span class="nf">-</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nv">put</span> <span class="ss">&#39;mul</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">scheme-number</span> <span class="nv">scheme-number</span><span class="p">)</span>
+       <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">tag</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nv">put</span> <span class="ss">&#39;div</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">scheme-number</span> <span class="nv">scheme-number</span><span class="p">)</span>
+       <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nv">tag</span> <span class="p">(</span><span class="nf">/</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nv">put</span> <span class="ss">&#39;make</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">scheme-number</span> <span class="nv">scheme-number</span><span class="p">)</span>
+       <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nv">tag</span> <span class="nv">x</span><span class="p">)))</span>
+  <span class="ss">&#39;done</span><span class="p">)</span>
+  
+  <span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-scheme-number</span> <span class="nv">n</span><span class="p">)</span>
+  <span class="p">((</span><span class="nf">get</span> <span class="ss">&#39;make</span> <span class="ss">&#39;scheme-number</span><span class="p">)</span> <span class="nv">n</span><span class="p">))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>利用同样的方法可以加入有理数/复数等操作</p></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%B8%A6%E6%9C%89%E9%80%9A%E7%94%A8%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%9A%84%E7%B3%BB%E7%BB%9F/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%8A%BD%E8%B1%A1%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%9A%E9%87%8D%E8%A1%A8%E7%A4%BA/">[读书笔记] sicp 第二章 抽象数据的多重表示</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><p>对于一个数据对象可以能存在多种有用的表示形式，而且我们也希望所涉及的系统能够处理多种表示形式。
+例子：复数的极坐标形式和直角坐标的形式
+构造通用型过程：可以在不止一种数据表示上操作的过程。采用的技术：让它们在带有类型标志的数据对象上工作。也就是说，让数据对象包含着它们应该如何处理的明确信息。</p>
+<h1 id="复数的表示">复数的表示</h1>
+<p>为一个数据提供了多种操作，存在多种形式</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">real-part</span> <span class="nv">z</span><span class="p">)</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">z</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">imag-part</span> <span class="nv">z</span><span class="p">)</span> <span class="p">(</span><span class="nf">cdr</span> <span class="nv">z</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">magnitude</span> <span class="nv">z</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">sqrt</span> <span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nv">square</span> <span class="p">(</span><span class="nv">real-part</span> <span class="nv">z</span><span class="p">))</span> <span class="p">(</span><span class="nv">square</span> <span class="p">(</span><span class="nv">imag-part</span> <span class="nv">z</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">angle</span> <span class="nv">z</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">atan</span> <span class="p">(</span><span class="nv">imag-part</span> <span class="nv">z</span><span class="p">)</span> <span class="p">(</span><span class="nv">real-part</span> <span class="nv">z</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-from-real-imag</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nc">cons</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-from-mag-ang</span> <span class="nv">r</span> <span class="nv">a</span><span class="p">)</span>
+  <span class="p">(</span><span class="nc">cons</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">r</span> <span class="p">(</span><span class="nf">cos</span> <span class="nv">a</span><span class="p">))</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">r</span> <span class="p">(</span><span class="nf">sin</span> <span class="nv">a</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">add-complex</span> <span class="nv">z1</span> <span class="nv">z2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">make-from-real-imag</span> <span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nv">real-part</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">real-part</span> <span class="nv">z2</span><span class="p">))</span>
+                       <span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nv">imag-part</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">imag-part</span> <span class="nv">z2</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">sub-complex</span> <span class="nv">z1</span> <span class="nv">z2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">make-from-real-imag</span> <span class="p">(</span><span class="nf">-</span> <span class="p">(</span><span class="nv">real-part</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">real-part</span> <span class="nv">z2</span><span class="p">))</span>
+                       <span class="p">(</span><span class="nf">-</span> <span class="p">(</span><span class="nv">imag-part</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">imag-part</span> <span class="nv">z2</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">mul-complex</span> <span class="nv">z1</span> <span class="nv">z2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">make-from-mag-ang</span> <span class="p">(</span><span class="nf">*</span> <span class="p">(</span><span class="nv">magnitude</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">magnitude</span> <span class="nv">z2</span><span class="p">))</span>
+                     <span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nv">angle</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">angle</span> <span class="nv">z2</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">div-complex</span> <span class="nv">z1</span> <span class="nv">z2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">make-from-mag-ang</span> <span class="p">(</span><span class="nf">/</span> <span class="p">(</span><span class="nv">magnitude</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">magnitude</span> <span class="nv">z2</span><span class="p">))</span>
+                     <span class="p">(</span><span class="nf">-</span> <span class="p">(</span><span class="nv">angle</span> <span class="nv">z1</span><span class="p">)</span> <span class="p">(</span><span class="nv">angle</span> <span class="nv">z2</span><span class="p">))))</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%8A%BD%E8%B1%A1%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%9A%E9%87%8D%E8%A1%A8%E7%A4%BA/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E7%AC%A6%E5%8F%B7%E6%95%B0%E6%8D%AE/">[读书笔记] sicp 第二章 符号数据</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -362,141 +505,6 @@
 </div></div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%9E%84%E9%80%A0%E8%BF%87%E7%A8%8B%E6%8A%BD%E8%B1%A1/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E9%BB%91%E5%AE%A2%E4%B8%8E%E7%94%BB%E5%AE%B6/">[读书摘录] 黑客与画家</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-03">2016-09-03</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%91%98%E5%BD%95/"><i class="far fa-folder fa-fw"></i>摘录</a></span></div><div class="content"><p>2016-08-31 08:09:42</p>
-<p>为什么小孩子会这样做呢？</p>
-<p>　　一部分原因是，青少年在心理上还没有摆脱儿童状态，许多人都会残忍地对待他人。他们折磨书呆子的原因就像拔掉一条蜘蛛腿一样，觉得很好玩。在一个人产生良知之前，折磨就是一种娱乐。</p>
-<p>　　孩子们欺负书呆子的另一个原因是为了让自己感到好受一些。当你踩水的时候，你把水踩下去，你的身体就会被托起来。同样，在任何社会等级制度中，那些对自己没自信的人就会通过虐待他们眼中的下等人来突显自己的身份。我已经意识到，正是因为这个原因，在美国社会中底层白人是对待黑人最残酷的群体。</p>
-<p>2016-08-31 08:12:26</p>
-<p>我认为，真实世界的关键并非在于它是由成年人组成的，而在于它的庞大规模使得你做的每件事都能产生真正意义上的效果。学校、监狱、上流社会的女士午餐会，都做不到这一点。这些场合的成员都好像关在封闭的泡沫之中，所作所为只对泡沫内部有影响，对外部没有影响。那么很自然地，这些场合就会产生野蛮的做法。因为它们不具备实际功能，所以也就无所谓采用的形式^。</p>
-<p>2016-08-31 08:13:16</p>
-<p>真实世界的特点是，它极其庞大。如果总体足够大，即使是人数最少的少数派，只要聚集在一起，也能产生可观的力量。在真实世界中，书呆子在某些地方聚集起来，形成自己的社区，智力因素成为那里最被看重的东西。有时，这种因素甚至会以相反的形式表现出来，特别是在大学的数理学系，书呆子甚至会夸大笨拙，以显示自己的聪明。约翰·纳什^非常钦佩诺伯特·维纳^^就学维纳的样子，经过走廊的时候都用手扶着墙走路。</p></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E9%BB%91%E5%AE%A2%E4%B8%8E%E7%94%BB%E5%AE%B6/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%9D%82%E8%B0%88/">杂谈</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E5%85%AD%E7%AB%A0-%E6%89%A7%E8%A1%8C%E6%9C%9F%E8%AF%AD%E6%84%8F%E5%AD%A6/">[读书笔记] 深入探索C&#43;&#43;对象模型 第六章 执行期语意学</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-08-20">2016-08-20</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="执行期语意学">执行期语意学</h1>
-<p>以下一个简单的式子</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">if</span> <span class="p">(</span><span class="n">yy</span> <span class="o">==</span> <span class="n">xx</span><span class="p">.</span><span class="n">getValue</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>xx  yy定义如下</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">X</span> <span class="n">xx</span><span class="p">;</span>
-<span class="n">Y</span> <span class="n">yy</span><span class="p">;</span>
-<span class="k">class</span> <span class="nc">Y</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-  <span class="n">Y</span><span class="p">();</span>
- <span class="o">~</span><span class="n">Y</span><span class="p">();</span>
-  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span><span class="o">&amp;</span> <span class="n">Y</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
-<span class="p">};</span>
-<span class="k">class</span> <span class="nc">X</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-  <span class="n">X</span><span class="p">();</span>
-  <span class="o">~</span><span class="n">X</span><span class="p">();</span>
-  <span class="k">operator</span> <span class="nf">Y</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
-  <span class="n">X</span> <span class="nf">getValue</span><span class="p">();</span>
-<span class="p">};</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>那么编译器在我们之后做了什么呢</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">if</span><span class="p">(</span><span class="n">yy</span> <span class="o">==</span> <span class="n">xx</span><span class="p">.</span><span class="n">getValue</span><span class="p">())</span>
-
-<span class="c1">//转换为
-</span><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">yy</span><span class="p">.</span><span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="n">xx</span><span class="p">.</span><span class="n">getValue</span><span class="p">())</span>
-
-<span class="c1">//接着转换
-</span><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">yy</span><span class="p">.</span><span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="n">xx</span><span class="p">.</span><span class="n">getValue</span><span class="p">().</span><span class="k">operator</span> <span class="n">Y</span><span class="p">()))</span>
-
-<span class="c1">//接着转换
-</span><span class="c1"></span><span class="n">X</span> <span class="n">temp1</span> <span class="o">=</span> <span class="n">xx</span><span class="p">.</span><span class="n">getValue</span><span class="p">();</span>
-<span class="n">Y</span> <span class="n">temp2</span> <span class="o">=</span> <span class="n">temp1</span><span class="p">.</span><span class="k">operator</span> <span class="n">Y</span><span class="p">();</span>
-<span class="kt">int</span> <span class="n">temp3</span> <span class="o">=</span> <span class="p">(</span><span class="n">yy</span><span class="p">.</span><span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="n">temp2</span><span class="p">));</span>
-<span class="k">if</span><span class="p">(</span><span class="n">temp3</span><span class="p">)</span>
-
-<span class="n">temp2</span><span class="p">.</span><span class="n">y</span><span class="o">::~</span><span class="n">Y</span><span class="p">();</span>
-<span class="n">temp1</span><span class="p">.</span><span class="n">x</span><span class="o">::~</span><span class="n">X</span><span class="p">();</span>
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E5%85%AD%E7%AB%A0-%E6%89%A7%E8%A1%8C%E6%9C%9F%E8%AF%AD%E6%84%8F%E5%AD%A6/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%94%E7%AB%A0-%E6%9E%84%E9%80%A0-%E8%A7%A3%E6%9E%84-%E6%8B%B7%E8%B4%9D%E8%AF%AD%E6%84%8F%E5%AD%A6/">[读书笔记]深入探索C&#43;&#43;对象模型 第五章 构造 解构 拷贝语意学</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-08-16">2016-08-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="构造解构拷贝语意学">构造、解构、拷贝语意学</h1>
-<h3 id="纯虚函数的存在">纯虚函数的存在</h3>
-<p>纯虚函数能够被静态的调用，不能经过虚拟机制调用。
-虚析构函数不能定义为纯虚的，一定要有定义，否则即使可以编译，但是链接的时候会有错误。因为其子类会静态调用上一层的析构函数。如果说上一层的析构函数是一个纯虚函数的话，那么链接的时候会失败。</p>
-<h3 id="虚拟规格的存在">虚拟规格的存在</h3>
-<p>不应该把所有的函数都声明为虚函数，然后靠编译器去优化操作吧virtual invocation去除。</p>
-<h3 id="虚拟规格中的const的存在">虚拟规格中的const的存在</h3>
-<p>实际上你很难知道一个类的子类对于这个函数是不是应该定义为const，因为即使现在你不需要修改类的内容，但子类可能需要修改，你没法预料到。那么最好不要定义一个有const函数的基类了。</p>
-<h2 id="无继承情况下的对象构造">“无继承”情况下的对象构造</h2>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">typedef</span> <span class="k">struct</span>
-<span class="p">{</span>
-    <span class="kt">float</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">Point</span><span class="p">;</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>编译器会分析声明，贴上Plaint OI' Data的卷标，被贴上该卷标的类，不会有构造函数或者析构函数的调用了。直接使用C的方式。</p></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%94%E7%AB%A0-%E6%9E%84%E9%80%A0-%E8%A7%A3%E6%9E%84-%E6%8B%B7%E8%B4%9D%E8%AF%AD%E6%84%8F%E5%AD%A6/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>
