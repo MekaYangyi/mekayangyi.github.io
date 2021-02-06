@@ -5,38 +5,44 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noodp" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-        <title>redis源码阅读-开始 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="redis源码阅读-开始" />
-<meta property="og:description" content="自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行阅读的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
-Redis的介绍 redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
-阅读顺序 如何阅读Redis源码？阅读的顺序主要还是按照黄建宏老师所建议的顺序进行阅读,暂时不看多机部分的实现。
- 阅读数据结构的实现。 阅读内存编码数据结构的实现。 阅读数据类型的实现。 阅读数据库实现相关代码。 阅读客户端和服务端相关代码。  至此将Redis阅读完毕。" />
+        <title>《去月球》 - 鉴心</title><meta name="Description" content="About LoveIt Theme"><meta property="og:title" content="《去月球》" />
+<meta property="og:description" content="悲伤。
+逆序的故事，抽丝剥茧式的把一个人的人生整个展现在你的面前。
+明明在一起的两个人，却由于种种心相隔很远。
+丽芙的一生都在通过各种暗示，希望主人公能够找回过去。
+主人公终于在临终前的愿望中，抓到那么一个记忆碎片，无来由的想要去月球。
+当，记忆被重新排列，故事里的两人有了圆满的结局。
+回过头来看，这不过是程序的重新编排。而现实中的两人，却一生都没能找到最初相遇的那个瞬间。" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" />
+<meta property="og:url" content="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="article:published_time" content="2017-03-21T10:21:21+00:00" />
-<meta property="article:modified_time" content="2017-03-21T10:21:21+00:00" />
+<meta property="article:published_time" content="2017-03-12T08:31:58+00:00" />
+<meta property="article:modified_time" content="2017-03-12T08:31:58+00:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
-<meta name="twitter:title" content="redis源码阅读-开始"/>
-<meta name="twitter:description" content="自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行阅读的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。
-Redis的介绍 redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。
-阅读顺序 如何阅读Redis源码？阅读的顺序主要还是按照黄建宏老师所建议的顺序进行阅读,暂时不看多机部分的实现。
- 阅读数据结构的实现。 阅读内存编码数据结构的实现。 阅读数据类型的实现。 阅读数据库实现相关代码。 阅读客户端和服务端相关代码。  至此将Redis阅读完毕。"/>
+<meta name="twitter:title" content="《去月球》"/>
+<meta name="twitter:description" content="悲伤。
+逆序的故事，抽丝剥茧式的把一个人的人生整个展现在你的面前。
+明明在一起的两个人，却由于种种心相隔很远。
+丽芙的一生都在通过各种暗示，希望主人公能够找回过去。
+主人公终于在临终前的愿望中，抓到那么一个记忆碎片，无来由的想要去月球。
+当，记忆被重新排列，故事里的两人有了圆满的结局。
+回过头来看，这不过是程序的重新编排。而现实中的两人，却一生都没能找到最初相遇的那个瞬间。"/>
 <meta name="application-name" content="鉴心">
 <meta name="apple-mobile-web-app-title" content="鉴心"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" /><link rel="prev" href="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" /><link rel="next" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" /><link rel="prev" href="http://coderyang.com/gitlab-workflow/" /><link rel="next" href="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
-        "headline": "redis源码阅读-开始",
+        "headline": "《去月球》",
         "inLanguage": "en",
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B\/"
-        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "redis, 源码阅读","wordcount":  11 ,
-        "url": "http:\/\/coderyang.com\/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B\/","datePublished": "2017-03-21T10:21:21+00:00","dateModified": "2017-03-21T10:21:21+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@id": "http:\/\/coderyang.com\/%E5%8E%BB%E6%9C%88%E7%90%83\/"
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "游戏","wordcount":  7 ,
+        "url": "http:\/\/coderyang.com\/%E5%8E%BB%E6%9C%88%E7%90%83\/","datePublished": "2017-03-12T08:31:58+00:00","dateModified": "2017-03-12T08:31:58+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -110,10 +116,10 @@ Redis的介绍 redis是一个使用C编写的key-value数据库。性能极高�
                 <div class="container"><div class="toc" id="toc-auto">
             <h2 class="toc-title">Contents</h2>
             <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animated flipInX">redis源码阅读-开始</h1><div class="post-meta">
-            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2017-03-21">2017-03-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;11 words&nbsp;
-                <i class="far fa-clock fa-fw"></i>&nbsp;One minute&nbsp;<span id="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" class="leancloud_visitors" data-flag-title="redis源码阅读-开始">
+        </div><article class="page single"><h1 class="single-title animated flipInX">《去月球》</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%B8%B8%E6%88%8F/"><i class="far fa-folder fa-fw"></i>游戏</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2017-03-12">2017-03-12</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;7 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;One minute&nbsp;<span id="/%E5%8E%BB%E6%9C%88%E7%90%83/" class="leancloud_visitors" data-flag-title="《去月球》">
                         <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
                     </span>&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
@@ -121,52 +127,45 @@ Redis的介绍 redis是一个使用C编写的key-value数据库。性能极高�
                     <span>Contents</span>
                     <span><i class="details-icon fas fa-angle-right"></i></span>
                 </div>
-                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
-  <ul>
-    <li><a href="#redis的介绍">Redis的介绍</a></li>
-    <li><a href="#阅读顺序">阅读顺序</a></li>
-  </ul>
-</nav></div>
-            </div><div class="content" id="content"><p>自本博客之后的文章大概都是依照《Redis设计与实现》对Redis的源码进行阅读的记录。目的是为了对于Redis有一个了解，同时对之后需要使用Redis的项目上能够有所帮助。</p>
-<h2 id="redis的介绍">Redis的介绍</h2>
-<p>redis是一个使用C编写的key-value数据库。性能极高且支持丰富的数据类型。它所有的操作都是原子性的。代码精简，只有3w行不到，利于阅读。</p>
-<h2 id="阅读顺序">阅读顺序</h2>
-<p><a href="http://blog.huangz.me/diary/2014/how-to-read-redis-source-code.html" target="_blank" rel="noopener noreffer">如何阅读Redis源码？</a>阅读的顺序主要还是按照黄建宏老师所建议的顺序进行阅读,暂时不看多机部分的实现。</p>
-<ol>
-<li>阅读数据结构的实现。</li>
-<li>阅读内存编码数据结构的实现。</li>
-<li>阅读数据类型的实现。</li>
-<li>阅读数据库实现相关代码。</li>
-<li>阅读客户端和服务端相关代码。</li>
-</ol>
-<p>至此将Redis阅读完毕。</p>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents"></nav></div>
+            </div><div class="content" id="content"><p>悲伤。</p>
+<p>逆序的故事，抽丝剥茧式的把一个人的人生整个展现在你的面前。</p>
+<p>明明在一起的两个人，却由于种种心相隔很远。</p>
+<p>丽芙的一生都在通过各种暗示，希望主人公能够找回过去。</p>
+<p>主人公终于在临终前的愿望中，抓到那么一个记忆碎片，无来由的想要去月球。</p>
+<p>当，记忆被重新排列，故事里的两人有了圆满的结局。</p>
+<p>回过头来看，这不过是程序的重新编排。而现实中的两人，却一生都没能找到最初相遇的那个瞬间。</p>
+<img src="/img/b56de93b97b07be29274142121c70828_720w.png" alt=""/>
+<img src="/img/2f16f84e1127ab5b03a6418fa6e94a54_720w.png" alt=""/>
+<img src="/img/899e245354315fa54def6433dcd820ed_720w.png" alt=""/>
+<img src="/img/144a0a80ba27b2aa7550e65f918891b6_720w.png" alt=""/>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
             <div class="post-info-mod">
-                <span>Updated on 2017-03-21</span>
+                <span>Updated on 2017-03-12</span>
             </div>
             <div class="post-info-license"></div>
         </div>
         <div class="post-info-line">
             <div class="post-info-md"><span>
-                            <a class="link-to-markdown" href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/index.md" target="_blank">Read Markdown</a>
+                            <a class="link-to-markdown" href="/%E5%8E%BB%E6%9C%88%E7%90%83/index.md" target="_blank">Read Markdown</a>
                         </span></div>
             <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" data-title="redis源码阅读-开始" data-hashtags="redis,源码阅读"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" data-hashtag="redis"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" data-title="redis源码阅读-开始"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" data-title="redis源码阅读-开始"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" data-title="redis源码阅读-开始"><i class="fab fa-weibo fa-fw"></i></a></span>
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" data-title="《去月球》" data-hashtags="游戏"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" data-hashtag="游戏"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" data-title="《去月球》"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" data-title="《去月球》"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://coderyang.com/%E5%8E%BB%E6%9C%88%E7%90%83/" data-title="《去月球》"><i class="fab fa-weibo fa-fw"></i></a></span>
             </div>
         </div>
     </div>
 
     <div class="post-info-more">
-        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></section>
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%B8%B8%E6%88%8F/">游戏</a></section>
         <section>
             <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
         </section>
     </div>
 
-    <div class="post-nav"><a href="/%E5%8E%BB%E6%9C%88%E7%90%83/" class="prev" rel="prev" title="《去月球》"><i class="fas fa-angle-left fa-fw"></i>《去月球》</a>
-            <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/" class="next" rel="next" title="redis源码阅读-内存分配">redis源码阅读-内存分配<i class="fas fa-angle-right fa-fw"></i></a></div>
+    <div class="post-nav"><a href="/gitlab-workflow/" class="prev" rel="prev" title="gitlab workflow"><i class="fas fa-angle-left fa-fw"></i>gitlab workflow</a>
+            <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/" class="next" rel="next" title="redis源码阅读-开始">redis源码阅读-开始<i class="fas fa-angle-right fa-fw"></i></a></div>
 </div>
 <div id="comments"><div id="valine" class="comment"></div><noscript>
                 Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.

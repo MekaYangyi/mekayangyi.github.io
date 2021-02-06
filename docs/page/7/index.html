@@ -103,6 +103,18 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/">windows下Pyqt &#43; guiqwt环境的搭建</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-10-19">2016-10-19</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content"><h1 id="事情的起因">事情的起因</h1>
+<p>这几天为了搭一个PyQt的生产环境遇到了好一些坑。
+本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。
+原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。
+最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样达到比较高的绘图效率，才解决了问题。但是MFC界面开发复杂，在MFC界面上花费过多的时间。同时本身绘图控件的开发，可能可以利用现有开源控件进行开发来避免重复造轮子。
+于是利用PyQt+guiqwt绘图库来开发的方案构建起来。guiqwt本身是QT下常用的绘图控件，效率足够高，经过一些优化是能够使用的。相对Python经常使用的matplotlib来说不够漂亮，但是进行实时数据的平移绘图，效率高出很多。PyQt是模仿QT写的图形库，可以利用QTCreate进行快速的界面构建，而Python相对C++来说，需要处理的坑更少，出现各类崩溃的异常的情况会更少一些。
+本文主要讲的是PyQt+guiqwt在windows上的搭建。
+目的是在之后能够通过本文进行快速的开发环境的搭建。</p></div><div class="post-footer">
+        <a href="/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/windows/">windows</a>,&nbsp;<a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">环境搭建</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%89%E7%AB%A0-%E6%A8%A1%E5%9D%97%E5%8C%96-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%8A%B6%E6%80%81/">[读书笔记] sicp 第三章 模块化 对象和状态</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><p>有效的程序综合还需要一些组织原则，它们能够指导我们系统化地完成系统的整体设计。特别的需要一些能够帮助我们构造起模块化的大型系统策略，也就是说，使这些系统能够“自然地”划分为一些具有内聚力的部分，使这些部分可以分别进行开发和维护。
 有一种非常强有力的设计策略，特别适合用于构造那类模拟真实物理系统的程序，那就是基于被模拟程序的结构去设计程序的结构。那么有关的物理系统里的每一个对象，我们构造起一个与之对象的计算对象；对该系统里的每种活动，我们在自己的计算系统里顶一种符号操作。采用这一策略时的希望是，在需要针对系统中的新对象或者新活动扩充对应的计算模型时候，我们能够不必对程序的组织方面做得很成功，那么在需要添加新特城或者排除旧东西里的错误时候，就只需要在系统里的一些小局部中工作。
@@ -464,46 +476,6 @@
 </div>
 </div></div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E6%95%B0%E6%8D%AE%E6%8A%BD%E8%B1%A1/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%9E%84%E9%80%A0%E8%BF%87%E7%A8%8B%E6%8A%BD%E8%B1%A1/">[读书笔记] sicp 第一章 构造过程抽象</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="关于读书的目的">关于读书的目的</h1>
-<p>很多时候对于一本比较复杂的书，你在到达一定阶段的时候是难以读进去的。Sicp我曾经在几个月前尝试的去读了第一章。很快就读完的，但是对于其的理解实在浅薄。
-我希望在这一次的阅读的过程中能够顺利的过一次不本书有所收获。
-在接下来的日子里，我会记录下读书笔记以及习题的解答。
-这是一个开始。</p>
-<h1 id="构造过程抽象">构造过程抽象</h1>
-<p>每一种强有力的语言为此提供了三种机制</p>
-<ul>
-<li>基本的表达形式， 用于表示语言所关心的最简单的个体。</li>
-<li>组合的方法，通过它们可以从简单的东西出发构建出复合的元素。</li>
-<li>抽象的方法，通过它们可以为 复合对象命名，并将它们作为单元去操作。</li>
-</ul>
-<p>在程序设计中，我们需要处理两类元素：过程和数据。非形式的说，数据是一种我们希望去操作的”东西“，而过程是有关操作这些数据的规则的描述。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nf">*</span> <span class="p">(</span> <span class="nf">+</span> <span class="mi">2</span> <span class="p">(</span> <span class="nf">*</span> <span class="mi">5</span> <span class="mi">6</span> <span class="p">))</span>
-	<span class="p">(</span> <span class="nf">+</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span><span class="p">))</span>
-
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">square</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
-
-<span class="p">(</span><span class="nv">square</span> <span class="mi">21</span><span class="p">)</span>
-<span class="mi">441</span>
-
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%9E%84%E9%80%A0%E8%BF%87%E7%A8%8B%E6%8A%BD%E8%B1%A1/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">

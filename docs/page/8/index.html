@@ -103,6 +103,46 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%9E%84%E9%80%A0%E8%BF%87%E7%A8%8B%E6%8A%BD%E8%B1%A1/">[读书笔记] sicp 第一章 构造过程抽象</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="关于读书的目的">关于读书的目的</h1>
+<p>很多时候对于一本比较复杂的书，你在到达一定阶段的时候是难以读进去的。Sicp我曾经在几个月前尝试的去读了第一章。很快就读完的，但是对于其的理解实在浅薄。
+我希望在这一次的阅读的过程中能够顺利的过一次不本书有所收获。
+在接下来的日子里，我会记录下读书笔记以及习题的解答。
+这是一个开始。</p>
+<h1 id="构造过程抽象">构造过程抽象</h1>
+<p>每一种强有力的语言为此提供了三种机制</p>
+<ul>
+<li>基本的表达形式， 用于表示语言所关心的最简单的个体。</li>
+<li>组合的方法，通过它们可以从简单的东西出发构建出复合的元素。</li>
+<li>抽象的方法，通过它们可以为 复合对象命名，并将它们作为单元去操作。</li>
+</ul>
+<p>在程序设计中，我们需要处理两类元素：过程和数据。非形式的说，数据是一种我们希望去操作的”东西“，而过程是有关操作这些数据的规则的描述。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nf">*</span> <span class="p">(</span> <span class="nf">+</span> <span class="mi">2</span> <span class="p">(</span> <span class="nf">*</span> <span class="mi">5</span> <span class="mi">6</span> <span class="p">))</span>
+	<span class="p">(</span> <span class="nf">+</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">square</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">square</span> <span class="mi">21</span><span class="p">)</span>
+<span class="mi">441</span>
+
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%9E%84%E9%80%A0%E8%BF%87%E7%A8%8B%E6%8A%BD%E8%B1%A1/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E9%BB%91%E5%AE%A2%E4%B8%8E%E7%94%BB%E5%AE%B6/">[读书摘录] 黑客与画家</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-03">2016-09-03</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><p>2016-08-31 08:09:42</p>
 <p>为什么小孩子会这样做呢？</p>
@@ -308,58 +348,6 @@ static 成员不属于类对象，不占空间</p>
 </div>
 </div></div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%B8%89%E7%AB%A0-data%E8%AF%AD%E6%84%8F%E5%AD%A6/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">c&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/">[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-08-07">2016-08-07</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="第二章构造函数语意学">第二章：构造函数语意学</h1>
-<p>由于C++的编译器在程序员之外做了太多事情，导致会产生很多意料之外的错误。
-例子 Conversion运算符。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//为了支持
-</span><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">cin</span><span class="p">);</span>
-<span class="c1">//定义了一个perator int()
-</span><span class="c1">//但是导致了以下错误的代码能够正常运行
-</span><span class="c1"></span><span class="kt">int</span> <span class="n">inVal</span><span class="p">;</span>
-<span class="n">cin</span> <span class="o">&lt;&lt;</span> <span class="n">inVal</span><span class="p">;</span>
-<span class="c1">//此处&lt;&lt;被解释为左移操作符
-</span><span class="c1"></span><span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">cin</span><span class="p">.</span><span class="k">operator</span> <span class="kt">int</span><span class="p">();</span>
-<span class="n">temp</span> <span class="o">&lt;&lt;</span> <span class="n">intVal</span><span class="p">;</span>
-</code></pre></td></tr></table>
-</div>
-</div><h1 id="default-constructor的构建操作">Default Constructor的构建操作</h1>
-<p>默认构造函数只在编译器认为需要的时候才创建。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Foo</span><span class="p">{</span><span class="k">public</span><span class="o">:</span> <span class="kt">int</span> <span class="n">val</span><span class="p">;</span> <span class="n">Foo</span> <span class="o">*</span><span class="n">pnext</span><span class="p">};</span>
-<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="n">Foo</span> <span class="n">test</span><span class="p">;</span>
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">]</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>这种情况实际没有默认构造函数，编译器什么都没做。</p></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">c&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">

@@ -103,6 +103,58 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/">[读书笔记]深入理解C&#43;&#43;对象模型 第二章 构造函数的语意学</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-08-07">2016-08-07</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="第二章构造函数语意学">第二章：构造函数语意学</h1>
+<p>由于C++的编译器在程序员之外做了太多事情，导致会产生很多意料之外的错误。
+例子 Conversion运算符。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//为了支持
+</span><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">cin</span><span class="p">);</span>
+<span class="c1">//定义了一个perator int()
+</span><span class="c1">//但是导致了以下错误的代码能够正常运行
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">inVal</span><span class="p">;</span>
+<span class="n">cin</span> <span class="o">&lt;&lt;</span> <span class="n">inVal</span><span class="p">;</span>
+<span class="c1">//此处&lt;&lt;被解释为左移操作符
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">cin</span><span class="p">.</span><span class="k">operator</span> <span class="kt">int</span><span class="p">();</span>
+<span class="n">temp</span> <span class="o">&lt;&lt;</span> <span class="n">intVal</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="default-constructor的构建操作">Default Constructor的构建操作</h1>
+<p>默认构造函数只在编译器认为需要的时候才创建。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Foo</span><span class="p">{</span><span class="k">public</span><span class="o">:</span> <span class="kt">int</span> <span class="n">val</span><span class="p">;</span> <span class="n">Foo</span> <span class="o">*</span><span class="n">pnext</span><span class="p">};</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">Foo</span> <span class="n">test</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这种情况实际没有默认构造函数，编译器什么都没做。</p></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E8%AF%AD%E6%84%8F%E5%AD%A6/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">c&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%85%B3%E4%BA%8E%E5%AF%B9%E8%B1%A1/">[读书笔记]深入探索C&#43;&#43; 对象模型 第一章 关于对象</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-08-07">2016-08-07</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="阅读的目的">阅读的目的</h1>
 <p>在阅读《C++ primer》的时候，书里面写了各种各样的情况下，C++的处理方式。囫囵吞枣的记下后，也就不求甚解了。而C++在工作中的使用已经有了那么一段时间。但是对于C++的很多现象，却依旧是只知道是这样，却不知道为什么是这样。

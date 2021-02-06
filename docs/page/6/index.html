@@ -103,6 +103,33 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%BD%BF%E7%94%A8gitlab/">第一次使用gitlab</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-01-28">2017-01-28</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content"><h1 id="安装git">安装git</h1>
+<p>版本差别不大，目前使用的版本git2.11.0.3。
+一路下一步,不修改安装位置，直接使用默认设置。</p>
+<h1 id="安装tortoisegit">安装TortoiseGit</h1>
+<p>一路下一步，不修改安装位置，直接使用默认设置。</p>
+<h1 id="登录账户">登录账户</h1>
+<h2 id="管理员创建账户">管理员创建账户</h2>
+<p>Admin→New User。新建账户、并设置密码。同时设置该用户所属Group。</p>
+<blockquote>
+<p>name：上传显示的名字，可以经常更改，使用中文名好。</p>
+</blockquote>
+<blockquote>
+<p>username：登陆的用户名，不可修改，用于账户登陆。</p>
+</blockquote>
+<blockquote>
+<p>email：账户email，内网联系email。</p>
+</blockquote>
+<blockquote>
+<p>password：密码，牢记，root用户可修改。</p>
+</blockquote>
+<h2 id="登录">登录</h2>
+<p>登陆内网gitlab，目前网址：10.10.10.98。
+<img src="/img/第一次使用gitlab/22-04-07.jpg" alt=""/></p></div><div class="post-footer">
+        <a href="/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%BD%BF%E7%94%A8gitlab/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/gitlab/">gitlab</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">[读书笔记] stl源码剖析 总结</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-11-21">2016-11-21</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content">大致上是将STL源码剖析看过了一篇。 前三章看到比较认真，后面几章就看到比较粗略了。 我想STL的精髓正是在内存配置、迭代器、容器中。 至于后面的一些关联式容器，用的红黑树稍复杂，不过在之前的数据结构的基础上和前几章对stl的一些常用方法是熟悉下，其实也就简单了。算法，利用迭代器，同时特化不同的版本。仿函数则是模仿函数效果的对象。整体上都算简单了。 我的计划是在未来的一小段日子里实现一个小型的stl，所谓实现，可能也不过是重新将sgi的代码打一遍罢了。不过对于整个stl的理解，我相信会更好一些。 之后我应该会更新一些写小型stl遇到的问题和解决方案。 项目的地址： https://github.com/MekaYangyi/STL/</div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">Read More</a><div class="post-tags">
@@ -467,18 +494,6 @@ push_back等操作都是值语义的，拷贝传进来的内容放入到vector�
 遂记录下来，成此博文。</p></div><div class="post-footer">
         <a href="/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/google/">google</a>,&nbsp;<a href="/tags/%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">编程规范</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/">windows下Pyqt &#43; guiqwt环境的搭建</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-10-19">2016-10-19</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content"><h1 id="事情的起因">事情的起因</h1>
-<p>这几天为了搭一个PyQt的生产环境遇到了好一些坑。
-本身搭建PyQt的目的是为了进行试验，使用PyQt开发曾经开发过的项目的难度。
-原项目是使用MFC开发，利用自己开发的折线绘制控件，进行高速的工控数据采集后，显示到界面上。难点主要在，高速采集之后，绘图的效率问题。
-最终通过自己开发了一套平移显示绘图控件，在新增数据的时候，每一次只绘制一部分数据，然后通过平移之前的图像与之后的链接在一起，这样达到比较高的绘图效率，才解决了问题。但是MFC界面开发复杂，在MFC界面上花费过多的时间。同时本身绘图控件的开发，可能可以利用现有开源控件进行开发来避免重复造轮子。
-于是利用PyQt+guiqwt绘图库来开发的方案构建起来。guiqwt本身是QT下常用的绘图控件，效率足够高，经过一些优化是能够使用的。相对Python经常使用的matplotlib来说不够漂亮，但是进行实时数据的平移绘图，效率高出很多。PyQt是模仿QT写的图形库，可以利用QTCreate进行快速的界面构建，而Python相对C++来说，需要处理的坑更少，出现各类崩溃的异常的情况会更少一些。
-本文主要讲的是PyQt+guiqwt在windows上的搭建。
-目的是在之后能够通过本文进行快速的开发环境的搭建。</p></div><div class="post-footer">
-        <a href="/windows%E4%B8%8Bpyqt-guiqwt%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/windows/">windows</a>,&nbsp;<a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">环境搭建</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>
