@@ -276,7 +276,6 @@ FUNCTION_PTR< R( Args... ) >::FUNCTION_PTR( F &&f ) : bridge( nullptr )
 - FUNCTION_PTR将所有可调用对象都转换为了一次虚函数的调用，降低了性能。
 - 每创建一个FUNCTION_PTR都需要一次堆内存分配。
 - gcc4.8中的std::function对于小对象不会进行堆内存的分配。
-- 项目里的实践见timer.hpp：T_TIMER_FACTORY、TIMER_FACTORY、T_TIMER、TIMER。
 
 
 

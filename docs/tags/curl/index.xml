@@ -272,10 +272,10 @@
 <h2 id="实践">实践</h2>
 <ol>
 <li>
-<p>最初实现了一个使用Multi Interface的HTTPC，给MSDK、HTTP_DIRTY使用。</p>
+<p>最初实现了一个使用Multi Interface的HTTPC。</p>
 <ul>
 <li>
-<p>matrix/httpc/unittest/httpc.cpp</p>
+<p>httpc/unittest/httpc.cpp</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -326,7 +326,7 @@
 </ul>
 </li>
 <li>
-<p>在HTTP_DIRTY压测过程中发现性能不足，DNS解析卡住主循环。根据https://moz.com/devblog/high-performance-libcurl-tips，增加了c-ares库，使得libcurl支持异步DNS，最终性能到了3000TPS。</p>
+<p>在压测过程中发现性能不足，DNS解析卡住主循环。根据https://moz.com/devblog/high-performance-libcurl-tips，增加了c-ares库，使得libcurl支持异步DNS，最终性能到了3000TPS。</p>
 </li>
 <li>
 <p>尝试使用Share Interface共享DNS，效果在接入异步DNS后不明显。</p>
@@ -407,7 +407,6 @@ It does not change the following information kept in the handle: live connection
 </ul>
 </li>
 </ol>
-<p>目前第四步还没做，后续优化增加该功能。</p>
 ]]></description>
 </item></channel>
 </rss>

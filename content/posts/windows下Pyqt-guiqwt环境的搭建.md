@@ -2,7 +2,7 @@
 title: windows下Pyqt + guiqwt环境的搭建
 date: 2016-10-19 23:47:25
 categories: 
-- 开发环境
+- 技巧
 tags:
 - windows
 - 环境搭建

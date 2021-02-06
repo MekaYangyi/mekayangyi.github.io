@@ -2,7 +2,7 @@
 title: 第一次使用gitlab
 date: 2017-01-28 09:19:43
 categories: 
-- gitlab
+- 技巧
 tags:
 - gitlab
 ---

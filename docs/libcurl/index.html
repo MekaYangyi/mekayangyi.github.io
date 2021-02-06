@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://coderyang.com/libcurl/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
 <meta property="article:published_time" content="2020-11-14T16:04:59+00:00" />
-<meta property="article:modified_time" content="2020-11-14T16:04:59+00:00" />
+<meta property="article:modified_time" content="2021-02-06T16:40:44+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -31,8 +31,8 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "http:\/\/coderyang.com\/libcurl\/"
-        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "curl","wordcount":  819 ,
-        "url": "http:\/\/coderyang.com\/libcurl\/","datePublished": "2020-11-14T16:04:59+00:00","dateModified": "2020-11-14T16:04:59+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+        },"image": ["http:\/\/coderyang.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "curl","wordcount":  818 ,
+        "url": "http:\/\/coderyang.com\/libcurl\/","datePublished": "2020-11-14T16:04:59+00:00","dateModified": "2021-02-06T16:40:44+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "http:\/\/coderyang.com\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -108,7 +108,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">高性能libcurl</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2020-11-14">2020-11-14</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;819 words&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2020-11-14">2020-11-14</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;818 words&nbsp;
                 <i class="far fa-clock fa-fw"></i>&nbsp;4 minutes&nbsp;<span id="/libcurl/" class="leancloud_visitors" data-flag-title="高性能libcurl">
                         <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
                     </span>&nbsp;</div>
@@ -394,10 +394,10 @@
 <h2 id="实践">实践</h2>
 <ol>
 <li>
-<p>最初实现了一个使用Multi Interface的HTTPC，给MSDK、HTTP_DIRTY使用。</p>
+<p>最初实现了一个使用Multi Interface的HTTPC。</p>
 <ul>
 <li>
-<p>matrix/httpc/unittest/httpc.cpp</p>
+<p>httpc/unittest/httpc.cpp</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -448,7 +448,7 @@
 </ul>
 </li>
 <li>
-<p>在HTTP_DIRTY压测过程中发现性能不足，DNS解析卡住主循环。根据https://moz.com/devblog/high-performance-libcurl-tips，增加了c-ares库，使得libcurl支持异步DNS，最终性能到了3000TPS。</p>
+<p>在压测过程中发现性能不足，DNS解析卡住主循环。根据https://moz.com/devblog/high-performance-libcurl-tips，增加了c-ares库，使得libcurl支持异步DNS，最终性能到了3000TPS。</p>
 </li>
 <li>
 <p>尝试使用Share Interface共享DNS，效果在接入异步DNS后不明显。</p>
@@ -529,12 +529,12 @@ It does not change the following information kept in the handle: live connection
 </ul>
 </li>
 </ol>
-<p>目前第四步还没做，后续优化增加该功能。</p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
             <div class="post-info-mod">
-                <span>Updated on 2020-11-14</span>
+                <span>Updated on 2021-02-06&nbsp;<a class="git-hash" href="https://github.com/dillonzq/LoveIt/commit/529fc4ca455ff9ba43741f80f4c25c0258f3377f" target="_blank" title="commit by mekayangyi(mekayangyi@gmail.com) 529fc4ca455ff9ba43741f80f4c25c0258f3377f: 新增三篇 function、libcurl、一致性与共识">
+                                    <i class="fas fa-hashtag fa-fw"></i>529fc4c</a></span>
             </div>
             <div class="post-info-license"></div>
         </div>

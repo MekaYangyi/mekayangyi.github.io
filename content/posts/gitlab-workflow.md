@@ -2,7 +2,7 @@
 title: gitlab workflow
 date: 2017-01-29 21:40:40
 categories: 
-- gitlab
+- 技巧
 tags:
 - gitlab
 ---

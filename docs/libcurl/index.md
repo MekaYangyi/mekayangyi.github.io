@@ -160,9 +160,9 @@ curl_global_cleanup：进程关闭时清理curl
 
 ## 实践
 
-1. 最初实现了一个使用Multi Interface的HTTPC，给MSDK、HTTP_DIRTY使用。
+1. 最初实现了一个使用Multi Interface的HTTPC。
 
-   - matrix/httpc/unittest/httpc.cpp
+   - httpc/unittest/httpc.cpp
 
       ```cpp
       TEST_F(HTTPC_TEST, HTTP_GET)                                                 
@@ -187,7 +187,7 @@ curl_global_cleanup：进程关闭时清理curl
       }
       ```
 
-2. 在HTTP_DIRTY压测过程中发现性能不足，DNS解析卡住主循环。根据https://moz.com/devblog/high-performance-libcurl-tips，增加了c-ares库，使得libcurl支持异步DNS，最终性能到了3000TPS。
+2. 在压测过程中发现性能不足，DNS解析卡住主循环。根据https://moz.com/devblog/high-performance-libcurl-tips，增加了c-ares库，使得libcurl支持异步DNS，最终性能到了3000TPS。
 
 3. 尝试使用Share Interface共享DNS，效果在接入异步DNS后不明显。
 
@@ -231,4 +231,3 @@ curl_global_cleanup：进程关闭时清理curl
 
 
 
-目前第四步还没做，后续优化增加该功能。
