@@ -1,7 +1,7 @@
 # 简易function
 
 
-本文主要讲一下怎么实现一个简易版本的function<>模板，从c++ templates第二版摘出，相应的技巧在timer中一些应用。
+本文主要讲一下怎么实现一个简易版本的function<>模板，从c++ templates第二版摘出。
 
 ## 出发点
 

@@ -35,7 +35,7 @@ FLP FLP 不可能定理是分布式系统领域最重要的定理之一，它给
     <pubDate>Sat, 19 Sep 2020 16:04:59 &#43;0000</pubDate>
     <author>Author</author>
     <guid>http://coderyang.com/function/</guid>
-    <description><![CDATA[本文主要讲一下怎么实现一个简易版本的function&lt;&gt;模板，从c++ templates第二版摘出，相应的技巧在timer中一些应用。
+    <description><![CDATA[本文主要讲一下怎么实现一个简易版本的function&lt;&gt;模板，从c++ templates第二版摘出。
 出发点 一个简单的例子，下面这个模板上述能够接受任意可调用的对象，lambda表达式、函数指针、仿函数。
 1 2 3 4 5 6 7  template&lt;typename F&gt; void for_int_up(int n, F f) { for (int i = 0; i &lt;= n; ++i) { f(i); } }   1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16  void print_int(int i) { std::count &lt;&lt; i &lt;&lt; &#39; &#39;; } int main() { int sum = 0; for_int_up(5, [&amp;sum](int i) { sum += i; }); for_int_up(5, print_int); return 0; }   像for_int_up这样的函数其实有两个问题：]]></description>
 </item><item>
