@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-06T20:50:48+08:00" />
+<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,39 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/clean-code%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">clean code读书笔记</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2018-07-23">2018-07-23</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content">命名，很多人戏称为编程中最难的事情。从实践经验出发来看，一个好的命名能够让代码阅读者迅速的知道代码的实际用途，而坏的命名不仅仅是让人摸不着头脑，而且可能误导他人。
+本文主要是clean code第二章有意义的命名的笔记，该章节系统的讲述了什么才是一个好的名字。
+  名副其实
+ 如果命名需要注释，则不是一个好的命名。
+命名需要表达出准确的含义，不应该使用magic num或者i、j、k这类无意义的变量名。
+   避免误导
+ 0和O、1、I和l。这类视觉上容易混淆的名字不需要使用。
+假设存在一个vector，里面存储这actor_rid，但是你命名为actor_list，导致阅读者误认为是用链表实现的。
+   做有意义的区分
+ 类似a1、a2、a3不能够带来任何信息的变量命名
+类似thexx、xxdata、xxinfo、xxobject这类没有意义的前缀、后缀
+不使用匈牙利命名法带上类型信息，现在ide随时可以看到类型
+变量的命名需要带有含义，不要带上冗余的无效的信息。
+   使用读得出来的名称
+ 如果变量难易阅读的话，对阅读者总是负担，难以记住也难易和他人交流
+   使用可搜索的名称
+ 作用域越大变量名越长，便于搜索同时不会重复。
+   避免使用编码
+ 匈牙利命名法在现代ide没有必要，同时影响ide的自动补全，修改类型名同时需要修改变量名
+类似m_的前缀没有必要
+   避免翻译
+ 缩写
+   类名
+ 类名应该是名词或者名词短语，不应该是动词
+   方法名
+ 方法名应该是动词或者动词短语，类似set_xx、is_xx
+   别扮可爱
+ 不要使用难以联想到的词，即使你认为很精妙，直接了当的命名。
+   每个概念对应一个词</div><div class="post-footer">
+        <a href="/clean-code%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E7%BC%96%E7%A8%8B/">编程</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%BF%99%E5%87%A0%E4%B8%AA%E6%9C%88%E7%9A%84%E4%B8%80%E7%82%B9%E9%9A%8F%E6%84%9F/">这几个月的一点随感</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-10-15">2017-10-15</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%9D%82%E8%B0%88/"><i class="far fa-folder fa-fw"></i>杂谈</a></span></div><div class="content">又有几个月没写博客了，自上次Redis系列之后，三个月过去。中间结束一个项目、面试了很多次、换了个工作、搬了次家、在家度过了一次国庆长假。
 结束一个项目 结束的一个项目，算是基本独立完成的比较大的一个项目。项目团队四个人，两程序、两自动化。
@@ -342,185 +375,6 @@ redis是我第一个比较完整的看完的现在流行的开源项目源码。
 </div></div><div class="post-footer">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%BA%8B%E5%8A%A1/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-aof%E6%8C%81%E4%B9%85%E5%8C%96/">Redis源码阅读-AOF持久化</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-16">2017-07-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>之前看了RDB持久化，功能是把数据库的数据全部使用一种特定格式进行存储。恢复时一个一个数据库键恢复。</p>
-<p>AOF持久化与RDB持久化不同，AOF通过保存Redis服务器执行的写命令来记录数据库的状态。</p>
-<h2 id="aof持久化的实现">AOF持久化的实现</h2>
-<p>AOF持久化功能分为命令追加、文件写入、文件同步三个步骤。</p>
-<ul>
-<li>命令追加：将命令数据写入aof_buf缓冲区</li>
-<li>文件写入：将aof_buff缓冲区数据写入系统IO缓冲区</li>
-<li>文件同步：将系统IO缓冲区的数据同步到磁盘文件</li>
-</ul>
-<h3 id="命令追加">命令追加</h3>
-<p>AOF持久化打开时，服务器在执行一个写命令之后，会以协议的格式将执行的命令追加倒服务器状态aof_buf缓冲区尾部。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">redisServer</span> <span class="p">{</span> 
-  <span class="c1">// ...
-</span><span class="c1"></span>  <span class="n">sds</span> <span class="n">aof_buf</span><span class="p">;</span>  <span class="c1">// aof缓冲区
-</span><span class="c1"></span>  <span class="c1">// ....
-</span><span class="c1"></span><span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>命令追加的实现</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span><span class="lnt">61
-</span><span class="lnt">62
-</span><span class="lnt">63
-</span><span class="lnt">64
-</span><span class="lnt">65
-</span><span class="lnt">66
-</span><span class="lnt">67
-</span><span class="lnt">68
-</span><span class="lnt">69
-</span><span class="lnt">70
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 将命令追加到AOF缓冲区中
-</span><span class="c1"></span><span class="kt">void</span> <span class="nf">feedAppendOnlyFile</span><span class="p">(</span><span class="k">struct</span> <span class="n">redisCommand</span> <span class="o">*</span><span class="n">cmd</span><span class="p">,</span> <span class="kt">int</span> <span class="n">dictid</span><span class="p">,</span> <span class="n">robj</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">sds</span> <span class="n">buf</span> <span class="o">=</span> <span class="n">sdsempty</span><span class="p">();</span>
-    <span class="n">robj</span> <span class="o">*</span><span class="n">tmpargv</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
-
-    <span class="c1">// 如果没切换到正确的数据库，则追加切换数据库命令
-</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">dictid</span> <span class="o">!=</span> <span class="n">server</span><span class="p">.</span><span class="n">aof_selected_db</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">char</span> <span class="n">seldb</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
-
-        <span class="n">snprintf</span><span class="p">(</span><span class="n">seldb</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">seldb</span><span class="p">),</span><span class="s">&#34;%d&#34;</span><span class="p">,</span><span class="n">dictid</span><span class="p">);</span>
-        <span class="n">buf</span> <span class="o">=</span> <span class="n">sdscatprintf</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="s">&#34;*2</span><span class="se">\r\n</span><span class="s">$6</span><span class="se">\r\n</span><span class="s">SELECT</span><span class="se">\r\n</span><span class="s">$%lu</span><span class="se">\r\n</span><span class="s">%s</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span>
-            <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span><span class="n">strlen</span><span class="p">(</span><span class="n">seldb</span><span class="p">),</span><span class="n">seldb</span><span class="p">);</span>
-        <span class="n">server</span><span class="p">.</span><span class="n">aof_selected_db</span> <span class="o">=</span> <span class="n">dictid</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="c1">// 根据命令类型追加命令
-</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">==</span> <span class="n">expireCommand</span> <span class="o">||</span> <span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">==</span> <span class="n">pexpireCommand</span> <span class="o">||</span>
-        <span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">==</span> <span class="n">expireatCommand</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// 追加过期键命令
-</span><span class="c1"></span>        <span class="n">buf</span> <span class="o">=</span> <span class="n">catAppendOnlyExpireAtCommand</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">==</span> <span class="n">setexCommand</span> <span class="o">||</span> <span class="n">cmd</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">==</span> <span class="n">psetexCommand</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// 追加setexCommand或者psetexCommand
-</span><span class="c1"></span>        <span class="n">tmpargv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">createStringObject</span><span class="p">(</span><span class="s">&#34;SET&#34;</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
-        <span class="n">tmpargv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
-        <span class="n">tmpargv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
-        <span class="n">buf</span> <span class="o">=</span> <span class="n">catAppendOnlyGenericCommand</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">tmpargv</span><span class="p">);</span>
-        <span class="n">decrRefCount</span><span class="p">(</span><span class="n">tmpargv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
-        <span class="n">buf</span> <span class="o">=</span> <span class="n">catAppendOnlyExpireAtCommand</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="c1">// 追加其他一般修改数据库命令
-</span><span class="c1"></span>        <span class="n">buf</span> <span class="o">=</span> <span class="n">catAppendOnlyGenericCommand</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="n">argc</span><span class="p">,</span><span class="n">argv</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="c1">// 将格式化的命令字符串追加到aof_buf缓冲区中
-</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">aof_state</span> <span class="o">==</span> <span class="n">REDIS_AOF_ON</span><span class="p">)</span>
-        <span class="n">server</span><span class="p">.</span><span class="n">aof_buf</span> <span class="o">=</span> <span class="n">sdscatlen</span><span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">aof_buf</span><span class="p">,</span><span class="n">buf</span><span class="p">,</span><span class="n">sdslen</span><span class="p">(</span><span class="n">buf</span><span class="p">));</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">aof_child_pid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1">// 如果在执行AOF重写，那么追加的新的AOF文件中
-</span><span class="c1"></span>        <span class="n">aofRewriteBufferAppend</span><span class="p">((</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="p">,</span><span class="n">sdslen</span><span class="p">(</span><span class="n">buf</span><span class="p">));</span>
-
-    <span class="n">sdsfree</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="c1">// 根据参数，格式化命令
-</span><span class="c1"></span><span class="n">sds</span> <span class="nf">catAppendOnlyGenericCommand</span><span class="p">(</span><span class="n">sds</span> <span class="n">dst</span><span class="p">,</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">robj</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
-    <span class="kt">int</span> <span class="n">len</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
-    <span class="n">robj</span> <span class="o">*</span><span class="n">o</span><span class="p">;</span>
-
-    <span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;*&#39;</span><span class="p">;</span>
-    <span class="n">len</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">ll2string</span><span class="p">(</span><span class="n">buf</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">argc</span><span class="p">);</span>
-    <span class="n">buf</span><span class="p">[</span><span class="n">len</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\r&#39;</span><span class="p">;</span>
-    <span class="n">buf</span><span class="p">[</span><span class="n">len</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
-    <span class="n">dst</span> <span class="o">=</span> <span class="n">sdscatlen</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span><span class="n">buf</span><span class="p">,</span><span class="n">len</span><span class="p">);</span>
-
-    <span class="c1">// 遍历每一个参数，支架到AOF缓冲区中
-</span><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">o</span> <span class="o">=</span> <span class="n">getDecodedObject</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
-        <span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;$&#39;</span><span class="p">;</span>
-        <span class="n">len</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">ll2string</span><span class="p">(</span><span class="n">buf</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">sdslen</span><span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">));</span>
-        <span class="n">buf</span><span class="p">[</span><span class="n">len</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\r&#39;</span><span class="p">;</span>
-        <span class="n">buf</span><span class="p">[</span><span class="n">len</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
-        <span class="n">dst</span> <span class="o">=</span> <span class="n">sdscatlen</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span><span class="n">buf</span><span class="p">,</span><span class="n">len</span><span class="p">);</span>
-        <span class="n">dst</span> <span class="o">=</span> <span class="n">sdscatlen</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">,</span><span class="n">sdslen</span><span class="p">(</span><span class="n">o</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">));</span>
-        <span class="n">dst</span> <span class="o">=</span> <span class="n">sdscatlen</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
-        <span class="n">decrRefCount</span><span class="p">(</span><span class="n">o</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="n">dst</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-aof%E6%8C%81%E4%B9%85%E5%8C%96/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>
@@ -541,7 +395,7 @@ redis是我第一个比较完整的看完的现在流行的开源项目源码。
                     <span class="page-link" aria-hidden="true">&hellip;</span>
                 </li><li class="page-item ">
                     <span class="page-link">
-                        <a href="/page/9/">9</a>
+                        <a href="/page/10/">10</a>
                     </span>
                 </li></ul></div></div>
             </main><footer class="footer">

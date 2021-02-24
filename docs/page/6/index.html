@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-06T20:50:48+08:00" />
+<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,24 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/gitlab-workflow/">gitlab workflow</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-01-29">2017-01-29</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content"><p>建立一个长期分支，就是master，master分支上的版本都是能够编译运行的版本。
+整个工作流程如下。
+第一步：根据需求，从master拉出新分支，不区分功能分支或补丁分支。
+第二步：新分支开发完成后，或者需要讨论的时候，先从master合并到分支，解决冲突，然后向master发起一个pull request（简称PR）。
+第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话机制，大家一起评审和讨论你的代码。对话过程中，你还可以不断提交代码。
+第四步：你的Pull Request被接受，合并进master，重新部署后，原来你拉出来的那个分支就被删除。（先部署再合并也可。）</p>
+<h1 id="建立测试项目">建立测试项目</h1>
+<p>新建一个项目用于测试工作流。
+演示项目地址：http://10.10.10.98/MekaYangyi/workflow
+<img src="/img/gitlab工作流程/10-21-42.jpg" alt=""/></p>
+<h1 id="设置分支保护">设置分支保护</h1>
+<p>新建项目默认master用户才能够push和merge。
+其余用户只能新建分支，在分支测试完毕后，再发起Merge Requests。发起后，由master进行审核后合并。
+<img src="/img/gitlab工作流程/10-32-56.jpg" alt=""/></p></div><div class="post-footer">
+        <a href="/gitlab-workflow/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/gitlab/">gitlab</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%BD%BF%E7%94%A8gitlab/">第一次使用gitlab</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-01-28">2017-01-28</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content"><h1 id="安装git">安装git</h1>
 <p>版本差别不大，目前使用的版本git2.11.0.3。
@@ -486,14 +504,6 @@ push_back等操作都是值语义的，拷贝传进来的内容放入到vector�
 </ol></div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">stl源码剖析</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">阅读谷歌编程规范</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-11-06">2016-11-06</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="事情的起因">事情的起因</h1>
-<p>好的东西就是这样，你每次看都能够有新的收获。
-这次也一样，读了一遍谷歌编程规范，又有些新的理解，也有一些需要重新让自己记住的点。
-遂记录下来，成此博文。</p></div><div class="post-footer">
-        <a href="/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/google/">google</a>,&nbsp;<a href="/tags/%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">编程规范</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>
@@ -521,8 +531,10 @@ push_back等操作都是值语义的，拷贝传进来的内容放入到vector�
                         <a href="/page/8/">8</a>
                     </span>
                 </li><li class="page-item ">
+                    <span class="page-link" aria-hidden="true">&hellip;</span>
+                </li><li class="page-item ">
                     <span class="page-link">
-                        <a href="/page/9/">9</a>
+                        <a href="/page/10/">10</a>
                     </span>
                 </li></ul></div></div>
             </main><footer class="footer">

@@ -3,7 +3,14 @@
         <title>All Posts - 鉴心</title>
         <link>http://coderyang.com/posts/</link>
         <description>All Posts | 鉴心</description>
-        <generator>Hugo -- gohugo.io</generator><language>en</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 18 Jan 2021 16:04:59 &#43;0000</lastBuildDate><atom:link href="http://coderyang.com/posts/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Wed, 24 Feb 2021 09:26:09 &#43;0800</lastBuildDate><atom:link href="http://coderyang.com/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>设计模式的个人总结</title>
+    <link>http://coderyang.com/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%AA%E4%BA%BA%E6%80%BB%E7%BB%93/</link>
+    <pubDate>Wed, 24 Feb 2021 09:26:09 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://coderyang.com/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%AA%E4%BA%BA%E6%80%BB%E7%BB%93/</guid>
+    <description><![CDATA[创建型模式  工厂方法  简单来说就是提供一个create方法 代码两个变化方向，一个是子类的扩展，一个是框架层的不变。 另外还有一种用法和单例有点像，提供一个create接口，但是返回的可能是公用的对象。   抽象工厂  单个类里有很好个create方法，用于创建不同的产品。 一般把创建操作独立成一个类A，然后组合进另一个类B。类B利用类A的接口完成具体的业务。   生成器  和抽象工厂有点像的，只是这里更强调步骤。生成器是把步骤隐藏，抽象工厂的步骤是不变的。 两个变化的方向，一个是创建不同的产品、一个是构建步骤不同，导致有两个继承树。   原型  就是一个clone接口，能够从已有的类copy一个新的出来。 比较适合的场景 怪物、AI的创建，怪物种类太多了，那么直接按照怪物的行为划分更下层的子类，通过组合的形式构造出来成千上万种怪物。 深入设计模式这种还要搞一个prototype继承树有点二，在游戏里组合用的更多些。   单例  全局访问点、通过封装保证只会创建出一个、延迟初始化 用的太多了，不过要写出一个线程安全的单例其实不容易。 隐式的构造时机，可能导致隐藏bug，不适合服务器场景，服务器要求行为固定 全局只能有一个对象，好处是调用可以少穿一个参数，坏处就是这个全局只有一个对象的限制很蛋痛，没法扩展成多个。    结构型模式  适配器  简单说就是套个壳，伪装成另外一种东西。非常朴素的一种设计模式，很常用。 装饰模式和适配器不太一样，装饰主要是想偷偷做一点其他事情。   桥接  功能和名字匹配，两种不同类型对象的中间连接的部分。 对象可以独立扩展，桥接部分也能独立扩展，这里面有三个变化的方向。   组合  同一类对象组合成一个大对象，偶尔用。 组合的模式可以有多种：并列、树等等。 使用范围有限，大部分类这样组合起来语义上就不通了。   装饰  简单来说就是穿一层衣服，增强功能。   外观  相当于一个大的模块，提供一个api类，把对外暴露的接口都放在这个类里。 使用者就不用关心模块内部的实现，最简单做法就是搞一个api.hpp暴露一些全局函数。 一个模块可以提供好几个外观。   享元  省内存，最常见的就是文字处理程序依靠该模式处理字符串。 游戏行业有很多特效、物件都可以用这个方法处理。   代理  非常常用的模式，比如数据库代理、RPC stub。 代理模式提供相同的接口，但是真实对象在另外的地方。    行为模式  责任链  常见于消息处理，一个消息过来，被一个链条下的handle消费。 有两种做法，一种是调用下一个节点由框架来做，一种是由节点来做。 节点来做比较适合插入时间统计的代码，这个节点相当于下一个节点的装饰器。然后也可以根据业务看是否取消继续调用，适合做拦截器。 形式可以不是链状，树也行，随意啥形状都行。   命令  游戏行业用的比较多的就是对同一个玩家输入的操作执行不同的响应。 本质上是框架复用。   迭代器：没啥好说的，框架复用，迭代模式任意扩展，stl用的太多了。 中介者  依赖导致，解除类之间互相调用产生的网状结构。 网状结构没了，都依赖中介者，这样只要改中介者，代码更容易改。   备忘录  用的很少的一个模式，就是把状态从对象中剥离，可以任意恢复状态。   观察者：  天天用的玩意，解耦，依赖倒置。 通知没有顺序，调用关系隐蔽，重入风险。   状态：和命令模式类似，是为了对同一个行为产生不同的反应，但是状态模式操作是一组的。 策略  代码分成两部分，上下文和策略，策略能独立扩展，上下文不变。 和命令模式有点像，不过目的不一样，命令不强调这个上下文。   模板方法：框架复用，和模板差不多，替换几个预设的步骤。 访问者：  双分发，不是很好用的一个模式，子类扩展还要改visitor。 框架复用，visitor就是一个遍历，然后每种类型对象调用不通的接口，接口的    ]]></description>
+</item><item>
     <title>一致性与共识算法</title>
     <link>http://coderyang.com/%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8E%E5%85%B1%E8%AF%86/</link>
     <pubDate>Mon, 18 Jan 2021 16:04:59 &#43;0000</pubDate>
@@ -192,103 +199,5 @@ redis是我第一个比较完整的看完的现在流行的开源项目源码。
 <li>命令回复处理器发送ok给客户端。</li>
 <li>客户端接收ok，并打印。</li>
 </ul>]]></description>
-</item><item>
-    <title>redis源码阅读-事件</title>
-    <link>http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%BA%8B%E4%BB%B6/</link>
-    <pubDate>Sun, 16 Jul 2017 22:24:01 &#43;0000</pubDate>
-    <author>Author</author>
-    <guid>http://coderyang.com/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%BA%8B%E4%BB%B6/</guid>
-    <description><![CDATA[<h1 id="redis源码阅读-事件">redis源码阅读-事件</h1>
-<p>redis服务器是一个事件驱动程序。当触发一个事件时,redis会创建一个事件,放入到待处理的队列，依次进行处理。</p>
-<p>redis事件分为文件时间和时间事件。</p>
-<p>文件事件：文件事件是对套接字操作的抽象，当服务器与客户端进行通讯，会产生出各种文件事件，而服务器则通过监听并处理这些事件来完成一系列网络通讯操作。</p>
-<p>时间事件：redis一些操作是需要定时进行执行的，而时间事件就是对这类操作的抽象。</p>
-<h2 id="事件的实现">事件的实现</h2>
-<p>以下是事件结构体定义。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="cm">/* File event structure */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">aeFileEvent</span> <span class="p">{</span>
-    <span class="kt">int</span> <span class="n">mask</span><span class="p">;</span> <span class="c1">// one of AE_(READABLE|WRITABLE) 类型
-</span><span class="c1"></span>    <span class="n">aeFileProc</span> <span class="o">*</span><span class="n">rfileProc</span><span class="p">;</span> <span class="c1">// 读事件处理器
-</span><span class="c1"></span>    <span class="n">aeFileProc</span> <span class="o">*</span><span class="n">wfileProc</span><span class="p">;</span> <span class="c1">// 写事件处理器
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="n">clientData</span><span class="p">;</span> <span class="c1">// 多路复用库的私有数据
-</span><span class="c1"></span><span class="p">}</span> <span class="n">aeFileEvent</span><span class="p">;</span>
-
-<span class="cm">/* Time event structure */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">aeTimeEvent</span> <span class="p">{</span>
-    <span class="kt">long</span> <span class="kt">long</span> <span class="n">id</span><span class="p">;</span>  <span class="c1">// 唯一标志
-</span><span class="c1"></span>    <span class="kt">long</span> <span class="n">when_sec</span><span class="p">;</span> <span class="c1">// 事件到达事件s
-</span><span class="c1"></span>    <span class="kt">long</span> <span class="n">when_ms</span><span class="p">;</span>  <span class="c1">// 事件到达事件ms
-</span><span class="c1"></span>    <span class="n">aeTimeProc</span> <span class="o">*</span><span class="n">timeProc</span><span class="p">;</span> <span class="c1">// 事件处理函数
-</span><span class="c1"></span>    <span class="n">aeEventFinalizerProc</span> <span class="o">*</span><span class="n">finalizerProc</span><span class="p">;</span> <span class="c1">// 事件释放函数
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="n">clientData</span><span class="p">;</span> <span class="c1">// 多路复用库的私有数据
-</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">aeTimeEvent</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span> <span class="c1">//　指向下一个时间事件结构，形成链表
-</span><span class="c1"></span><span class="p">}</span> <span class="n">aeTimeEvent</span><span class="p">;</span>
-
-<span class="cm">/* A fired event */</span>
-<span class="c1">// 触发的事件结构体
-</span><span class="c1"></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">aeFiredEvent</span> <span class="p">{</span>
-    <span class="kt">int</span> <span class="n">fd</span><span class="p">;</span> <span class="c1">// 文件事件描述符
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">mask</span><span class="p">;</span>　<span class="c1">// one of AE_(READABLE|WRITABLE) 类型
-</span><span class="c1"></span><span class="p">}</span> <span class="n">aeFiredEvent</span><span class="p">;</span>
-
-<span class="c1">// 事件循环结构体
-</span><span class="c1"></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">aeEventLoop</span> <span class="p">{</span>
-    <span class="kt">int</span> <span class="n">maxfd</span><span class="p">;</span>   <span class="c1">// 当前注册的最大描述符
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">setsize</span><span class="p">;</span> <span class="c1">// 需要监听的描述符个数
-</span><span class="c1"></span>    <span class="kt">long</span> <span class="kt">long</span> <span class="n">timeEventNextId</span><span class="p">;</span> <span class="c1">// 下一个时间事件ID
-</span><span class="c1"></span>    <span class="n">time_t</span> <span class="n">lastTime</span><span class="p">;</span>     <span class="c1">// 上一次时间循环时间
-</span><span class="c1"></span>    <span class="n">aeFileEvent</span> <span class="o">*</span><span class="n">events</span><span class="p">;</span> <span class="c1">// 注册要使用的文件时间
-</span><span class="c1"></span>    <span class="n">aeFiredEvent</span> <span class="o">*</span><span class="n">fired</span><span class="p">;</span> <span class="c1">// 已准备好，待处理事件
-</span><span class="c1"></span>    <span class="n">aeTimeEvent</span> <span class="o">*</span><span class="n">timeEventHead</span><span class="p">;</span> <span class="c1">// 时间事件
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">stop</span><span class="p">;</span> <span class="c1">// 事件处理器开关
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="n">apidata</span><span class="p">;</span> <span class="c1">// 处理多路服用库的私有数据
-</span><span class="c1"></span>    <span class="n">aeBeforeSleepProc</span> <span class="o">*</span><span class="n">beforesleep</span><span class="p">;</span> <span class="c1">// 处理事件前要执行的函数
-</span><span class="c1"></span><span class="p">}</span> <span class="n">aeEventLoop</span><span class="p">;</span>
-</code></pre></td></tr></table>
-</div>
-</div>]]></description>
 </item></channel>
 </rss>

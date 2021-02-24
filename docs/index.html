@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-06T20:50:48+08:00" />
+<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,11 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%AA%E4%BA%BA%E6%80%BB%E7%BB%93/">设计模式的个人总结</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2021-02-24">2021-02-24</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%BD%AF%E5%B7%A5/"><i class="far fa-folder fa-fw"></i>软工</a></span></div><div class="content">创建型模式  工厂方法  简单来说就是提供一个create方法 代码两个变化方向，一个是子类的扩展，一个是框架层的不变。 另外还有一种用法和单例有点像，提供一个create接口，但是返回的可能是公用的对象。   抽象工厂  单个类里有很好个create方法，用于创建不同的产品。 一般把创建操作独立成一个类A，然后组合进另一个类B。类B利用类A的接口完成具体的业务。   生成器  和抽象工厂有点像的，只是这里更强调步骤。生成器是把步骤隐藏，抽象工厂的步骤是不变的。 两个变化的方向，一个是创建不同的产品、一个是构建步骤不同，导致有两个继承树。   原型  就是一个clone接口，能够从已有的类copy一个新的出来。 比较适合的场景 怪物、AI的创建，怪物种类太多了，那么直接按照怪物的行为划分更下层的子类，通过组合的形式构造出来成千上万种怪物。 深入设计模式这种还要搞一个prototype继承树有点二，在游戏里组合用的更多些。   单例  全局访问点、通过封装保证只会创建出一个、延迟初始化 用的太多了，不过要写出一个线程安全的单例其实不容易。 隐式的构造时机，可能导致隐藏bug，不适合服务器场景，服务器要求行为固定 全局只能有一个对象，好处是调用可以少穿一个参数，坏处就是这个全局只有一个对象的限制很蛋痛，没法扩展成多个。    结构型模式  适配器  简单说就是套个壳，伪装成另外一种东西。非常朴素的一种设计模式，很常用。 装饰模式和适配器不太一样，装饰主要是想偷偷做一点其他事情。   桥接  功能和名字匹配，两种不同类型对象的中间连接的部分。 对象可以独立扩展，桥接部分也能独立扩展，这里面有三个变化的方向。   组合  同一类对象组合成一个大对象，偶尔用。 组合的模式可以有多种：并列、树等等。 使用范围有限，大部分类这样组合起来语义上就不通了。   装饰  简单来说就是穿一层衣服，增强功能。   外观  相当于一个大的模块，提供一个api类，把对外暴露的接口都放在这个类里。 使用者就不用关心模块内部的实现，最简单做法就是搞一个api.hpp暴露一些全局函数。 一个模块可以提供好几个外观。   享元  省内存，最常见的就是文字处理程序依靠该模式处理字符串。 游戏行业有很多特效、物件都可以用这个方法处理。   代理  非常常用的模式，比如数据库代理、RPC stub。 代理模式提供相同的接口，但是真实对象在另外的地方。    行为模式  责任链  常见于消息处理，一个消息过来，被一个链条下的handle消费。 有两种做法，一种是调用下一个节点由框架来做，一种是由节点来做。 节点来做比较适合插入时间统计的代码，这个节点相当于下一个节点的装饰器。然后也可以根据业务看是否取消继续调用，适合做拦截器。 形式可以不是链状，树也行，随意啥形状都行。   命令  游戏行业用的比较多的就是对同一个玩家输入的操作执行不同的响应。 本质上是框架复用。   迭代器：没啥好说的，框架复用，迭代模式任意扩展，stl用的太多了。 中介者  依赖导致，解除类之间互相调用产生的网状结构。 网状结构没了，都依赖中介者，这样只要改中介者，代码更容易改。   备忘录  用的很少的一个模式，就是把状态从对象中剥离，可以任意恢复状态。   观察者：  天天用的玩意，解耦，依赖倒置。 通知没有顺序，调用关系隐蔽，重入风险。   状态：和命令模式类似，是为了对同一个行为产生不同的反应，但是状态模式操作是一组的。 策略  代码分成两部分，上下文和策略，策略能独立扩展，上下文不变。 和命令模式有点像，不过目的不一样，命令不强调这个上下文。   模板方法：框架复用，和模板差不多，替换几个预设的步骤。 访问者：  双分发，不是很好用的一个模式，子类扩展还要改visitor。 框架复用，visitor就是一个遍历，然后每种类型对象调用不通的接口，接口的    </div><div class="post-footer">
+        <a href="/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%AA%E4%BA%BA%E6%80%BB%E7%BB%93/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E8%BD%AF%E5%B7%A5/">软工</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8E%E5%85%B1%E8%AF%86/">一致性与共识算法</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2021-01-18">2021-01-18</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E5%88%86%E4%BA%AB/"><i class="far fa-folder fa-fw"></i>分享</a></span></div><div class="content">本文从《数据密集型引用系统设计》、Paxos lecture (Raft user study)（https://www.youtube.com/watch?v=JEpsBg0AO6o） 各截取了部分。
 挑战 故障 数据：
@@ -174,39 +179,6 @@ FLP FLP 不可能定理是分布式系统领域最重要的定理之一，它给
 摄影 随着年龄的增长，越来越想留住时间。很遗憾的是之前没有做好记录，每年都没有全家福。</div><div class="post-footer">
         <a href="/%E6%88%91%E7%9A%842018/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E9%9A%8F%E6%84%9F/">随感</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/clean-code%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">clean code读书笔记</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2018-07-23">2018-07-23</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content">命名，很多人戏称为编程中最难的事情。从实践经验出发来看，一个好的命名能够让代码阅读者迅速的知道代码的实际用途，而坏的命名不仅仅是让人摸不着头脑，而且可能误导他人。
-本文主要是clean code第二章有意义的命名的笔记，该章节系统的讲述了什么才是一个好的名字。
-  名副其实
- 如果命名需要注释，则不是一个好的命名。
-命名需要表达出准确的含义，不应该使用magic num或者i、j、k这类无意义的变量名。
-   避免误导
- 0和O、1、I和l。这类视觉上容易混淆的名字不需要使用。
-假设存在一个vector，里面存储这actor_rid，但是你命名为actor_list，导致阅读者误认为是用链表实现的。
-   做有意义的区分
- 类似a1、a2、a3不能够带来任何信息的变量命名
-类似thexx、xxdata、xxinfo、xxobject这类没有意义的前缀、后缀
-不使用匈牙利命名法带上类型信息，现在ide随时可以看到类型
-变量的命名需要带有含义，不要带上冗余的无效的信息。
-   使用读得出来的名称
- 如果变量难易阅读的话，对阅读者总是负担，难以记住也难易和他人交流
-   使用可搜索的名称
- 作用域越大变量名越长，便于搜索同时不会重复。
-   避免使用编码
- 匈牙利命名法在现代ide没有必要，同时影响ide的自动补全，修改类型名同时需要修改变量名
-类似m_的前缀没有必要
-   避免翻译
- 缩写
-   类名
- 类名应该是名词或者名词短语，不应该是动词
-   方法名
- 方法名应该是动词或者动词短语，类似set_xx、is_xx
-   别扮可爱
- 不要使用难以联想到的词，即使你认为很精妙，直接了当的命名。
-   每个概念对应一个词</div><div class="post-footer">
-        <a href="/clean-code%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E7%BC%96%E7%A8%8B/">编程</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
 </article><ul class="pagination"><li class="page-item active">
                     <span class="page-link">
                         <a href="/">1</a>
@@ -223,7 +195,7 @@ FLP FLP 不可能定理是分布式系统领域最重要的定理之一，它给
                     <span class="page-link" aria-hidden="true">&hellip;</span>
                 </li><li class="page-item ">
                     <span class="page-link">
-                        <a href="/page/9/">9</a>
+                        <a href="/page/10/">10</a>
                     </span>
                 </li></ul></div></div>
             </main><footer class="footer">

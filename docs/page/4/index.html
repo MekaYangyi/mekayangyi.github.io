@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-06T20:50:48+08:00" />
+<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,42 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/">redis源码阅读-整数集合</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-08">2017-07-08</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>创建一个只包含整数值元素的集合，同时元素数量不多时，redis会使用整数集合作为键的底层实现。</p>
+<h2 id="整数集合的实现">整数集合的实现</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">intset</span> <span class="p">{</span>
+    <span class="n">uint32_t</span> <span class="n">encoding</span><span class="p">;</span> <span class="c1">// 编码方式
+</span><span class="c1"></span>    <span class="n">uint32_t</span> <span class="n">length</span><span class="p">;</span> <span class="c1">// 元素数量
+</span><span class="c1"></span>    <span class="n">int8_t</span> <span class="n">contents</span><span class="p">[];</span> <span class="c1">// 保存元素的数组
+</span><span class="c1"></span><span class="p">}</span> <span class="n">intset</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>encoding表示整数集合的编码模式，目前提供三种模式</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="cp">#define INTSET_ENC_INT16 (sizeof(int16_t))
+</span><span class="cp">#define INTSET_ENC_INT32 (sizeof(int32_t))
+</span><span class="cp">#define INTSET_ENC_INT64 (sizeof(int64_t))
+</span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E8%B7%B3%E8%B7%83%E8%A1%A8/">redis源码阅读-跳跃表</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-08">2017-07-08</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>跳跃表一种有序数据结构，每个节点维护多个指向其他节点的指针，达到快速访问节点的目的。</p>
 <p>大部分情况下跳跃表的效率可以和平衡数媲美，实现比平衡树简单，不少程序使用跳跃表来代替平衡树。</p>
@@ -370,61 +406,6 @@
 复制 C:\Program_Files_(x86)\Microsoft_Visual Studio\2017\Enterprise\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.Shell.Interop.8.0.dll 到 C:\Windows\assembly\GAC\Microsoft.VisualStudio.Shell.Interop.8.0\8.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Shell.Interop.8.0.dll</div><div class="post-footer">
         <a href="/vs2017%E4%B8%8Evs2005%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%8A%80%E5%B7%A7/">技巧</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E9%93%BE%E8%A1%A8/">redis源码阅读-链表</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-26">2017-03-26</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>C语言程序由于没有标准库的存在，各种造轮子。Redis为了满足需求，同样写了一个链表。</p>
-<p>实现文件在adlist.h/adlist.c中。</p>
-<h2 id="结构体定义">结构体定义</h2>
-<p>和普通的C写的双向链表差不多。没有什么特点。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">listNode</span> <span class="p">{</span>
-    <span class="k">struct</span> <span class="n">listNode</span> <span class="o">*</span><span class="n">prev</span><span class="p">;</span> <span class="c1">// 前节点
-</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">listNode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span> <span class="c1">// 后节点
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="n">value</span><span class="p">;</span> <span class="c1">// 值
-</span><span class="c1"></span><span class="p">}</span> <span class="n">listNode</span><span class="p">;</span>
-
-<span class="c1">// 迭代器
-</span><span class="c1"></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">listIter</span> <span class="p">{</span>
-    <span class="n">listNode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="c1">// 下一个节点
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">direction</span><span class="p">;</span><span class="c1">// 方向
-</span><span class="c1"></span><span class="p">}</span> <span class="n">listIter</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">list</span> <span class="p">{</span>
-    <span class="n">listNode</span> <span class="o">*</span><span class="n">head</span><span class="p">;</span> <span class="c1">// 头
-</span><span class="c1"></span>    <span class="n">listNode</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span> <span class="c1">// 尾
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">dup</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span> <span class="c1">// 自定义节点复制函数
-</span><span class="c1"></span>    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span> <span class="c1">// 自定义节点释放函数
-</span><span class="c1"></span>    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">match</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 自定义节点匹配函数
-</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">len</span><span class="p">;</span> <span class="c1">// 链表长度
-</span><span class="c1"></span><span class="p">}</span> <span class="n">list</span><span class="p">;</span>
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E9%93%BE%E8%A1%A8/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>
@@ -453,7 +434,7 @@
                     <span class="page-link" aria-hidden="true">&hellip;</span>
                 </li><li class="page-item ">
                     <span class="page-link">
-                        <a href="/page/9/">9</a>
+                        <a href="/page/10/">10</a>
                     </span>
                 </li></ul></div></div>
             </main><footer class="footer">
