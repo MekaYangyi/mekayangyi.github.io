@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
+<meta property="og:updated_time" content="2021-06-25T08:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,22 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/">[读书笔记] stl源码剖析 第一章、第二章 概论、内存配置器</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-11-16">2016-11-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="概论">概论</h1>
+<p>第一章基本都是C++基础的知识，读了《C++ Primer》的话都懂。关于各种C++的特性、STL特性都有。</p>
+<h2 id="stl六大组件-功能与运用">STL六大组件 功能与运用</h2>
+<p>STL提供六大组件，彼此可以组合套用</p>
+<ol>
+<li>容器：各种数据结构。Vector,list,deque,set,map</li>
+<li>算法：各种常用算法如sort,search,copy,erase</li>
+<li>迭代器：扮演容器与算法之间的粘合剂，所谓的泛型指针。五种类型</li>
+<li>仿函数：行为类似函数，可以作为算法的某种策略。仿函数是重载了()的class或者class template，一般函数指针可视为狭义的仿函数</li>
+<li>配接器：一种用来修饰容器或者仿函数或迭代器接口的东西。</li>
+<li>配置器：负责控件的配置与管理。</li>
+</ol></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90-%E7%AC%AC%E4%B8%80%E4%BA%8C%E7%AB%A0-%E6%A6%82%E8%AE%BA%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE%E5%99%A8/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/stl%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/">stl源码剖析</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E9%98%85%E8%AF%BB%E8%B0%B7%E6%AD%8C%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">阅读谷歌编程规范</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-11-06">2016-11-06</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="事情的起因">事情的起因</h1>
 <p>好的东西就是这样，你每次看都能够有新的收获。
@@ -264,148 +280,6 @@
 </div>
 </div></div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%8A%BD%E8%B1%A1%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%9A%E9%87%8D%E8%A1%A8%E7%A4%BA/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E7%AC%A6%E5%8F%B7%E6%95%B0%E6%8D%AE/">[读书笔记] sicp 第二章 符号数据</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nc">list</span> <span class="ss">&#39;a</span> <span class="ss">&#39;b</span><span class="p">)</span>
-<span class="p">(</span><span class="nv">eq?</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><h1 id="符号求导">符号求导</h1>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-lisp" data-lang="lisp">
-<span class="c1">;e是变量吗</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">variable?</span> <span class="nv">x</span><span class="p">)</span>
-  <span class="p">(</span><span class="nv">symbol?</span> <span class="nv">x</span><span class="p">))</span><span class="c1">;symbol?判断变量是不是符号</span>
-
-<span class="c1">;v1和v2是同一个变量吗</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">same-variable?</span> <span class="nv">v1</span> <span class="nv">v2</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">and</span> <span class="p">(</span><span class="nv">variable?</span> <span class="nv">v1</span><span class="p">)</span> <span class="p">(</span><span class="nv">variable?</span> <span class="nv">v2</span><span class="p">)</span> <span class="p">(</span><span class="nv">eq?</span> <span class="nv">v1</span> <span class="nv">v2</span><span class="p">)))</span>
-
-<span class="c1">;e是和式吗</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">sum?</span> <span class="nv">x</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">and</span> <span class="p">(</span><span class="nv">pair?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nv">eq?</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">x</span><span class="p">)</span> <span class="ss">&#39;+</span><span class="p">)))</span>
-
-<span class="c1">;e的被加数</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">addend</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nf">cadr</span> <span class="nv">s</span><span class="p">))</span>
-
-<span class="c1">;e的加数</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">augend</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nf">caddr</span> <span class="nv">s</span><span class="p">))</span>
-
-<span class="c1">;构造起a1和a2的和式</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-sum</span> <span class="nv">a1</span> <span class="nv">a2</span><span class="p">)</span> <span class="p">(</span><span class="nc">list</span> <span class="ss">&#39;+</span> <span class="nv">a1</span> <span class="nv">a2</span><span class="p">))</span>
-
-<span class="c1">;e是乘式吗</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">product?</span> <span class="nv">x</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">and</span> <span class="p">(</span><span class="nv">pair?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nv">eq?</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">x</span><span class="p">)</span> <span class="ss">&#39;*</span><span class="p">)))</span>
-
-<span class="c1">;e的被乘数</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">multiplier</span> <span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nf">cadr</span> <span class="nv">p</span><span class="p">))</span>
-
-<span class="c1">;e的乘数</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">multiplicand</span> <span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nf">caddr</span> <span class="nv">p</span><span class="p">))</span>
-
-<span class="c1">;构造起来m1与m2的乘式</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-product</span> <span class="nv">m1</span> <span class="nv">m2</span><span class="p">)</span>
-       <span class="p">(</span><span class="nc">list</span> <span class="ss">&#39;*</span> <span class="nv">m1</span> <span class="nv">m2</span><span class="p">))</span>
-
-<span class="c1">;求导</span>
-<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">deriv</span> <span class="nf">exp</span> <span class="nv">var</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">number?</span> <span class="nf">exp</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="p">((</span><span class="nv">variable?</span> <span class="nf">exp</span><span class="p">)</span>
-         <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nv">same-variable?</span> <span class="nf">exp</span> <span class="nv">var</span><span class="p">)</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="p">((</span><span class="nv">sum?</span> <span class="nf">exp</span><span class="p">)</span>
-         <span class="p">(</span><span class="nv">make-sum</span> <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">addend</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">)</span>
-                   <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">augend</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">)))</span>
-        <span class="p">((</span><span class="nv">product?</span> <span class="nf">exp</span><span class="p">)</span>
-         <span class="p">(</span><span class="nv">make-sum</span>
-          <span class="p">(</span><span class="nv">make-product</span> <span class="p">(</span><span class="nv">multiplier</span> <span class="nf">exp</span><span class="p">)</span>
-                        <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">multiplicand</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">))</span>
-          <span class="p">(</span><span class="nv">make-product</span> <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">multiplier</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">)</span>
-                        <span class="p">(</span><span class="nv">multiplicand</span> <span class="nf">exp</span><span class="p">))))</span>
-        <span class="p">(</span><span class="nv">else</span>
-         <span class="p">(</span><span class="kt">error</span> <span class="s">&#34;unknown expression type -- DERIV&#34;</span> <span class="nf">exp</span><span class="p">))))</span>
-
-<span class="p">(</span><span class="nv">deriv</span> <span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="nv">x</span> <span class="mi">3</span><span class="p">)</span> <span class="ss">&#39;x</span><span class="p">)</span>
-<span class="p">(</span><span class="nv">deriv</span> <span class="o">&#39;</span><span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="ss">&#39;x</span><span class="p">)</span>
-<span class="p">(</span><span class="nv">deriv</span> <span class="o">&#39;</span><span class="p">(</span><span class="nf">*</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nf">+</span> <span class="nv">x</span> <span class="mi">3</span><span class="p">))</span> <span class="ss">&#39;x</span><span class="p">)</span>
-
-<span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">)</span>
-<span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">*</span> <span class="mi">1</span> <span class="nv">y</span><span class="p">))</span>
-<span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nf">*</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nf">+</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">))</span> <span class="p">(</span><span class="nf">*</span> <span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">*</span> <span class="mi">1</span> <span class="nv">y</span><span class="p">))</span> <span class="p">(</span><span class="nf">+</span> <span class="nv">x</span> <span class="mi">3</span><span class="p">)))</span>
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E7%AC%A6%E5%8F%B7%E6%95%B0%E6%8D%AE/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">

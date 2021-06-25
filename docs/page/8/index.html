@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
+<meta property="og:updated_time" content="2021-06-25T08:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,148 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E7%AC%A6%E5%8F%B7%E6%95%B0%E6%8D%AE/">[读书笔记] sicp 第二章 符号数据</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nc">list</span> <span class="ss">&#39;a</span> <span class="ss">&#39;b</span><span class="p">)</span>
+<span class="p">(</span><span class="nv">eq?</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="符号求导">符号求导</h1>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp">
+<span class="c1">;e是变量吗</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">variable?</span> <span class="nv">x</span><span class="p">)</span>
+  <span class="p">(</span><span class="nv">symbol?</span> <span class="nv">x</span><span class="p">))</span><span class="c1">;symbol?判断变量是不是符号</span>
+
+<span class="c1">;v1和v2是同一个变量吗</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">same-variable?</span> <span class="nv">v1</span> <span class="nv">v2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">and</span> <span class="p">(</span><span class="nv">variable?</span> <span class="nv">v1</span><span class="p">)</span> <span class="p">(</span><span class="nv">variable?</span> <span class="nv">v2</span><span class="p">)</span> <span class="p">(</span><span class="nv">eq?</span> <span class="nv">v1</span> <span class="nv">v2</span><span class="p">)))</span>
+
+<span class="c1">;e是和式吗</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">sum?</span> <span class="nv">x</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">and</span> <span class="p">(</span><span class="nv">pair?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nv">eq?</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">x</span><span class="p">)</span> <span class="ss">&#39;+</span><span class="p">)))</span>
+
+<span class="c1">;e的被加数</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">addend</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nf">cadr</span> <span class="nv">s</span><span class="p">))</span>
+
+<span class="c1">;e的加数</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">augend</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nf">caddr</span> <span class="nv">s</span><span class="p">))</span>
+
+<span class="c1">;构造起a1和a2的和式</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-sum</span> <span class="nv">a1</span> <span class="nv">a2</span><span class="p">)</span> <span class="p">(</span><span class="nc">list</span> <span class="ss">&#39;+</span> <span class="nv">a1</span> <span class="nv">a2</span><span class="p">))</span>
+
+<span class="c1">;e是乘式吗</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">product?</span> <span class="nv">x</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">and</span> <span class="p">(</span><span class="nv">pair?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nv">eq?</span> <span class="p">(</span><span class="nf">car</span> <span class="nv">x</span><span class="p">)</span> <span class="ss">&#39;*</span><span class="p">)))</span>
+
+<span class="c1">;e的被乘数</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">multiplier</span> <span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nf">cadr</span> <span class="nv">p</span><span class="p">))</span>
+
+<span class="c1">;e的乘数</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">multiplicand</span> <span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nf">caddr</span> <span class="nv">p</span><span class="p">))</span>
+
+<span class="c1">;构造起来m1与m2的乘式</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">make-product</span> <span class="nv">m1</span> <span class="nv">m2</span><span class="p">)</span>
+       <span class="p">(</span><span class="nc">list</span> <span class="ss">&#39;*</span> <span class="nv">m1</span> <span class="nv">m2</span><span class="p">))</span>
+
+<span class="c1">;求导</span>
+<span class="p">(</span><span class="nv">define</span> <span class="p">(</span><span class="nv">deriv</span> <span class="nf">exp</span> <span class="nv">var</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">number?</span> <span class="nf">exp</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">((</span><span class="nv">variable?</span> <span class="nf">exp</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nv">same-variable?</span> <span class="nf">exp</span> <span class="nv">var</span><span class="p">)</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="p">((</span><span class="nv">sum?</span> <span class="nf">exp</span><span class="p">)</span>
+         <span class="p">(</span><span class="nv">make-sum</span> <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">addend</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">augend</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">)))</span>
+        <span class="p">((</span><span class="nv">product?</span> <span class="nf">exp</span><span class="p">)</span>
+         <span class="p">(</span><span class="nv">make-sum</span>
+          <span class="p">(</span><span class="nv">make-product</span> <span class="p">(</span><span class="nv">multiplier</span> <span class="nf">exp</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">multiplicand</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">))</span>
+          <span class="p">(</span><span class="nv">make-product</span> <span class="p">(</span><span class="nv">deriv</span> <span class="p">(</span><span class="nv">multiplier</span> <span class="nf">exp</span><span class="p">)</span> <span class="nv">var</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nv">multiplicand</span> <span class="nf">exp</span><span class="p">))))</span>
+        <span class="p">(</span><span class="nv">else</span>
+         <span class="p">(</span><span class="kt">error</span> <span class="s">&#34;unknown expression type -- DERIV&#34;</span> <span class="nf">exp</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nv">deriv</span> <span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="nv">x</span> <span class="mi">3</span><span class="p">)</span> <span class="ss">&#39;x</span><span class="p">)</span>
+<span class="p">(</span><span class="nv">deriv</span> <span class="o">&#39;</span><span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="ss">&#39;x</span><span class="p">)</span>
+<span class="p">(</span><span class="nv">deriv</span> <span class="o">&#39;</span><span class="p">(</span><span class="nf">*</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nf">+</span> <span class="nv">x</span> <span class="mi">3</span><span class="p">))</span> <span class="ss">&#39;x</span><span class="p">)</span>
+
+<span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">)</span>
+<span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">*</span> <span class="mi">1</span> <span class="nv">y</span><span class="p">))</span>
+<span class="o">&#39;</span><span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nf">*</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nf">+</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">))</span> <span class="p">(</span><span class="nf">*</span> <span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nf">*</span> <span class="nv">x</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">*</span> <span class="mi">1</span> <span class="nv">y</span><span class="p">))</span> <span class="p">(</span><span class="nf">+</span> <span class="nv">x</span> <span class="mi">3</span><span class="p">)))</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E7%AC%A6%E5%8F%B7%E6%95%B0%E6%8D%AE/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/sicp/">sicp</a>,&nbsp;<a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E8%A7%A3%E9%87%8A/">计算机程序的构造与解释</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-sicp-%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%9E%84%E9%80%A0%E6%95%B0%E6%8D%AE%E6%8A%BD%E8%B1%A1/">[读书笔记] sicp 第二章 构造数据抽象</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-09-10">2016-09-10</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><p>第一章关注的是计算过程，以及过程在程序中所扮演的角色。
 本章，讲将数据对象组合起来，形成复合数据的方式。
@@ -354,43 +496,6 @@
 </div>
 </div><p>编译器会分析声明，贴上Plaint OI' Data的卷标，被贴上该卷标的类，不会有构造函数或者析构函数的调用了。直接使用C的方式。</p></div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E4%BA%94%E7%AB%A0-%E6%9E%84%E9%80%A0-%E8%A7%A3%E6%9E%84-%E6%8B%B7%E8%B4%9D%E8%AF%AD%E6%84%8F%E5%AD%A6/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">c&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E5%9B%9B%E7%AB%A0-function%E8%AF%AD%E6%84%8F%E5%AD%A6/">[读书笔记]深入探索C&#43;&#43;对象模型 第四章 Function语意学</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2016-08-14">2016-08-14</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><i class="far fa-folder fa-fw"></i>读书笔记</a></span></div><div class="content"><h1 id="第三章function语意学">第三章：Function语意学</h1>
-<h2 id="member的各种调用方式">Member的各种调用方式</h2>
-<h3 id="nonstatic-member-functions">Nonstatic Member Functions</h3>
-<p>C++的设计准则之一就是:nonstatic member function 至少必须和一般的nonmember function有相同的效率。
-nonstatic member function会转换为nonmember形式。</p>
-<ol>
-<li>改写函数原型，安插一个额外的参数，也就是this指针。</li>
-<li>将每一个对“nonstatic data member的存取操作&quot;改为经由this指针来存取。</li>
-<li>将member function重写成一个外部函数，对函数名称进行“mangling&quot;处理，使它在程序中成为一个独一无二的词汇。</li>
-</ol>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">normalize__7Point3dFv</span><span class="p">(</span><span class="k">register</span> <span class="k">const</span> <span class="n">Point3d</span> <span class="o">*</span><span class="k">const</span> <span class="k">this</span><span class="p">,</span>
-                                                <span class="n">Point3d</span> <span class="o">&amp;</span><span class="n">__result</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">register</span> <span class="kt">float</span> <span class="n">mag</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">magnitude</span><span class="p">();</span>
-    <span class="n">__result</span><span class="p">.</span><span class="n">Point3d</span><span class="o">::</span><span class="n">Point3d</span><span class="p">();</span>
-    
-    <span class="n">__result</span><span class="p">.</span><span class="n">_x</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_x</span><span class="o">/</span><span class="n">mag</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer">
-        <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E6%B7%B1%E5%85%A5%E6%8E%A2%E7%B4%A2c-%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B-%E7%AC%AC%E5%9B%9B%E7%AB%A0-function%E8%AF%AD%E6%84%8F%E5%AD%A6/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c&#43;&#43;/">c&#43;&#43;</a>,&nbsp;<a href="/tags/%E7%90%86%E8%AE%BA/">理论</a>,&nbsp;<a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">

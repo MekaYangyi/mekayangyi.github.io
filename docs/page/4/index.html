@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
+<meta property="og:updated_time" content="2021-06-25T08:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,88 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/">redis源码阅读-压缩列表ziplist</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-08">2017-07-08</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>压缩列表时列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每个列表项要么是小整数，要么是长度比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。</p>
+<h2 id="压缩列表的构成">压缩列表的构成</h2>
+<p>压缩列表是redis为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。一个压缩列表可以包含任意多个节点，每个节点可以保存一个字节数组或者一个整数组。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">《redis设计与实现》
+空白 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;-- end --&gt;|
+
+size          4 bytes   4 bytes 2 bytes  1 byte
+            +---------+--------+-------+-----------+
+component   | zlbytes | zltail | zllen | zlend     |
+            |         |        |       |           |
+value       |  1011   |  1010  |   0   | 1111 1111 |
+            +---------+--------+-------+-----------+
+                                       ^
+                                       |
+                               ZIPLIST_ENTRY_HEAD
+                                       &amp;
+address                        ZIPLIST_ENTRY_TAIL
+                                       &amp;
+                               ZIPLIST_ENTRY_END
+
+非空 ziplist 示例图
+
+area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
+
+size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+                                       ^                          ^        ^
+address                                |                          |        |
+                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
+                                                                  |
+                                                        ZIPLIST_ENTRY_TAIL
+</code></pre></td></tr></table>
+</div>
+</div><p>zlbytes记录整个压缩列表占用的字节数。</p>
+<p>zltail记录压缩列表尾节点距离压缩列表的起始地址有多少字节。</p>
+<p>zzlen记录压缩列表包含的节点数量。</p>
+<p>entryX列表节点，数量不定。</p>
+<p>zlend特殊值0xff，标记压缩列表末端。</p></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/">redis源码阅读-整数集合</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-08">2017-07-08</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>创建一个只包含整数值元素的集合，同时元素数量不多时，redis会使用整数集合作为键的底层实现。</p>
 <h2 id="整数集合的实现">整数集合的实现</h2>
@@ -399,13 +481,6 @@
 参考设计和样本程序给出了产品的一种使用方式，有时这些就是能获得的全部文档了。但是，在使用这些设计时一定要注意，创建它们的人往往只了解他们的产品，而没有遵循好的设计实践，或者不是为真实应用而设计的（最常见的缺点是不能进行错误恢复）。不要照搬这些设计，如果你没有在开始的时候发现bug，那么将来也会发现。此外，即使是最好的参考设计可能也不会完全符合应用程序的特定需求，而不符合的地方可能就是出问题的地方。当我照搬了朋友的微处理器设计时，就发生了问题，因为他的设计无法处理中</p></div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E8%B0%83%E8%AF%95%E4%B9%9D%E6%B3%95%E8%BD%AF%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E7%9A%84%E6%8E%92%E6%9F%A5%E4%B9%8B%E9%81%93/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%9D%82%E8%B0%88/">杂谈</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/vs2017%E4%B8%8Evs2005%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3/">vs2017与vs2005冲突解决</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-04-16">2017-04-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content">先安装vs2005，后安装vs2017，vs2017无法运行 原因：vs2005注册了Microsoft.VisualStudio.Shell.Interop.8.0.dll，优先于vs2017需要的dll。导致运行错误。
-解决方法：
-复制 C:\Program_Files_(x86)\Microsoft_Visual Studio\2017\Enterprise\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.Shell.Interop.8.0.dll 到 C:\Windows\assembly\GAC\Microsoft.VisualStudio.Shell.Interop.8.0\8.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Shell.Interop.8.0.dll</div><div class="post-footer">
-        <a href="/vs2017%E4%B8%8Evs2005%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%8A%80%E5%B7%A7/">技巧</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>

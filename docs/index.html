@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
+<meta property="og:updated_time" content="2021-06-25T08:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,35 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/%E6%88%91%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86/">我的工具集</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2021-06-25">2021-06-25</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content">只写一些每天都能用上的或者无替代的工具。
+生产：
+  印象笔记+剪辑插件：知识库构建+书影音笔记归档
+  typore：最好的markdown编辑器用于日常工作文档产出
+  onedriver：文档同步以及版本管理
+  滴答清单：日历视图作为时间-事件日志、纪念日管理、检查清单、想要的东西目标、日常待做事务
+  flomo：闪念，想到什么就写什么，关键是记下来，部分替代微信文件传输助手。隔段时间归档部分。
+  snipaste：随意的截图、顶置显示、批注
+  xshell+xftp：终端+方便的服务器文件传输
+  vscode：开源项目代码阅读，C++跳转新版本都有了，不折腾。
+  网易邮箱大师：简单的邮件管理
+  centbrowser：全局手势是痛点
+  utool：快速打开、文件搜索
+  powertoys：方便的分屏，快速把窗口布置到屏幕的一部分
+  office：ppt、excel、visio
+  其他：
+  分区助手：换硬盘时系统迁移、磁盘分区调整
+  v2ray：翻墙
+  office tool：支持基本所有版本的office安装、激活、清理垃圾
+  2345看图王去广告版：图片、pdf阅读器
+  feedly+rsshub插件：rss阅读器+rsshub源生成支持把github、知乎专栏等生成rss
+  油猴插件：百度、微博、贴吧页面精简去除、豆瓣页面增强、返利推广连接清洗
+  沙拉查词：使用彩云小译，表现优于google翻译
+  豆瓣：书影音列表、短评
+  微信阅读：常见的出版书、大部分网络小说阅读工具</div><div class="post-footer">
+        <a href="/%E6%88%91%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E5%B7%A5%E5%85%B7/">工具</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%AA%E4%BA%BA%E6%80%BB%E7%BB%93/">设计模式的个人总结</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2021-02-24">2021-02-24</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E8%BD%AF%E5%B7%A5/"><i class="far fa-folder fa-fw"></i>软工</a></span></div><div class="content">创建型模式  工厂方法  简单来说就是提供一个create方法 代码两个变化方向，一个是子类的扩展，一个是框架层的不变。 另外还有一种用法和单例有点像，提供一个create接口，但是返回的可能是公用的对象。   抽象工厂  单个类里有很好个create方法，用于创建不同的产品。 一般把创建操作独立成一个类A，然后组合进另一个类B。类B利用类A的接口完成具体的业务。   生成器  和抽象工厂有点像的，只是这里更强调步骤。生成器是把步骤隐藏，抽象工厂的步骤是不变的。 两个变化的方向，一个是创建不同的产品、一个是构建步骤不同，导致有两个继承树。   原型  就是一个clone接口，能够从已有的类copy一个新的出来。 比较适合的场景 怪物、AI的创建，怪物种类太多了，那么直接按照怪物的行为划分更下层的子类，通过组合的形式构造出来成千上万种怪物。 深入设计模式这种还要搞一个prototype继承树有点二，在游戏里组合用的更多些。   单例  全局访问点、通过封装保证只会创建出一个、延迟初始化 用的太多了，不过要写出一个线程安全的单例其实不容易。 隐式的构造时机，可能导致隐藏bug，不适合服务器场景，服务器要求行为固定 全局只能有一个对象，好处是调用可以少穿一个参数，坏处就是这个全局只有一个对象的限制很蛋痛，没法扩展成多个。    结构型模式  适配器  简单说就是套个壳，伪装成另外一种东西。非常朴素的一种设计模式，很常用。 装饰模式和适配器不太一样，装饰主要是想偷偷做一点其他事情。   桥接  功能和名字匹配，两种不同类型对象的中间连接的部分。 对象可以独立扩展，桥接部分也能独立扩展，这里面有三个变化的方向。   组合  同一类对象组合成一个大对象，偶尔用。 组合的模式可以有多种：并列、树等等。 使用范围有限，大部分类这样组合起来语义上就不通了。   装饰  简单来说就是穿一层衣服，增强功能。   外观  相当于一个大的模块，提供一个api类，把对外暴露的接口都放在这个类里。 使用者就不用关心模块内部的实现，最简单做法就是搞一个api.hpp暴露一些全局函数。 一个模块可以提供好几个外观。   享元  省内存，最常见的就是文字处理程序依靠该模式处理字符串。 游戏行业有很多特效、物件都可以用这个方法处理。   代理  非常常用的模式，比如数据库代理、RPC stub。 代理模式提供相同的接口，但是真实对象在另外的地方。    行为模式  责任链  常见于消息处理，一个消息过来，被一个链条下的handle消费。 有两种做法，一种是调用下一个节点由框架来做，一种是由节点来做。 节点来做比较适合插入时间统计的代码，这个节点相当于下一个节点的装饰器。然后也可以根据业务看是否取消继续调用，适合做拦截器。 形式可以不是链状，树也行，随意啥形状都行。   命令  游戏行业用的比较多的就是对同一个玩家输入的操作执行不同的响应。 本质上是框架复用。   迭代器：没啥好说的，框架复用，迭代模式任意扩展，stl用的太多了。 中介者  依赖导致，解除类之间互相调用产生的网状结构。 网状结构没了，都依赖中介者，这样只要改中介者，代码更容易改。   备忘录  用的很少的一个模式，就是把状态从对象中剥离，可以任意恢复状态。   观察者：  天天用的玩意，解耦，依赖倒置。 通知没有顺序，调用关系隐蔽，重入风险。   状态：和命令模式类似，是为了对同一个行为产生不同的反应，但是状态模式操作是一组的。 策略  代码分成两部分，上下文和策略，策略能独立扩展，上下文不变。 和命令模式有点像，不过目的不一样，命令不强调这个上下文。   模板方法：框架复用，和模板差不多，替换几个预设的步骤。 访问者：  双分发，不是很好用的一个模式，子类扩展还要改visitor。 框架复用，visitor就是一个遍历，然后每种类型对象调用不通的接口，接口的    </div><div class="post-footer">
         <a href="/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%AA%E4%BA%BA%E6%80%BB%E7%BB%93/">Read More</a><div class="post-tags">
@@ -145,40 +174,6 @@ FLP FLP 不可能定理是分布式系统领域最重要的定理之一，它给
 无意义。第四个终极关怀或存在的既定事实是无意义。如果我们注定得死，如果我们构建我们自己的世界，如果每一个人最终都是独自一人身处于一个无关紧要的世界之中，那么生命有什么意义我们为什么要活着？我们应该怎样活着？如果并不存在为我们预先设计的蓝图，那么我们每个人就必须构建自己的生命意义。然而，个人自己创造出来的意义能否坚强到令其能容忍生活？人类这种寻找意义的生物，却被投入到本身毫无意义的宇宙之中，于是，存在的动力性冲突便从进退维谷的境地中滋生出来。</div><div class="post-footer">
         <a href="/%E8%AF%BB%E4%B9%A6%E6%91%98%E5%BD%95-%E5%AD%98%E5%9C%A8%E4%B8%BB%E4%B9%89%E5%BF%83%E7%90%86%E6%B2%BB%E7%96%97/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E5%BF%83%E7%90%86%E5%AD%A6/">心理学</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E6%88%91%E7%9A%842018/">我的2018</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2018-12-23">2018-12-23</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%9D%82%E8%B0%88/"><i class="far fa-folder fa-fw"></i>杂谈</a></span></div><div class="content">距离上次博客又过去了几个月。自从换了工作之后时间总是比较紧张，一直是996的节奏。每周只有一天的休息日，往往这天会安排着调整下节奏、与朋友聚会，属于自己独处的时间减少了。
-当然这不是不写博客的理由了，核心原因还是懒，毕竟真想做什么，怎么都能挤出时间。
-一年的总结 2018对我来说过得很慢的一年，一年里做了挺多的事情。我自己对过去的一年还算满意。
-没有女朋友：意识到自己的年龄也挺大了，但是还没有女朋友。
-学会了做饭：按照王刚的教程学习做了几个菜。
-书籍50余本：10本为技术书籍，17本小说，8本互联网、游戏行业逸闻，10本社科类书籍，还有一些漫画、小品文章。
-影视剧50余部：涉及国漫、日漫、欧美电影、日本电影、国产电影。
-游戏10个：大作认真玩的只有两部，塞尔达、荒野大镖客2。还有一些开拓游戏叙事的小品游戏，比如弗洛伦丝、伊迪丝芬奇的记忆。
-三地：上海、江西、杭州。我挺喜欢杭州的，希望以后有机会去那发展吧。
-代码：代码文本行数应该在6w左右。数量还算满意。
-明年的展望 工作 通过三年的阅读与实践，我能说把计算机系很多本科基础知识都补充了。数据结构、设计模式、计算机组成、网络、数据库、编程语言等等吧，都有了一定程度的理解。
-现在大概处于一个瓶颈阶段，想要更进一步，还是有很多东西需要去改进。
-然后是希望未来的一年开发的游戏能够成功上市，完成一段心愿。
-打字 问题：
-我打字是通过小学时候不断的聊QQ学习的，现在暴露出来几个缺陷。
- 英文单词经常打错，比如linux输入一些命令，10个以内的字母，经常打一半就出错。 中文打字速度不算快，且容易错。 对键盘符号的位置不熟悉，还不能做到完全盲打的程度。  解决方案：
- 专门的打字练习 改用双屏  代码的复制粘贴 问题：
-不是指大段代码的复制粘贴，而是指对一些单个变量、函数的粘贴。
-原因：
- emacs的补全不是很好用 整个项目里的变量一直使用复制粘贴，没有那么熟悉， 会打错字  解决方案：
-强制的不复制粘贴，改为手打。
-英文 问题：
-英文很差，导致我现在对于英文的文档比较露怯。
-解决方案：
-一般来说技术书使用的英文都不是太难，考虑到我提升英语的目的是为了更好的阅读英文技术资料。所以完全可以通过直接开始阅读英文技术资料提高，同时也能够达到提高技术的目的。
- 持续的英文技术资料的阅读。 普通英文咨询的阅读。  源码阅读 今年一年阅读了比较多的书籍，但是除了项目没有怎么阅读优秀开源项目的源码，视野比较窄，急需扩展。同时能够吸收项目之外的优秀设计。
-编程练习 项目之外的造轮子少，整体还是懒，经常阅读了书籍没有去实践。编程这个东西，只有练习才能够真正的理解设计。
-生活 生活总是一成不变的，希望在未来的一年里能够多发展几项技能。
-锻炼 身体越来越差，体重越来越大。每周能抽出3天时间进行专项的锻炼，初期以跑步为主。
-摄影 随着年龄的增长，越来越想留住时间。很遗憾的是之前没有做好记录，每年都没有全家福。</div><div class="post-footer">
-        <a href="/%E6%88%91%E7%9A%842018/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E9%9A%8F%E6%84%9F/">随感</a></div></div>
 </article><ul class="pagination"><li class="page-item active">
                     <span class="page-link">
                         <a href="/">1</a>

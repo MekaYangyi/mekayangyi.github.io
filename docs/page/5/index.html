@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
+<meta property="og:updated_time" content="2021-06-25T08:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,13 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/vs2017%E4%B8%8Evs2005%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3/">vs2017与vs2005冲突解决</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-04-16">2017-04-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%8A%80%E5%B7%A7/"><i class="far fa-folder fa-fw"></i>技巧</a></span></div><div class="content">先安装vs2005，后安装vs2017，vs2017无法运行 原因：vs2005注册了Microsoft.VisualStudio.Shell.Interop.8.0.dll，优先于vs2017需要的dll。导致运行错误。
+解决方法：
+复制 C:\Program_Files_(x86)\Microsoft_Visual Studio\2017\Enterprise\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.Shell.Interop.8.0.dll 到 C:\Windows\assembly\GAC\Microsoft.VisualStudio.Shell.Interop.8.0\8.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Shell.Interop.8.0.dll</div><div class="post-footer">
+        <a href="/vs2017%E4%B8%8Evs2005%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%8A%80%E5%B7%A7/">技巧</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E9%93%BE%E8%A1%A8/">redis源码阅读-链表</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-26">2017-03-26</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>C语言程序由于没有标准库的存在，各种造轮子。Redis为了满足需求，同样写了一个链表。</p>
 <p>实现文件在adlist.h/adlist.c中。</p>
@@ -225,17 +232,6 @@ Redis的介绍 redis是一个使用C编写的key-value数据库。性能极高�
  阅读数据结构的实现。 阅读内存编码数据结构的实现。 阅读数据类型的实现。 阅读数据库实现相关代码。 阅读客户端和服务端相关代码。  至此将Redis阅读完毕。</div><div class="post-footer">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%BC%80%E5%A7%8B/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/%E5%8E%BB%E6%9C%88%E7%90%83/">《去月球》</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-03-12">2017-03-12</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%B8%B8%E6%88%8F/"><i class="far fa-folder fa-fw"></i>游戏</a></span></div><div class="content">悲伤。
-逆序的故事，抽丝剥茧式的把一个人的人生整个展现在你的面前。
-明明在一起的两个人，却由于种种心相隔很远。
-丽芙的一生都在通过各种暗示，希望主人公能够找回过去。
-主人公终于在临终前的愿望中，抓到那么一个记忆碎片，无来由的想要去月球。
-当，记忆被重新排列，故事里的两人有了圆满的结局。
-回过头来看，这不过是程序的重新编排。而现实中的两人，却一生都没能找到最初相遇的那个瞬间。</div><div class="post-footer">
-        <a href="/%E5%8E%BB%E6%9C%88%E7%90%83/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E6%B8%B8%E6%88%8F/">游戏</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>

@@ -11,7 +11,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://coderyang.com/" />
 <meta property="og:image" content="http://coderyang.com/logo.png"/>
-<meta property="og:updated_time" content="2021-02-24T09:26:09+08:00" />
+<meta property="og:updated_time" content="2021-06-25T08:26:09+08:00" />
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="http://coderyang.com/logo.png"/>
 
@@ -103,6 +103,84 @@
         alt="/images/avatar.png"
         title="/images/avatar.png" /></a></div><h2 class="home-subtitle"><div id="id-1" class="typeit"></div></h2><div class="links"><a href="https://github.com/MekaYangyi" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:mekayangyi@gmail.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%BA%8B%E5%8A%A1/">redis源码阅读-事务</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-16">2017-07-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>redis的事务提供了一种将单个命令请求打包，然后一次性、按照顺序执行多个命令的机制，这种方式服务器会一次性把命令执行完，中间不会执行其他客户端的命令。不过redis的命令不支持错误命令执行后的回滚机制，也就是命令设计者要对命令的正确性负责，即使多个命令中存在部分错误的命令，剩余命令也会继续执行下去。</p>
+<h2 id="主要命令">主要命令</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">命令</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">MULTI</td>
+<td style="text-align:center">开始一个新的事务</td>
+</tr>
+<tr>
+<td style="text-align:center">DISCARD</td>
+<td style="text-align:center">放弃执行事务</td>
+</tr>
+<tr>
+<td style="text-align:center">EXEC</td>
+<td style="text-align:center">执行事务中的所有命令</td>
+</tr>
+<tr>
+<td style="text-align:center">WATCH</td>
+<td style="text-align:center">监视key，如果在exec之前被修改，则不执行事务</td>
+</tr>
+<tr>
+<td style="text-align:center">UNWATCH</td>
+<td style="text-align:center">取消对所有键的监视</td>
+</tr>
+</tbody>
+</table>
+<h2 id="事务的实现">事务的实现</h2>
+<p>一个事务分为三个阶段：</p>
+<ul>
+<li>事务开始</li>
+<li>命令入队</li>
+<li>事务执行</li>
+</ul>
+<h3 id="事务开始">事务开始</h3>
+<p>使用multi开启事务，redis主要使用redisClient中flag成员记录状态。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c">
+<span class="kt">void</span> <span class="nf">multiCommand</span><span class="p">(</span><span class="n">redisClient</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 已经开启事务
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">REDIS_MULTI</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">addReplyError</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s">&#34;MULTI calls can not be nested&#34;</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 标记事务开启
+</span><span class="c1"></span>    <span class="n">c</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">REDIS_MULTI</span><span class="p">;</span>
+    <span class="n">addReply</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">shared</span><span class="p">.</span><span class="n">ok</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer">
+        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E4%BA%8B%E5%8A%A1/">Read More</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-aof%E6%8C%81%E4%B9%85%E5%8C%96/">Redis源码阅读-AOF持久化</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-16">2017-07-16</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>之前看了RDB持久化，功能是把数据库的数据全部使用一种特定格式进行存储。恢复时一个一个数据库键恢复。</p>
 <p>AOF持久化与RDB持久化不同，AOF通过保存Redis服务器执行的写命令来记录数据库的状态。</p>
@@ -928,88 +1006,6 @@ SAVE命令调用saveCommand进行处理</p>
 <h4 id="引用计数">引用计数</h4>
 <p>常见的管理方式，引用计数为0时回收。</p></div><div class="post-footer">
         <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%AF%B9%E8%B1%A1/">Read More</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/">redis源码阅读-压缩列表ziplist</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>杨一</a></span>&nbsp;<span class="post-publish">published on <time datetime="2017-07-08">2017-07-08</time></span>&nbsp;<span class="post-category">included in <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"><i class="far fa-folder fa-fw"></i>源码阅读</a></span></div><div class="content"><p>压缩列表时列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每个列表项要么是小整数，要么是长度比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。</p>
-<h2 id="压缩列表的构成">压缩列表的构成</h2>
-<p>压缩列表是redis为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。一个压缩列表可以包含任意多个节点，每个节点可以保存一个字节数组或者一个整数组。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">《redis设计与实现》
-空白 ziplist 示例图
-
-area        |&lt;---- ziplist header ----&gt;|&lt;-- end --&gt;|
-
-size          4 bytes   4 bytes 2 bytes  1 byte
-            +---------+--------+-------+-----------+
-component   | zlbytes | zltail | zllen | zlend     |
-            |         |        |       |           |
-value       |  1011   |  1010  |   0   | 1111 1111 |
-            +---------+--------+-------+-----------+
-                                       ^
-                                       |
-                               ZIPLIST_ENTRY_HEAD
-                                       &amp;
-address                        ZIPLIST_ENTRY_TAIL
-                                       &amp;
-                               ZIPLIST_ENTRY_END
-
-非空 ziplist 示例图
-
-area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
-
-size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
-            +---------+--------+-------+--------+--------+--------+--------+-------+
-component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
-            +---------+--------+-------+--------+--------+--------+--------+-------+
-                                       ^                          ^        ^
-address                                |                          |        |
-                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
-                                                                  |
-                                                        ZIPLIST_ENTRY_TAIL
-</code></pre></td></tr></table>
-</div>
-</div><p>zlbytes记录整个压缩列表占用的字节数。</p>
-<p>zltail记录压缩列表尾节点距离压缩列表的起始地址有多少字节。</p>
-<p>zzlen记录压缩列表包含的节点数量。</p>
-<p>entryX列表节点，数量不定。</p>
-<p>zlend特殊值0xff，标记压缩列表末端。</p></div><div class="post-footer">
-        <a href="/redis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8ziplist/">Read More</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/redis/">redis</a>,&nbsp;<a href="/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></div></div>
 </article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
